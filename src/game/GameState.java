@@ -20,6 +20,7 @@ public class GameState {
     }
 
     public GameState(BitBoard roteFische, BitBoard blaueFische, BitBoard kraken) {
+        //Make sure those BitBoards get cloned
         this.roteFische = roteFische;
         this.blaueFische = blaueFische;
         this.kraken = kraken;

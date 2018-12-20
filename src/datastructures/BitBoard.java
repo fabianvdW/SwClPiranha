@@ -118,4 +118,9 @@ public class BitBoard {
         return sb.toString();
     }
 
+    @Override
+    public BitBoard clone(){
+        return new BitBoard(this.l0,this.l1);
+    }
+
 }
