@@ -30,8 +30,8 @@ public class BitBoard {
     }
 
     public void orEquals(BitBoard b) {
-        l0 &= b.l0;
-        l1 &= b.l1;
+        l0 |= b.l0;
+        l1 |= b.l1;
     }
 
     public BitBoard not() {
