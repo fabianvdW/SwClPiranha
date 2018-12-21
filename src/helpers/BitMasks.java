@@ -6,67 +6,110 @@ import game.GameDirection;
 public class BitMasks {
 
     public static void main(String[] args) {
-        System.out.println(generateRichtungsBitBoards());
+        System.out.println(generateRichtungsBitBoardsEinSeitigWithDestinationSquareAttackLine());
     }
 
-    public static String generateRichtungsBitBoards() {
+    public static String generateRichtungsBitBoardsEinSeitigWithDestinationSquareAttackLine() {
+        StringBuilder sb = new StringBuilder();
+        //sb.append("{");
+        for (int y = 0; y < 10; y++) {
+            for (int x = 0; x < 10; x++) {
+                //sb.append("{");
+                int shift = x + y * 10;
+                //sb.append("{");
+                for (GameDirection direction : GameDirection.values()) {
+                    for (int squares = 2; squares <= 9; squares++) {
+                        //sb.append("new BitBoard(");
+                        BitBoard res = new BitBoard(0, 0);
+                        int plusShift = direction.getShift();
+                        int lastShift = shift;
+                        int newShift = shift + plusShift;
+                        int xDiff = Math.abs(lastShift % 10 - newShift % 10);
+                        int yDiff = Math.abs(lastShift / 10 - newShift / 10);
+                        int count = 1;
+                        while (xDiff <= 1 && yDiff <= 1 && newShift >= 0 && newShift <= 99 && count + 1 <= squares) {
+                            count++;
+                            res.orEquals(new BitBoard(0, 1).leftShift(newShift));
+                            lastShift = newShift;
+                            newShift += plusShift;
+                            xDiff = Math.abs(lastShift % 10 - newShift % 10);
+                            yDiff = Math.abs(lastShift / 10 - newShift / 10);
+                        }
+                        //sb.append(String.format("0x%016x", res.l0) + "L,");
+                        sb.append(res.l0 + " ");
+                        sb.append(res.l1 + " ");
+                        //sb.append(String.format("0x%016x", res.l1) + "L");
+                        //sb.append("),");
+                    }
+                    //sb.append("},");
+                }
+                //sb.append("},");
+            }
+        }
+        //sb.append("};");
+        return sb.toString();
+    }
+
+    public static String generateRichtungsBitBoardsEinSeitig() {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
         for (int y = 0; y < 10; y++) {
             for (int x = 0; x < 10; x++) {
                 sb.append("{");
                 int shift = x + y * 10;
-                for (GameDirection gd : GameDirection.values()) {
+                for (GameDirection direction : GameDirection.values()) {
                     sb.append("new BitBoard(");
                     BitBoard res = new BitBoard(0, 0);
                     res.orEquals(new BitBoard(0, 1).leftShift(shift));
-                    int plusShift = 0;
-                    switch (gd) {
-                        case UP: {
-                            plusShift = 10;
-                            break;
-                        }
-                        case UP_LEFT: {
-                            plusShift = 11;
-                            break;
-                        }
-                        case LEFT: {
-                            plusShift = 1;
-                            break;
-                        }
-                        case DOWN_LEFT: {
-                            plusShift = -9;
-                            break;
-                        }
-                        case DOWN: {
-                            plusShift = -10;
-                            break;
-                        }
-                        case DOWN_RIGHT: {
-                            plusShift = -11;
-                            break;
-                        }
-                        case RIGHT: {
-                            plusShift = -1;
-                            break;
-                        }
-                        case UP_RIGHT: {
-                            plusShift = 9;
-                            break;
-                        }
-                    }
+                    int plusShift = direction.getShift();
                     int lastShift = shift;
                     int newShift = shift + plusShift;
                     int xDiff = Math.abs(lastShift % 10 - newShift % 10);
                     int yDiff = Math.abs(lastShift / 10 - newShift / 10);
-                    while (xDiff <= 1 && yDiff <= 1&&newShift>=0&&newShift<=99) {
+                    while (xDiff <= 1 && yDiff <= 1 && newShift >= 0 && newShift <= 99) {
                         res.orEquals(new BitBoard(0, 1).leftShift(newShift));
                         lastShift = newShift;
                         newShift += plusShift;
                         xDiff = Math.abs(lastShift % 10 - newShift % 10);
                         yDiff = Math.abs(lastShift / 10 - newShift / 10);
                     }
+                    sb.append(String.format("0x%016x", res.l0) + "L,");
+                    sb.append(String.format("0x%016x", res.l1) + "L");
+                    sb.append("),");
+                }
+                sb.append("},");
+            }
+        }
+        sb.append("};");
+        return sb.toString();
+    }
 
+    public static String generateRichtungsBitBoardsZweiSeitig() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        for (int y = 0; y < 10; y++) {
+            for (int x = 0; x < 10; x++) {
+                sb.append("{");
+                int shift = x + y * 10;
+                for (int i = 0; i < 4; i++) {
+                    sb.append("new BitBoard(");
+                    BitBoard res = new BitBoard(0, 0);
+                    res.orEquals(new BitBoard(0, 1).leftShift(shift));
+                    GameDirection g1 = GameDirection.values()[i];
+                    for (int j = 0; j < 2; j++) {
+                        int plusShift = g1.getShift() * (j == 0 ? 1 : -1);
+                        int lastShift = shift;
+                        int newShift = shift + plusShift;
+                        int xDiff = Math.abs(lastShift % 10 - newShift % 10);
+                        int yDiff = Math.abs(lastShift / 10 - newShift / 10);
+                        while (xDiff <= 1 && yDiff <= 1 && newShift >= 0 && newShift <= 99) {
+                            res.orEquals(new BitBoard(0, 1).leftShift(newShift));
+                            lastShift = newShift;
+                            newShift += plusShift;
+                            xDiff = Math.abs(lastShift % 10 - newShift % 10);
+                            yDiff = Math.abs(lastShift / 10 - newShift / 10);
+                        }
+                    }
                     sb.append(String.format("0x%016x", res.l0) + "L,");
                     sb.append(String.format("0x%016x", res.l1) + "L");
                     sb.append("),");
