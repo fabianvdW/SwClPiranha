@@ -8,6 +8,10 @@ public class GameState {
     public BitBoard blaueFische;
     public BitBoard kraken;
 
+    public int pliesPlayed;
+    public int roundsPlayed;
+
+    public GameStatus gs;
     public GameState() {
         //Pre calculated values from BitMasks
         this.roteFische = new BitBoard(0x0000000002018060L, 0x1806018060180400L);
@@ -16,7 +20,9 @@ public class GameState {
     }
 
     public GameState(BitBoard kraken) {
-        this();
+        //Pre calculated values from BitMasks
+        this.roteFische = new BitBoard(0x0000000002018060L, 0x1806018060180400L);
+        this.blaueFische = new BitBoard(0x00000007f8000000L, 0x00000000000001feL);
         this.kraken = kraken;
     }
 
