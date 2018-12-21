@@ -80,6 +80,15 @@ public class BitBoard {
         }
     }
 
+    public BitBoard xOr(BitBoard b) {
+        return new BitBoard(b.l0 ^ l0, b.l1 ^ l1);
+    }
+
+    public void xOrEquals(BitBoard b) {
+        l0 ^= b.l0;
+        l1 ^= b.l1;
+    }
+
     public String getBinaryString() {
         String s = "";
         for (int i = 0; i < Long.numberOfLeadingZeros(l0); i++) {
@@ -119,8 +128,8 @@ public class BitBoard {
     }
 
     @Override
-    public BitBoard clone(){
-        return new BitBoard(this.l0,this.l1);
+    public BitBoard clone() {
+        return new BitBoard(this.l0, this.l1);
     }
 
 }
