@@ -14,6 +14,7 @@ public class GameLogic {
         }
     }
 
+    //Diese Methode berechnet nicht den größten Schwarm, sondern nur den Schwarm ausgehend von dem Fisch am Weitesten rechts unten.
     public static int getSchwarm(GameState gs, GameColor gc){
         BitBoard meineFische;
         if(gc==GameColor.RED){
