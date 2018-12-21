@@ -41,6 +41,9 @@ public class GameLogic {
     }
 
     public static HashMap<GameMove, GameState> getPossibleMoves(GameState gs, GameColor gc) {
+        if(gs.gs!=GameStatus.INGAME){
+            return null;
+        }
         BitBoard meineFische;
         BitBoard gegnerFische;
         if (gc == GameColor.RED) {
@@ -91,12 +94,12 @@ public class GameLogic {
             BitBoard newRed = gs.roteFische.and(einheitsUnit.leftShift(gm.from).not());
             newRed.orEquals(leftShift);
             BitBoard newBlau = gs.blaueFische.and(leftShift.not());
-            return new GameState(newRed, newBlau, gs.kraken);
+            return new GameState(newRed, newBlau, gs.kraken,GameColor.BLUE,gs.pliesPlayed+1,gs.roundsPlayed);
         } else {
             BitBoard newBlau = gs.blaueFische.and(einheitsUnit.leftShift(gm.from).not());
             newBlau.orEquals(leftShift);
             BitBoard newRed = gs.roteFische.and(leftShift.not());
-            return new GameState(newRed, newBlau, gs.kraken);
+            return new GameState(newRed, newBlau, gs.kraken,GameColor.RED,gs.pliesPlayed+1,gs.roundsPlayed+1);
         }
     }
 }
