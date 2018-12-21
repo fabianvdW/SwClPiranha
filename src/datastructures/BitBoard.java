@@ -88,37 +88,40 @@ public class BitBoard {
         l0 ^= b.l0;
         l1 ^= b.l1;
     }
-    public int popCount(){
-        return Long.bitCount(l0)+Long.bitCount(l1);
-    }
-    public boolean equalsZero(){
-        return l1==0&&l0==0;
+
+    public int popCount() {
+        return Long.bitCount(l0) + Long.bitCount(l1);
     }
 
-    public int numberOfTrailingZeros(){
+    public boolean equalsZero() {
+        return l1 == 0 && l0 == 0;
+    }
+
+    public int numberOfTrailingZeros() {
         int l1Trail = Long.numberOfTrailingZeros(l1);
-        if(l1Trail==64){
-            return 64+Long.numberOfTrailingZeros(l0);
-        }else{
+        if (l1Trail == 64) {
+            return 64 + Long.numberOfTrailingZeros(l0);
+        } else {
             return l1Trail;
         }
     }
 
-    public BitBoard unsetBit(int bit){
-        if(bit<=63){
-            return new BitBoard(l0,l1&~(1L<<bit));
-        }else{
-            return new BitBoard(l0&~(1L<<(bit-64)),l1);
+    public BitBoard unsetBit(int bit) {
+        if (bit <= 63) {
+            return new BitBoard(l0, l1 & ~(1L << bit));
+        } else {
+            return new BitBoard(l0 & ~(1L << (bit - 64)), l1);
         }
     }
 
-    public void unsetBitEquals(int bit){
-        if(bit<=63){
-            l1&=~(1L<<bit);
-        }else{
-            l0&=~(1L<<(bit-64));
+    public void unsetBitEquals(int bit) {
+        if (bit <= 63) {
+            l1 &= ~(1L << bit);
+        } else {
+            l0 &= ~(1L << (bit - 64));
         }
     }
+
     public String getBinaryString() {
         String s = "";
         for (int i = 0; i < Long.numberOfLeadingZeros(l0); i++) {
