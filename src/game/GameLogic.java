@@ -46,7 +46,7 @@ public class GameLogic {
         }
         //Jeden Fisch durchgehen
         //Es gibt 8 Richtungen es braucht also einen Array [100][8]
-        HashMap<GameMove, GameState> result = new HashMap<>();
+        HashMap<GameMove, GameState> result = new HashMap<>(60);
         BitBoard fischIterator = meineFische.clone();
         while (!fischIterator.equalsZero()) {
             int fischPos = fischIterator.numberOfTrailingZeros();
