@@ -6,15 +6,6 @@ import java.util.HashMap;
 
 public class GameLogic {
 
-
-    public static int getAnzahlFische(GameState gs, GameColor gc) {
-        if (gc == GameColor.RED) {
-            return gs.roteFische.popCount();
-        } else {
-            return gs.blaueFische.popCount();
-        }
-    }
-
     //Diese Methode berechnet nicht den größten Schwarm, sondern nur den Schwarm ausgehend von dem Fisch am Weitesten rechts unten.
     public static int getSchwarm(GameState gs, GameColor gc) {
         BitBoard meineFische;
@@ -41,7 +32,7 @@ public class GameLogic {
     }
 
     public static HashMap<GameMove, GameState> getPossibleMoves(GameState gs, GameColor gc) {
-        if(gs.gs!=GameStatus.INGAME){
+        if (gs.gs != GameStatus.INGAME) {
             return null;
         }
         BitBoard meineFische;
@@ -68,10 +59,10 @@ public class GameLogic {
                     int destination = fischPos + dir.getShift() * squares * (j == 0 ? 1 : -1);
                     if (destination <= 99 && destination >= 0 && Math.abs(destination / 10 - fischPos / 10) <= squares && Math.abs(destination % 10 - fischPos % 10) <= squares) {
                         BitBoard destinationSquare = new BitBoard(0, 1).leftShift(destination);
-                        //Check that destinationSquare is not fish of my color or Kraken
-                        if (destinationSquare.and(meineFische.or(gs.kraken)).equalsZero()) {
+                        //Check that destinationSquare is on attackLine and destinationSquare is not fish of my color or Kraken
+                        if (!BitBoardConstants.SQUARE_ATTACK_DIRECTION_SQUARES_TWO_SIDED[fischPos][dir.ordinal()].and(destinationSquare).equalsZero()&&destinationSquare.and(meineFische.or(gs.kraken)).equalsZero()) {
                             //Check that there is no enemy fish on the line
-                            //TODO TEST THAT
+
                             if (squares < 2 || BitBoardConstants.SQUARE_ATTACK_DIRECTION_SQUARE_DESTINATION_ATTACK_LINE[fischPos][dir.ordinal() + (j == 0 ? 0 : 4)][squares - 2].and(gegnerFische).equalsZero()) {
                                 //Valid move
                                 GameMove gm = new GameMove(fischPos, destination, (j == 0 ? dir : GameDirection.values()[i + 4]));
@@ -94,12 +85,12 @@ public class GameLogic {
             BitBoard newRed = gs.roteFische.and(einheitsUnit.leftShift(gm.from).not());
             newRed.orEquals(leftShift);
             BitBoard newBlau = gs.blaueFische.and(leftShift.not());
-            return new GameState(newRed, newBlau, gs.kraken,GameColor.BLUE,gs.pliesPlayed+1,gs.roundsPlayed);
+            return new GameState(newRed, newBlau, gs.kraken, GameColor.BLUE, gs.pliesPlayed + 1, gs.roundsPlayed);
         } else {
             BitBoard newBlau = gs.blaueFische.and(einheitsUnit.leftShift(gm.from).not());
             newBlau.orEquals(leftShift);
             BitBoard newRed = gs.roteFische.and(leftShift.not());
-            return new GameState(newRed, newBlau, gs.kraken,GameColor.RED,gs.pliesPlayed+1,gs.roundsPlayed+1);
+            return new GameState(newRed, newBlau, gs.kraken, GameColor.RED, gs.pliesPlayed + 1, gs.roundsPlayed + 1);
         }
     }
 }
