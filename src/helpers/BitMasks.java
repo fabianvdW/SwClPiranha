@@ -1,11 +1,81 @@
 package helpers;
 
 import datastructures.BitBoard;
+import game.GameDirection;
 
 public class BitMasks {
 
     public static void main(String[] args) {
-        System.out.println(generateNachbarFelder());
+        System.out.println(generateRichtungsBitBoards());
+    }
+
+    public static String generateRichtungsBitBoards() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        for (int y = 0; y < 10; y++) {
+            for (int x = 0; x < 10; x++) {
+                sb.append("{");
+                int shift = x + y * 10;
+                for (GameDirection gd : GameDirection.values()) {
+                    sb.append("new BitBoard(");
+                    BitBoard res = new BitBoard(0, 0);
+                    res.orEquals(new BitBoard(0, 1).leftShift(shift));
+                    int plusShift = 0;
+                    switch (gd) {
+                        case UP: {
+                            plusShift = 10;
+                            break;
+                        }
+                        case UP_LEFT: {
+                            plusShift = 11;
+                            break;
+                        }
+                        case LEFT: {
+                            plusShift = 1;
+                            break;
+                        }
+                        case DOWN_LEFT: {
+                            plusShift = -9;
+                            break;
+                        }
+                        case DOWN: {
+                            plusShift = -10;
+                            break;
+                        }
+                        case DOWN_RIGHT: {
+                            plusShift = -11;
+                            break;
+                        }
+                        case RIGHT: {
+                            plusShift = -1;
+                            break;
+                        }
+                        case UP_RIGHT: {
+                            plusShift = 9;
+                            break;
+                        }
+                    }
+                    int lastShift = shift;
+                    int newShift = shift + plusShift;
+                    int xDiff = Math.abs(lastShift % 10 - newShift % 10);
+                    int yDiff = Math.abs(lastShift / 10 - newShift / 10);
+                    while (xDiff <= 1 && yDiff <= 1&&newShift>=0&&newShift<=99) {
+                        res.orEquals(new BitBoard(0, 1).leftShift(newShift));
+                        lastShift = newShift;
+                        newShift += plusShift;
+                        xDiff = Math.abs(lastShift % 10 - newShift % 10);
+                        yDiff = Math.abs(lastShift / 10 - newShift / 10);
+                    }
+
+                    sb.append(String.format("0x%016x", res.l0) + "L,");
+                    sb.append(String.format("0x%016x", res.l1) + "L");
+                    sb.append("),");
+                }
+                sb.append("},");
+            }
+        }
+        sb.append("};");
+        return sb.toString();
     }
 
     public static String generateNachbarFelder() {
@@ -13,7 +83,7 @@ public class BitMasks {
         sb.append("{");
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
-                int shift =(j + i * 10);
+                int shift = (j + i * 10);
                 BitBoard b = new BitBoard(0, 1);
                 BitBoard res = new BitBoard(0, 0);
                 sb.append("new BitBoard(");
@@ -61,9 +131,9 @@ public class BitMasks {
                             break;
                         }
                     }
-                    int xDiff= Math.abs(newShift%10-shift%10);
-                    int yDiff= Math.abs(newShift/10-shift/10);
-                    if (newShift <= 99 && newShift >= 0&&xDiff<=1&&yDiff<=1) {
+                    int xDiff = Math.abs(newShift % 10 - shift % 10);
+                    int yDiff = Math.abs(newShift / 10 - shift / 10);
+                    if (newShift <= 99 && newShift >= 0 && xDiff <= 1 && yDiff <= 1) {
                         res.orEquals(b.leftShift(newShift));
                     }
                 }
