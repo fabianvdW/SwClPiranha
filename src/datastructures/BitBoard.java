@@ -43,7 +43,6 @@ public class BitBoard {
         l1 = ~l1;
     }
 
-    //amount<=64
     public BitBoard rightShift(int amount) {
         if (amount <= 63) {
             return new BitBoard(l0 >>> amount, l1 >>> amount | ((l0 & GET_N_BITS_FROM_RIGHT[amount]) << (64 - amount)));

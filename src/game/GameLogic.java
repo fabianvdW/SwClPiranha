@@ -57,12 +57,11 @@ public class GameLogic {
                 int squares = attackLine.popCount();
                 for (int j = 0; j < 2; j++) {
                     int destination = fischPos + dir.getShift() * squares * (j == 0 ? 1 : -1);
-                    if (destination <= 99 && destination >= 0 && Math.abs(destination / 10 - fischPos / 10) <= squares && Math.abs(destination % 10 - fischPos % 10) <= squares) {
+                    if (destination <= 99 && destination >= 0) {
                         BitBoard destinationSquare = new BitBoard(0, 1).leftShift(destination);
                         //Check that destinationSquare is on attackLine and destinationSquare is not fish of my color or Kraken
                         if (!BitBoardConstants.SQUARE_ATTACK_DIRECTION_SQUARES_TWO_SIDED[fischPos][dir.ordinal()].and(destinationSquare).equalsZero()&&destinationSquare.and(meineFische.or(gs.kraken)).equalsZero()) {
                             //Check that there is no enemy fish on the line
-
                             if (squares < 2 || BitBoardConstants.SQUARE_ATTACK_DIRECTION_SQUARE_DESTINATION_ATTACK_LINE[fischPos][dir.ordinal() + (j == 0 ? 0 : 4)][squares - 2].and(gegnerFische).equalsZero()) {
                                 //Valid move
                                 GameMove gm = new GameMove(fischPos, destination, (j == 0 ? dir : GameDirection.values()[i + 4]));
