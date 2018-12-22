@@ -6,16 +6,19 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
+        BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine();
+        long l0=System.currentTimeMillis();
         for(int i=0;i<100000;i++){
             GameState g= playGame(false);
             if(g.gs!=GameStatus.DRAW){
                 System.out.println(g);
             }
         }
+        long l1=System.currentTimeMillis();
+        System.out.println(l1-l0);
     }
 
     public static GameState playGame(boolean verbose) {
-        BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine();
         GameState g = StringToGameStateConverter.readGameState(StringToGameStateConverter.STANDARD_GAME_STATE);
         g.analyze();
         if (verbose) {
