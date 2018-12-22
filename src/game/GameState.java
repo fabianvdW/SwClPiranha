@@ -24,6 +24,7 @@ public class GameState {
         this.move=GameColor.RED;
         this.pliesPlayed=0;
         this.roundsPlayed=0;
+        this.gs=GameStatus.INGAME;
     }
 
     public GameState(BitBoard kraken) {
@@ -34,6 +35,7 @@ public class GameState {
         this.move=GameColor.RED;
         this.pliesPlayed=0;
         this.roundsPlayed=0;
+        this.gs=GameStatus.INGAME;
     }
 
     public GameState(BitBoard roteFische, BitBoard blaueFische, BitBoard kraken,GameColor move,int pliesPlayed,int roundsPlayed) {
