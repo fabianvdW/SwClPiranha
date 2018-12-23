@@ -5,21 +5,20 @@ import helpers.StringToGameStateConverter;
 import java.util.List;
 
 public class Main {
+    static long profiler=0L;
     public static void main(String[] args) {
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine();
+        GameState g2 = new GameState();
         long l0=System.currentTimeMillis();
         for(int i=0;i<100000;i++){
-            GameState g= playGame(false);
-            if(g.gs!=GameStatus.DRAW){
-                System.out.println(g);
-            }
+            GameState g= playGame(false,g2);
         }
         long l1=System.currentTimeMillis();
         System.out.println(l1-l0);
+        System.out.println(profiler);
     }
 
-    public static GameState playGame(boolean verbose) {
-        GameState g = StringToGameStateConverter.readGameState(StringToGameStateConverter.STANDARD_GAME_STATE);
+    public static GameState playGame(boolean verbose,GameState g) {
         g.analyze();
         if (verbose) {
             System.out.println(g);
