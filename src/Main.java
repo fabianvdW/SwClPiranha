@@ -7,11 +7,9 @@ import java.util.Random;
 
 public class Main {
     static long profiler=0L;
-    static Random r;
     public static void main(String[] args) {
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine();
         GameState g2 = new GameState();
-        r= new Random();
         long l0=System.currentTimeMillis();
         for(int i=0;i<100000;i++){
             GameState g= playGame(false,g2);
@@ -30,7 +28,7 @@ public class Main {
             System.out.println("GameState: " + g.gs);
         }
         while (g.gs == GameStatus.INGAME) {
-            g= g.possibleFollowingStates.get(r.nextInt(g.possibleFollowingStates.size()));
+            g=g.possibleFollowingStates.get((int)(Math.random()*g.possibleFollowingStates.size()));
             g.analyze();
             if (verbose) {
                 System.out.println(g);
