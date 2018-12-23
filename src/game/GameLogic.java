@@ -2,6 +2,7 @@ package game;
 
 import datastructures.BitBoard;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class GameLogic {
@@ -31,9 +32,9 @@ public class GameLogic {
         return result;
     }
 
-    public static HashMap<GameMove, GameState> getPossibleMoves(GameState gs, GameColor gc) {
+    public static void getPossibleMoves(GameState gs, GameColor gc) {
         if (gs.gs != GameStatus.INGAME) {
-            return null;
+            return;
         }
         BitBoard meineFische;
         BitBoard gegnerFische;
@@ -46,7 +47,9 @@ public class GameLogic {
         }
         //Jeden Fisch durchgehen
         //Es gibt 8 Richtungen es braucht also einen Array [100][8]
-        HashMap<GameMove, GameState> result = new HashMap<>(60);
+        //HashMap<GameMove, GameState> result = new HashMap<>(60);
+        gs.possibleMoves= new ArrayList<>(60);
+        gs.possibleFollowingStates= new ArrayList<>(60);
         BitBoard fischIterator = meineFische.clone();
         while (!fischIterator.equalsZero()) {
             int fischPos = fischIterator.numberOfTrailingZeros();
@@ -65,7 +68,9 @@ public class GameLogic {
                             if (squares < 2 || BitBoardConstants.SQUARE_ATTACK_DIRECTION_SQUARE_DESTINATION_ATTACK_LINE[fischPos][dir.ordinal() + (j == 0 ? 0 : 4)][squares - 2].and(gegnerFische).equalsZero()) {
                                 //Valid move
                                 GameMove gm = new GameMove(fischPos, destination, (j == 0 ? dir : GameDirection.values()[i + 4]));
-                                result.put(gm, makeMove(gs, gm, gc));
+                                gs.possibleMoves.add(gm);
+                                gs.possibleFollowingStates.add(makeMove(gs,gm,gc));
+                                //result.put(gm, makeMove(gs, gm, gc));
                             }
                         }
                     }
@@ -74,7 +79,7 @@ public class GameLogic {
             }
             fischIterator.unsetBitEquals(fischPos);
         }
-        return result;
+        return;
     }
 
     public static GameState makeMove(GameState gs, GameMove gm, GameColor gc) {

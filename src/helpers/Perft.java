@@ -25,8 +25,8 @@ public class Perft {
             return 1;
         }
         int count=0;
-        for(GameMove gm: g.possibleMoves.keySet()){
-            count+=perft(g.possibleMoves.get(gm).clone(),depth-1);
+        for(int i=0;i<g.possibleFollowingStates.size();i++){
+            count+=perft(g.possibleFollowingStates.get(i).clone(),depth-1);
         }
         return count;
     }
