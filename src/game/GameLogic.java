@@ -10,9 +10,9 @@ public class GameLogic {
     public static int getSchwarm(GameState gs, GameColor gc) {
         BitBoard meineFische;
         if (gc == GameColor.RED) {
-            meineFische = gs.roteFische;
+            meineFische = gs.roteFische.clone();
         } else {
-            meineFische = gs.blaueFische;
+            meineFische = gs.blaueFische.clone();
         }
         if (meineFische.equalsZero()) {
             return 0;
@@ -24,7 +24,7 @@ public class GameLogic {
         do {
             result++;
             fischBit = neighboringFieldsAndMeineFische.numberOfTrailingZeros();
-            meineFische = meineFische.unsetBit(fischBit);
+            meineFische.unsetBitEquals(fischBit);
             neighboringFields.orEquals(BitBoardConstants.NACHBARN[fischBit]);
             neighboringFieldsAndMeineFische = neighboringFields.and(meineFische);
         } while (!neighboringFieldsAndMeineFische.equalsZero());
