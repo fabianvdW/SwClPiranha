@@ -60,7 +60,8 @@ public class GameLogic {
                 for (int j = 0; j < 2; j++) {
                     int destination = fischPos + dir.getShift() * squares * (j == 0 ? 1 : -1);
                     if (destination <= 99 && destination >= 0) {
-                        BitBoard destinationSquare = new BitBoard(0, 1).leftShift(destination);
+                        //BitBoard destinationSquare = new BitBoard(0, 1).leftShift(destination);
+                        BitBoard destinationSquare= BitBoardConstants.EINHEITS_UNIT_LEFT_SHIFT[destination];
                         //Check that destinationSquare is on attackLine and destinationSquare is not fish of my color or Kraken
                         if (!BitBoardConstants.SQUARE_ATTACK_DIRECTION_SQUARES_TWO_SIDED[fischPos][dir.ordinal()].and(destinationSquare).equalsZero()&&destinationSquare.and(meineFische.or(gs.kraken)).equalsZero()) {
                             //Check that there is no enemy fish on the line
@@ -82,17 +83,17 @@ public class GameLogic {
     }
 
     public static GameState makeMove(GameState gs, GameMove gm, GameColor gc) {
-        BitBoard einheitsUnit = new BitBoard(0, 1);
-        BitBoard leftShift = einheitsUnit.leftShift(gm.to);
+        BitBoard leftShiftTo = BitBoardConstants.EINHEITS_UNIT_LEFT_SHIFT[gm.to];
+        BitBoard leftShiftFrom= BitBoardConstants.EINHEITS_UNIT_LEFT_SHIFT[gm.from];
         if (gc == GameColor.RED) {
-            BitBoard newRed = gs.roteFische.and(einheitsUnit.leftShift(gm.from).not());
-            newRed.orEquals(leftShift);
-            BitBoard newBlau = gs.blaueFische.and(leftShift.not());
+            BitBoard newRed = gs.roteFische.and(leftShiftFrom.not());
+            newRed.orEquals(leftShiftTo);
+            BitBoard newBlau = gs.blaueFische.and(leftShiftTo.not());
             return new GameState(newRed, newBlau, gs.kraken, GameColor.BLUE, gs.pliesPlayed + 1, gs.roundsPlayed);
         } else {
-            BitBoard newBlau = gs.blaueFische.and(einheitsUnit.leftShift(gm.from).not());
-            newBlau.orEquals(leftShift);
-            BitBoard newRed = gs.roteFische.and(leftShift.not());
+            BitBoard newBlau = gs.blaueFische.and(leftShiftFrom.not());
+            newBlau.orEquals(leftShiftTo);
+            BitBoard newRed = gs.roteFische.and(leftShiftTo.not());
             return new GameState(newRed, newBlau, gs.kraken, GameColor.RED, gs.pliesPlayed + 1, gs.roundsPlayed + 1);
         }
     }
