@@ -116,11 +116,10 @@ public class BitBoard {
     }
 
     public int numberOfTrailingZeros() {
-        int l1Trail = Long.numberOfTrailingZeros(l1);
-        if (l1Trail == 64) {
+        if (l1==0) {
             return 64 + Long.numberOfTrailingZeros(l0);
         } else {
-            return l1Trail;
+            return Long.numberOfTrailingZeros(l1);
         }
     }
 
