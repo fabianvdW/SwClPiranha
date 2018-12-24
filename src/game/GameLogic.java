@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class GameLogic {
-
+    static GameDirection[] directions= GameDirection.values();
     //Diese Methode berechnet nicht den größten Schwarm, sondern nur den Schwarm ausgehend von dem Fisch am Weitesten rechts unten.
     public static int getSchwarm(GameState gs, GameColor gc) {
         BitBoard meineFische;
@@ -53,7 +53,7 @@ public class GameLogic {
         while (!fischIterator.equalsZero()) {
             int fischPos = fischIterator.numberOfTrailingZeros();
             for (int i = 0; i < 4; i++) {
-                GameDirection dir = GameDirection.values()[i];
+                GameDirection dir = GameLogic.directions[i];
                 //Check for possible moves
                 BitBoard attackLine = BitBoardConstants.SQUARE_ATTACK_DIRECTION_SQUARES_TWO_SIDED[fischPos][dir.ordinal()].and(meineFische.or(gegnerFische));
                 int squares = attackLine.popCount();
@@ -67,7 +67,7 @@ public class GameLogic {
                             //Check that there is no enemy fish on the line
                             if (squares < 2 || BitBoardConstants.SQUARE_ATTACK_DIRECTION_SQUARE_DESTINATION_ATTACK_LINE[fischPos][dir.ordinal() + (j == 0 ? 0 : 4)][squares - 2].and(gegnerFische).equalsZero()) {
                                 //Valid move
-                                GameMove gm = new GameMove(fischPos, destination, (j == 0 ? dir : GameDirection.values()[i + 4]));
+                                GameMove gm = new GameMove(fischPos, destination, (j == 0 ? dir : GameLogic.directions[i + 4]));
                                 gs.possibleMoves.add(gm);
                                 gs.possibleFollowingStates.add(makeMove(gs,gm,gc));
                                 //result.put(gm, makeMove(gs, gm, gc));
