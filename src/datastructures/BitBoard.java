@@ -16,6 +16,25 @@ public class BitBoard {
         this.l1 = l1;
     }
 
+    //Optimized methods
+    public static boolean inplaceWithParameterAndEqualsZero(BitBoard inplaceParam,BitBoard and1,BitBoard and2){
+        inplaceParam.l0=and1.l0&and2.l0;
+        inplaceParam.l1=and1.l1&and2.l1;
+        return inplaceParam.equalsZero();
+    }
+    public int popCountOnMeAndOredBitBoards(BitBoard or1,BitBoard or2){
+        return  Long.bitCount(this.l0&(or1.l0|or2.l0))+Long.bitCount(this.l1&(or1.l1|or2.l1));
+    }
+    public boolean orEqualsZero(BitBoard or1,BitBoard or2){
+       // return (this.l1&(or1.l1|or2.l1))==0 && (this.l0&(or1.l0|or2.l0))==0;
+        //Faster Alternative
+        return ((this.l1&(or1.l1|or2.l1))|(this.l0&(or1.l0|or2.l0)))==0;
+    }
+    public boolean andEqualsZero(BitBoard and){
+       // return (this.l1&and.l1)==0&&(this.l0&and.l0)==0;
+        //Faster Alternative
+        return ((this.l1&and.l1)|(this.l0&and.l0))==0;
+    }
     public BitBoard and(BitBoard b) {
         return new BitBoard(l0 & b.l0, l1 & b.l1);
     }
@@ -93,7 +112,7 @@ public class BitBoard {
     }
 
     public boolean equalsZero() {
-        return l1 == 0 && l0 == 0;
+        return (l1|l0) == 0;
     }
 
     public int numberOfTrailingZeros() {

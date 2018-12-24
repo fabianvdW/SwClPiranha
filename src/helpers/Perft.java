@@ -12,7 +12,7 @@ public class Perft {
         long t0=System.currentTimeMillis();
         System.out.println(perft(g,5));
         long t1=System.currentTimeMillis();
-        System.out.println("NPS: "+((nodes+0.0)/((t1-t0)/1000)));
+        System.out.println("NPS: "+((nodes+0.0)/((t1-t0+0.0)/1000.0)));
     }
 
     public static int perft(GameState g, int depth){
