@@ -3,6 +3,7 @@ package game;
 import datastructures.BitBoard;
 import helpers.StringColor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class GameState {
@@ -15,7 +16,8 @@ public class GameState {
 
     public GameStatus gs;
     public GameColor move;
-    public HashMap<GameMove,GameState> possibleMoves;
+    public ArrayList<GameMove> possibleMoves;
+    public ArrayList<GameState> possibleFollowingStates;
     public GameState() {
         //Pre calculated values from BitMasks
         this.roteFische = new BitBoard(0x0000000002018060L, 0x1806018060180400L);
@@ -78,7 +80,7 @@ public class GameState {
             return;
         }
 
-        this.possibleMoves=GameLogic.getPossibleMoves(this,this.move);
+        GameLogic.getPossibleMoves(this,this.move);
         if(this.possibleMoves.isEmpty()){
             if(this.move==GameColor.RED){
                 this.gs=GameStatus.BLUE_WIN;

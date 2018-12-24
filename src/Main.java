@@ -3,6 +3,7 @@ import game.*;
 import helpers.StringToGameStateConverter;
 
 import java.util.List;
+import java.util.Random;
 
 public class Main {
     static long profiler=0L;
@@ -10,12 +11,11 @@ public class Main {
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine();
         GameState g2 = new GameState();
         long l0=System.currentTimeMillis();
-        for(int i=0;i<100000;i++){
+        for(int i=0;i<1000000;i++){
             GameState g= playGame(false,g2);
         }
         long l1=System.currentTimeMillis();
         System.out.println(l1-l0);
-        System.out.println(profiler);
     }
 
     public static GameState playGame(boolean verbose,GameState g) {
@@ -27,8 +27,7 @@ public class Main {
             System.out.println("GameState: " + g.gs);
         }
         while (g.gs == GameStatus.INGAME) {
-            Object[] values = g.possibleMoves.values().toArray();
-            g = (GameState) values[(int) (values.length * Math.random())];
+            g=g.possibleFollowingStates.get((int)(Math.random()*g.possibleFollowingStates.size()));
             g.analyze();
             if (verbose) {
                 System.out.println(g);
