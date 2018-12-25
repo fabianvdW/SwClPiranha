@@ -16,8 +16,9 @@ public class GameState {
 
     public GameStatus gs;
     public GameColor move;
-    public ArrayList<GameMove> possibleMoves;
-    public ArrayList<GameState> possibleFollowingStates;
+    //public ArrayList<GameMove> possibleMoves;
+    //public ArrayList<GameState> possibleFollowingStates;
+    public GameMoveResultObject gmro;
     public GameState() {
         //Pre calculated values from BitMasks
         this.roteFische = new BitBoard(0x0000000002018060L, 0x1806018060180400L);
@@ -81,7 +82,7 @@ public class GameState {
         }
 
         GameLogic.getPossibleMoves(this,this.move);
-        if(this.possibleMoves.isEmpty()){
+        if(this.gmro.instances==0){
             if(this.move==GameColor.RED){
                 this.gs=GameStatus.BLUE_WIN;
             }else{
