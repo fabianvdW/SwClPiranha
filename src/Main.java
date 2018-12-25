@@ -11,8 +11,8 @@ public class Main {
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine();
         GameState g2 = new GameState();
         long l0=System.currentTimeMillis();
-        for(int i=0;i<1000000;i++){
-            GameState g= playGame(false,g2);
+        for(int i=0;i<100000;i++){
+            playGame(false,g2);
         }
         long l1=System.currentTimeMillis();
         System.out.println(l1-l0);
@@ -27,7 +27,7 @@ public class Main {
             System.out.println("GameState: " + g.gs);
         }
         while (g.gs == GameStatus.INGAME) {
-            g=g.possibleFollowingStates.get((int)(Math.random()*g.possibleFollowingStates.size()));
+            g=g.gmro.states[(int)(Math.random()*g.gmro.instances)];
             g.analyze();
             if (verbose) {
                 System.out.println(g);
