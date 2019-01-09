@@ -10,9 +10,11 @@ public class Perft {
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine();
         GameState g = StringToGameStateConverter.readGameState(StringToGameStateConverter.STANDARD_GAME_STATE);
         long t0=System.currentTimeMillis();
-        System.out.println(perft(g,5));
+        System.out.println(perft(g,1));
         //Perft 5: 250613480
+        //Perft 6
         long t1=System.currentTimeMillis();
+        System.out.println("Time: "+(t1-t0));
         System.out.println("NPS: "+((nodes+0.0)/((t1-t0+0.0)/1000.0)));
     }
 

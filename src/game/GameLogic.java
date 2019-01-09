@@ -23,12 +23,36 @@ public class GameLogic {
         int result = 0;
         int fischBit;
         BitBoard neighboringFields = new BitBoard(0, 0);
-        BitBoard neighboringFieldsAndMeineFische = meineFische;
+        BitBoard neighboringFieldsAndMeineFische = meineFische.clone();
         boolean b = false;
         do {
             result++;
             fischBit = neighboringFieldsAndMeineFische.numberOfTrailingZeros();
             meineFische.unsetBitEquals(fischBit);
+            neighboringFields.orEquals(BitBoardConstants.NACHBARN[fischBit]);
+            //neighboringFieldsAndMeineFische = neighboringFields.and(meineFische);
+            b = BitBoard.inplaceWithParameterAndEqualsZero(neighboringFieldsAndMeineFische, neighboringFields, meineFische);
+            //InplaceWithParamater-And-EqualsZero
+        } while (!b);
+        return result;
+    }
+
+    //Diese Methode berechnet nicht den größten Schwarm, sondern nur den Schwarm ausgehend von dem Fisch am Weitesten rechts unten.
+    public static BitBoard getSchwarmBoard(BitBoard meineFische, GameColor gc) {
+        meineFische=meineFische.clone();
+        if (meineFische.equalsZero()) {
+            return new BitBoard(0,0);
+        }
+        BitBoard result= new BitBoard(0,0);
+        int fischBit;
+        BitBoard neighboringFields = new BitBoard(0, 0);
+        BitBoard neighboringFieldsAndMeineFische = meineFische.clone();
+        boolean b = false;
+        do {
+            fischBit = neighboringFieldsAndMeineFische.numberOfTrailingZeros();
+            meineFische.unsetBitEquals(fischBit);
+
+            result.orEquals(new BitBoard(0,1).leftShift(fischBit));
             neighboringFields.orEquals(BitBoardConstants.NACHBARN[fischBit]);
             //neighboringFieldsAndMeineFische = neighboringFields.and(meineFische);
             b = BitBoard.inplaceWithParameterAndEqualsZero(neighboringFieldsAndMeineFische, neighboringFields, meineFische);
@@ -86,8 +110,6 @@ public class GameLogic {
             //BitBoard destinationSquare = new BitBoard(0, 1).leftShift(destination);
             BitBoard destinationSquare= BitBoardConstants.EINHEITS_UNIT_LEFT_SHIFT[destination];
             //Check that destinationSquare is on attackLine and destinationSquare is not fish of my color or Kraken
-            //Second Argument was: !BitBoardConstants.SQUARE_ATTACK_DIRECTION_SQUARES_TWO_SIDED[fischPos][i].and(destinationSquare).equalsZero()
-            //First Argument was: destinationSquare.and(meineFische.or(gs.kraken)).equalsZero()
             if (destinationSquare.orEqualsZero(meineFische, gs.kraken) && !BitBoardConstants.SQUARE_ATTACK_DIRECTION_SQUARES_TWO_SIDED[fischPos][iOriginal].andEqualsZero(destinationSquare)) {
                 //Check that there is no enemy fish on the line
                 //Second Argument was: BitBoardConstants.SQUARE_ATTACK_DIRECTION_SQUARE_DESTINATION_ATTACK_LINE[fischPos][i + (j == 0 ? 0 : 4)][squares - 2].and(gegnerFische).equalsZero()
