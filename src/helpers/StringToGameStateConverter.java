@@ -7,6 +7,7 @@ import game.GameStatus;
 
 public class StringToGameStateConverter {
 
+    /*
     public final static String[][] STANDARD_GAME_STATE = {
             {" ", "b", "b", "b", "b", "b", "b", "b", "b", " "},
             {"r", " ", " ", " ", " ", " ", " ", " ", " ", "r"},
@@ -18,6 +19,20 @@ public class StringToGameStateConverter {
             {"r", " ", " ", " ", " ", " ", " ", " ", " ", "r"},
             {"r", " ", " ", " ", " ", " ", " ", " ", " ", "r"},
             {" ", "b", "b", "b", "b", "b", "b", "b", "b", " "}
+    };
+    */
+    //Blau am Zug
+    public final static String[][] STANDARD_GAME_STATE = {
+            {" ", " ", " ", " ", " ", "b", " ", " ", " ", " "},
+            {" ", " ", " ", " ", "r", " ", "b", " ", " ", " "},
+            {" ", " ", " ", " ", " ", "b", " ", "r", " ", " "},
+            {"r", " ", " ", "r", "b", "b", " ", " ", " ", "r"},
+            {" ", " ", "k", " ", " ", " ", "b", "r", " ", " "},
+            {" ", " ", " ", "r", " ", "r", "b", " ", " ", " "},
+            {" ", " ", "r", " ", " ", " ", "b", " ", "r", " "},
+            {" ", " ", " ", "b", "k", "r", "b", " ", " ", " "},
+            {" ", " ", " ", " ", "b", " ", " ", "r", " ", " "},
+            {" ", " ", " ", "b", "b", "b", "b", " ", " ", " "}
     };
 
     public static GameState readGameState(String[][] arr) {

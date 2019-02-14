@@ -11,7 +11,7 @@ public class Main {
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine();
         GameState g2 = new GameState();
         long l0=System.currentTimeMillis();
-        for(int i=0;i<100000;i++){
+        for(int i=0;i<1000000;i++){
             playGame(false,g2);
         }
         long l1=System.currentTimeMillis();
