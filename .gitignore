@@ -2,3 +2,8 @@
 *.xml
 SwClPiranha.iml
 *.class
+src/META-INF/MANIFEST.MF
+out/production/SoftwareChallenge/META-INF/MANIFEST.MF
+out/artifacts/SoftwareChallenge_jar/ABC.zip
+out/artifacts/SoftwareChallenge_jar/SoftwareChallenge.jar
+out/artifacts/SoftwareChallenge_jar/data.txt

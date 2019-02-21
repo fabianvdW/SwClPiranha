@@ -3,7 +3,7 @@ import game.*;
 public class Main {
     static long profiler=0L;
     public static void main(String[] args) {
-        BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine();
+        BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("SwClPiranha/src/game/data.txt");
         MyGameState g2 = new MyGameState();
         long l0=System.currentTimeMillis();
         for(int i=0;i<1000000;i++){

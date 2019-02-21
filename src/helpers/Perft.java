@@ -5,7 +5,7 @@ import game.*;
 public class Perft {
     static int nodes=0;
     public static void main(String[] args){
-        BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine();
+        BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("SwClPiranha/src/game/data.txt");
         MyGameState g = StringToGameStateConverter.readGameState(StringToGameStateConverter.STANDARD_GAME_STATE);
         long t0=System.currentTimeMillis();
         System.out.println(perft(g,1));
