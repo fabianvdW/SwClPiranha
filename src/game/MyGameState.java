@@ -3,10 +3,7 @@ package game;
 import datastructures.BitBoard;
 import helpers.StringColor;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-public class GameState {
+public class MyGameState {
     public BitBoard roteFische;
     public BitBoard blaueFische;
     public BitBoard kraken;
@@ -17,20 +14,20 @@ public class GameState {
     public GameStatus gs;
     public GameColor move;
     //public ArrayList<GameMove> possibleMoves;
-    //public ArrayList<GameState> possibleFollowingStates;
+    //public ArrayList<MyGameState> possibleFollowingStates;
     public GameMoveResultObject gmro;
-    public GameState() {
+    public MyGameState() {
         //Pre calculated values from BitMasks
         this.roteFische = new BitBoard(0x0000000002018060L, 0x1806018060180400L);
         this.blaueFische = new BitBoard(0x00000007f8000000L, 0x00000000000001feL);
-        this.kraken = GameState.generateRandomKraken();
+        this.kraken = MyGameState.generateRandomKraken();
         this.move=GameColor.RED;
         this.pliesPlayed=0;
         this.roundsPlayed=0;
         this.gs=GameStatus.INGAME;
     }
 
-    public GameState(BitBoard kraken) {
+    public MyGameState(BitBoard kraken) {
         //Pre calculated values from BitMasks
         this.roteFische = new BitBoard(0x0000000002018060L, 0x1806018060180400L);
         this.blaueFische = new BitBoard(0x00000007f8000000L, 0x00000000000001feL);
@@ -41,7 +38,7 @@ public class GameState {
         this.gs=GameStatus.INGAME;
     }
 
-    public GameState(BitBoard roteFische, BitBoard blaueFische, BitBoard kraken,GameColor move,int pliesPlayed,int roundsPlayed) {
+    public MyGameState(BitBoard roteFische, BitBoard blaueFische, BitBoard kraken, GameColor move, int pliesPlayed, int roundsPlayed) {
         //Make sure those BitBoards get cloned
         this.roteFische = roteFische;
         this.blaueFische = blaueFische;
@@ -117,8 +114,8 @@ public class GameState {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof GameState) {
-            GameState g = (GameState) o;
+        if (o instanceof MyGameState) {
+            MyGameState g = (MyGameState) o;
             return g.roteFische == this.roteFische && g.blaueFische == this.blaueFische && g.kraken == this.kraken;
         }
         return false;
@@ -131,8 +128,8 @@ public class GameState {
     }
 
     @Override
-    public GameState clone() {
-        return new GameState(this.roteFische.clone(), this.blaueFische.clone(), this.kraken.clone(),this.move,this.pliesPlayed,this.roundsPlayed);
+    public MyGameState clone() {
+        return new MyGameState(this.roteFische.clone(), this.blaueFische.clone(), this.kraken.clone(),this.move,this.pliesPlayed,this.roundsPlayed);
     }
 
     @Override

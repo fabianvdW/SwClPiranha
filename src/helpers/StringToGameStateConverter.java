@@ -2,8 +2,7 @@ package helpers;
 
 import datastructures.BitBoard;
 import game.GameColor;
-import game.GameState;
-import game.GameStatus;
+import game.MyGameState;
 
 public class StringToGameStateConverter {
 
@@ -35,7 +34,7 @@ public class StringToGameStateConverter {
             {" ", " ", " ", "b", "b", "b", "b", " ", " ", " "}
     };
 
-    public static GameState readGameState(String[][] arr) {
+    public static MyGameState readGameState(String[][] arr) {
         BitBoard roteFische = new BitBoard(0, 0);
         BitBoard blaueFische = new BitBoard(0, 0);
         BitBoard kraken = new BitBoard(0, 0);
@@ -53,6 +52,6 @@ public class StringToGameStateConverter {
             }
 
         }
-        return new GameState(roteFische, blaueFische, kraken, GameColor.RED,0,0);
+        return new MyGameState(roteFische, blaueFische, kraken, GameColor.RED,0,0);
     }
 }

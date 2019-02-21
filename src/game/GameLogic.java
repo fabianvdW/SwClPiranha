@@ -2,15 +2,12 @@ package game;
 
 import datastructures.BitBoard;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 public class GameLogic {
     static GameDirection[] directions = GameDirection.values();
     static int someValue;
 
     //Diese Methode berechnet nicht den größten Schwarm, sondern nur den Schwarm ausgehend von dem Fisch am Weitesten rechts unten.
-    public static int getSchwarm(GameState gs, GameColor gc) {
+    public static int getSchwarm(MyGameState gs, GameColor gc) {
         BitBoard meineFische;
         if (gc == GameColor.RED) {
             meineFische = gs.roteFische.clone();
@@ -61,17 +58,17 @@ public class GameLogic {
         return result;
     }
 
-    public static void initGmro(GameState gs) {
+    public static void initGmro(MyGameState gs) {
         gs.gmro = new GameMoveResultObject();
     }
 
-    public static void addToGmro(GameState gs, GameMove gm, GameState ng) {
+    public static void addToGmro(MyGameState gs, GameMove gm, MyGameState ng) {
         gs.gmro.moves[gs.gmro.instances] = gm;
         gs.gmro.states[gs.gmro.instances] = ng;
         gs.gmro.instances++;
     }
 
-    public static void getPossibleMoves(GameState gs, GameColor gc) {
+    public static void getPossibleMoves(MyGameState gs, GameColor gc) {
         if (gs.gs != GameStatus.INGAME) {
             return;
         }
@@ -104,7 +101,7 @@ public class GameLogic {
         return;
     }
 
-    public static void checkDirection(int fischPos, GameDirection dir, int squares, GameState gs, GameColor gc, BitBoard meineFische, BitBoard gegnerFische, int iOriginal, int newI) {
+    public static void checkDirection(int fischPos, GameDirection dir, int squares, MyGameState gs, GameColor gc, BitBoard meineFische, BitBoard gegnerFische, int iOriginal, int newI) {
         int destination = fischPos + dir.getShift() * squares;
         if (destination <= 99 && destination >= 0) {
             //BitBoard destinationSquare = new BitBoard(0, 1).leftShift(destination);
@@ -122,7 +119,7 @@ public class GameLogic {
         }
     }
 
-    public static GameState makeMove(GameState gs, GameMove gm, GameColor gc) {
+    public static MyGameState makeMove(MyGameState gs, GameMove gm, GameColor gc) {
         BitBoard leftShiftTo = BitBoardConstants.EINHEITS_UNIT_LEFT_SHIFT[gm.to];
         BitBoard leftShiftToNot = BitBoardConstants.EINHEITS_UNIT_LEFT_SHIFT_NOT[gm.to];
         BitBoard leftShiftFromNot = BitBoardConstants.EINHEITS_UNIT_LEFT_SHIFT_NOT[gm.from];
@@ -130,12 +127,12 @@ public class GameLogic {
             BitBoard newRed = gs.roteFische.and(leftShiftFromNot);
             newRed.orEquals(leftShiftTo);
             BitBoard newBlau = gs.blaueFische.and(leftShiftToNot);
-            return new GameState(newRed, newBlau, gs.kraken, GameColor.BLUE, gs.pliesPlayed + 1, gs.roundsPlayed);
+            return new MyGameState(newRed, newBlau, gs.kraken, GameColor.BLUE, gs.pliesPlayed + 1, gs.roundsPlayed);
         } else {
             BitBoard newBlau = gs.blaueFische.and(leftShiftFromNot);
             newBlau.orEquals(leftShiftTo);
             BitBoard newRed = gs.roteFische.and(leftShiftToNot);
-            return new GameState(newRed, newBlau, gs.kraken, GameColor.RED, gs.pliesPlayed + 1, gs.roundsPlayed + 1);
+            return new MyGameState(newRed, newBlau, gs.kraken, GameColor.RED, gs.pliesPlayed + 1, gs.roundsPlayed + 1);
         }
     }
 }

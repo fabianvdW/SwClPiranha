@@ -2,13 +2,11 @@ package helpers;
 
 import game.*;
 
-import java.util.HashMap;
-
 public class Perft {
     static int nodes=0;
     public static void main(String[] args){
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine();
-        GameState g = StringToGameStateConverter.readGameState(StringToGameStateConverter.STANDARD_GAME_STATE);
+        MyGameState g = StringToGameStateConverter.readGameState(StringToGameStateConverter.STANDARD_GAME_STATE);
         long t0=System.currentTimeMillis();
         System.out.println(perft(g,1));
         //Perft 5: 250613480
@@ -18,7 +16,7 @@ public class Perft {
         System.out.println("NPS: "+((nodes+0.0)/((t1-t0+0.0)/1000.0)));
     }
 
-    public static int perft(GameState g, int depth){
+    public static int perft(MyGameState g, int depth){
         if(depth==0){
             return 1;
         }

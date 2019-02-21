@@ -3,19 +3,17 @@ package artificialplayer;
 import game.*;
 import helpers.StringToGameStateConverter;
 
-import java.util.ArrayList;
-
 public class AlphaBeta {
     public static void main(String[] args) {
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine();
-        GameState g = StringToGameStateConverter.readGameState(StringToGameStateConverter.STANDARD_GAME_STATE);
-        System.out.println(g);
-        System.out.println(BoardRating.rating(g));
-        System.out.println(alphaBetaRoot(g, 3,1));
+        MyGameState g = StringToGameStateConverter.readGameState(StringToGameStateConverter.STANDARD_GAME_STATE);
+        //System.out.println(g);
+        //System.out.println(BoardRating.rating(g));
+        System.out.println(alphaBetaRoot(g, 2,1));
     }
 
     //Rot ist 1, Blaue ist -1
-    public static double alphaBeta(GameState g, int depth, int maximizingPlayer, double alpha, double beta) {
+    public static double alphaBeta(MyGameState g, int depth, int maximizingPlayer, double alpha, double beta) {
         g.analyze();
         if (g.gs != GameStatus.INGAME) {
             if (g.gs == GameStatus.DRAW) {
@@ -47,7 +45,7 @@ public class AlphaBeta {
         return val;
 
     }
-    public static GameMove alphaBetaRoot(GameState g, int depth, int maximizingPlayer){
+    public static GameMove alphaBetaRoot(MyGameState g, int depth, int maximizingPlayer){
         g.analyze();
         if (g.gs != GameStatus.INGAME) {
             return null;

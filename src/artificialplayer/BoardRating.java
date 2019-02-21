@@ -1,16 +1,15 @@
 package artificialplayer;
 
 import datastructures.BitBoard;
-import game.BitBoardConstants;
 import game.GameColor;
 import game.GameLogic;
-import game.GameState;
+import game.MyGameState;
 
 import java.util.ArrayList;
 
 public class BoardRating {
 
-    public static double rating(GameState g) {
+    public static double rating(MyGameState g) {
         //Größter momentaner Schwarm
         //Schwarm-Anzahl
         int anzahlRoteFische = g.roteFische.popCount();
@@ -83,7 +82,7 @@ public class BoardRating {
         return redInsg-blueInsg;
     }
 
-    public static ArrayList<Schwarm> berechneSchwaerme(GameState g, GameColor gc) {
+    public static ArrayList<Schwarm> berechneSchwaerme(MyGameState g, GameColor gc) {
         BitBoard fischClone = gc == GameColor.RED ? g.roteFische.clone() : g.blaueFische.clone();
         ArrayList<Schwarm> res = new ArrayList<>();
         while (!fischClone.equalsZero()) {
