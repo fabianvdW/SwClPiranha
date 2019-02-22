@@ -3,13 +3,10 @@ package artificialplayer;
 import game.*;
 import helpers.StringToGameStateConverter;
 
-public class AlphaBeta {
+public class AlphaBeta extends ArtificalPlayer {
     public static void main(String[] args) {
-        BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("SwClPiranha/src/game/data.txt");
-        MyGameState g = StringToGameStateConverter.readGameState(StringToGameStateConverter.STANDARD_GAME_STATE);
-        //System.out.println(g);
-        //System.out.println(BoardRating.rating(g));
-        System.out.println(alphaBetaRoot(g, 2,1));
+        ArtificalPlayer a = new AlphaBeta();
+        a.main(args[0]);
     }
 
     //Rot ist 1, Blaue ist -1
@@ -45,7 +42,8 @@ public class AlphaBeta {
         return val;
 
     }
-    public static GameMove alphaBetaRoot(MyGameState g, int depth, int maximizingPlayer){
+
+    public static GameMove alphaBetaRoot(MyGameState g, int depth, int maximizingPlayer) {
         g.analyze();
         if (g.gs != GameStatus.INGAME) {
             return null;
@@ -54,18 +52,22 @@ public class AlphaBeta {
             return null;
         }
         double val = -100000;
-        GameMove bestMove =null;
+        GameMove bestMove = null;
         GameMoveResultObject gmro = g.gmro;
         g.gmro = null;
         for (int i = 0; i < gmro.instances; i++) {
             double rat = -alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -1000, 1000);
             if (rat > val) {
                 val = rat;
-                bestMove= gmro.moves[i];
+                bestMove = gmro.moves[i];
             }
         }
-        System.out.println(val);
         return bestMove;
+    }
+
+    @Override
+    public GameMove requestMove() {
+        return AlphaBeta.alphaBetaRoot(this.mg, 2, this.mg.move == GameColor.RED ? 1 : -1);
     }
 }
 
