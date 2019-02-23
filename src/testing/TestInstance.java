@@ -75,9 +75,19 @@ public class TestInstance {
     public static void printErgebnisse(String p1Name, String p2Name, boolean zwischenergebniss) {
         System.out.println("-----------------------------------");
         System.out.println(zwischenergebniss ? "Zwischenergebnis: " : "Endergebnis: ");
-        System.out.println("Name \t\t Wins \t Draws \t Loss    Crashes    Average Think Time(in millis)");
-        System.out.println(p1Name + "\t " + p1Wins + "\t " + draws + " \t" + p2Wins + " \t" + p1Crashes + "\t " + timeUsedP1 / (movesP1 + 0.0));
-        System.out.println(p2Name + "\t " + p2Wins + "\t " + draws + " \t" + p1Wins + " \t" + p2Crashes + "\t " + timeUsedP2 / (movesP2 + 0.0));
+        System.out.println("Name \t\t Wins \t Draws \t Loss  Crashes    Think Time  Elo Gain");
+        double N = (p1Wins + p2Wins + draws + 0.0);
+        double score = p1Wins + draws / 2.0;
+        double winrate = score / N;
+        double margin = 1.96 * Math.sqrt(N * winrate * (1 - winrate));
+
+        double eloGainP1 = -400.0 * Math.log10(N / score - 1.0);
+        eloGainP1 = Math.round(eloGainP1 * 100.0) / 100.0;
+        double errorMargin = -400.0 * Math.log10(N / (N * winrate + margin) - 1);
+        errorMargin = Math.round(errorMargin * 100.0) / 100.0;
+        System.out.println(Math.round(eloGainP1));
+        System.out.println(p1Name + "\t " + p1Wins + "\t " + draws + " \t" + p2Wins + " \t" + p1Crashes + "\t " + Math.round((timeUsedP1 / (movesP1 + 0.0)) * 100.0) / 100.0 + "\t\t " + eloGainP1 + "\u00B1 " + errorMargin);
+        System.out.println(p2Name + "\t " + p2Wins + "\t " + draws + " \t" + p1Wins + " \t" + p2Crashes + "\t " + Math.round((timeUsedP2 / (movesP2 + 0.0) * 100.0)) / 100.0 + "\t\t " + (-1.0 * eloGainP1) + "\u00B1 " + errorMargin);
     }
 
     public static GameMove parseGameMove(BufferedReader input) {
@@ -96,6 +106,8 @@ public class TestInstance {
                 Thread.sleep(5);
             }
             String timeStamp2 = sdf.format(new Date());
+            l.log(LogLevel.ERROR, timeStamp1);
+            l.log(LogLevel.ERROR, timeStamp2);
             System.out.println(timeStamp1);
             System.out.println(timeStamp2);
         } catch (Exception e) {
