@@ -1,6 +1,8 @@
 package testing;
 
 import game.*;
+import helpers.logging.Log;
+import helpers.logging.LogLevel;
 
 import java.io.*;
 import java.text.DateFormat;
@@ -23,6 +25,7 @@ public class TestInstance {
     static long timeUsedP2;
     static int movesP1;
     static int movesP2;
+    static Log l;
 
     public static void main(String[] args) {
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("data.txt");
@@ -33,6 +36,7 @@ public class TestInstance {
         String jarFile2 = args[4];
         String p2Name = args[5];
         millisTime = Integer.parseInt(args[6]);
+        l = new Log("spielleiter-error.log");
         System.out.println("Started Tests!");
         System.out.println("Games: " + games);
         System.out.println("Processors: " + processors);
@@ -46,7 +50,8 @@ public class TestInstance {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                printErgebnisse(p1Name, p2Name,true);
+                printErgebnisse(p1Name, p2Name, true);
+                l.flush();
             }
         }, 10000, 10000);
         try {
@@ -57,7 +62,8 @@ public class TestInstance {
             e.printStackTrace();
         }
         timer.cancel();
-        printErgebnisse(p1Name, p2Name,false);
+        printErgebnisse(p1Name, p2Name, false);
+        l.onClose();
         try {
             Thread.sleep(5000);
         } catch (Exception e) {
@@ -66,9 +72,9 @@ public class TestInstance {
         System.exit(0);
     }
 
-    public static void printErgebnisse(String p1Name, String p2Name,boolean zwischenergebniss) {
+    public static void printErgebnisse(String p1Name, String p2Name, boolean zwischenergebniss) {
         System.out.println("-----------------------------------");
-        System.out.println(zwischenergebniss?"Zwischenergebnis: ":"Endergebnis: ");
+        System.out.println(zwischenergebniss ? "Zwischenergebnis: " : "Endergebnis: ");
         System.out.println("Name \t\t Wins \t Draws \t Loss    Crashes    Average Think Time(in millis)");
         System.out.println(p1Name + "\t " + p1Wins + "\t " + draws + " \t" + p2Wins + " \t" + p1Crashes + "\t " + timeUsedP1 / (movesP1 + 0.0));
         System.out.println(p2Name + "\t " + p2Wins + "\t " + draws + " \t" + p1Wins + " \t" + p2Crashes + "\t " + timeUsedP2 / (movesP2 + 0.0));
@@ -214,6 +220,7 @@ class TestGames extends Thread {
                         long afterTime = System.currentTimeMillis();
                         if (move == null) {
                             System.out.println("Timeout " + p1Name + "in p" + this.name + "g" + i);
+                            TestInstance.l.log(LogLevel.ERROR, "Timeout " + p1Name + "in p" + this.name + "g" + i);
                             TestInstance.p1Crashes++;
                             cleanUp(p1, p2, p1Writer, p1Input, p2Writer, p2Input);
                             continue A;
@@ -222,6 +229,7 @@ class TestGames extends Thread {
                         mg = TestInstance.checkGameMove(move, mg);
                         if (mg == null) {
                             System.out.println("Illegal move " + p1Name + "in p" + this.name + "g" + i);
+                            TestInstance.l.log(LogLevel.ERROR, "Illegal move " + p1Name + "in p" + this.name + "g" + i);
                             TestInstance.p1Crashes++;
                             cleanUp(p1, p2, p1Writer, p1Input, p2Writer, p2Input);
                             continue A;
@@ -241,6 +249,7 @@ class TestGames extends Thread {
                         long afterTime = System.currentTimeMillis();
                         if (move == null) {
                             System.out.println("Timeout " + p2Name + "in p" + this.name + "g" + i);
+                            TestInstance.l.log(LogLevel.ERROR, "Timeout " + p2Name + "in p" + this.name + "g" + i);
                             TestInstance.p2Crashes++;
                             cleanUp(p1, p2, p1Writer, p1Input, p2Writer, p2Input);
                             continue A;
@@ -249,6 +258,7 @@ class TestGames extends Thread {
                         mg = TestInstance.checkGameMove(move, mg);
                         if (mg == null) {
                             System.out.println("Illegal move " + p2Name + "in p" + this.name + "g" + i);
+                            TestInstance.l.log(LogLevel.ERROR, "Illegal move " + p2Name + "in p" + this.name + "g" + i);
                             TestInstance.p2Crashes++;
                             cleanUp(p1, p2, p1Writer, p1Input, p2Writer, p2Input);
                             continue A;
