@@ -1,6 +1,6 @@
 import game.GameColor;
 import game.GameLogic;
-import game.GameState;
+import game.MyGameState;
 import helpers.StringToGameStateConverter;
 import org.junit.Assert;
 import org.junit.Test;
@@ -20,7 +20,7 @@ public class GameLogicTest {
                 {"r"," "," "," "," "," "," "," "," ","r"},
                 {" "," "," "," "," "," "," "," "," "," "}
         };
-        GameState gs=StringToGameStateConverter.readGameState(g);
+        MyGameState gs=StringToGameStateConverter.readGameState(g);
         Assert.assertEquals(GameLogic.getSchwarm(gs,GameColor.RED),8);
         Assert.assertEquals(GameLogic.getSchwarm(gs,GameColor.BLUE),0);
 
