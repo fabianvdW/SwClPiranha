@@ -16,15 +16,16 @@ public class MyGameState {
     //public ArrayList<GameMove> possibleMoves;
     //public ArrayList<MyGameState> possibleFollowingStates;
     public GameMoveResultObject gmro;
+
     public MyGameState() {
         //Pre calculated values from BitMasks
         this.roteFische = new BitBoard(0x0000000002018060L, 0x1806018060180400L);
         this.blaueFische = new BitBoard(0x00000007f8000000L, 0x00000000000001feL);
         this.kraken = MyGameState.generateRandomKraken();
-        this.move=GameColor.RED;
-        this.pliesPlayed=0;
-        this.roundsPlayed=0;
-        this.gs=GameStatus.INGAME;
+        this.move = GameColor.RED;
+        this.pliesPlayed = 0;
+        this.roundsPlayed = 0;
+        this.gs = GameStatus.INGAME;
     }
 
     public MyGameState(BitBoard kraken) {
@@ -32,10 +33,10 @@ public class MyGameState {
         this.roteFische = new BitBoard(0x0000000002018060L, 0x1806018060180400L);
         this.blaueFische = new BitBoard(0x00000007f8000000L, 0x00000000000001feL);
         this.kraken = kraken;
-        this.move=GameColor.RED;
-        this.pliesPlayed=0;
-        this.roundsPlayed=0;
-        this.gs=GameStatus.INGAME;
+        this.move = GameColor.RED;
+        this.pliesPlayed = 0;
+        this.roundsPlayed = 0;
+        this.gs = GameStatus.INGAME;
     }
 
     public MyGameState(BitBoard roteFische, BitBoard blaueFische, BitBoard kraken, GameColor move, int pliesPlayed, int roundsPlayed) {
@@ -43,51 +44,80 @@ public class MyGameState {
         this.roteFische = roteFische;
         this.blaueFische = blaueFische;
         this.kraken = kraken;
-        this.move=move;
-        this.pliesPlayed=pliesPlayed;
-        this.roundsPlayed=roundsPlayed;
-        this.gs=GameStatus.INGAME;
+        this.move = move;
+        this.pliesPlayed = pliesPlayed;
+        this.roundsPlayed = roundsPlayed;
+        this.gs = GameStatus.INGAME;
     }
-    public void analyze(){
-        if(pliesPlayed%2==0) {
+
+    public void analyze() {
+        if (pliesPlayed % 2 == 0) {
             int roteFischeAmount = this.roteFische.popCount();
-            int roterSchwarm= GameLogic.getSchwarm(this,GameColor.RED);
+            int roterSchwarm = GameLogic.getSchwarm(this, GameColor.RED);
             int blaueFischeAmount = this.blaueFische.popCount();
-            int blauerSchwarm= GameLogic.getSchwarm(this,GameColor.BLUE);
-            if(roterSchwarm==roteFischeAmount&&blauerSchwarm==blaueFischeAmount){
-                if(roteFischeAmount>blaueFischeAmount){
-                    this.gs=GameStatus.RED_WIN;
+            int blauerSchwarm = GameLogic.getSchwarm(this, GameColor.BLUE);
+            if (roterSchwarm == roteFischeAmount && blauerSchwarm == blaueFischeAmount) {
+                if (roteFischeAmount > blaueFischeAmount) {
+                    this.gs = GameStatus.RED_WIN;
                     return;
-                }else if(blaueFischeAmount>roteFischeAmount){
-                    this.gs=GameStatus.BLUE_WIN;
+                } else if (blaueFischeAmount > roteFischeAmount) {
+                    this.gs = GameStatus.BLUE_WIN;
                     return;
-                }else{
-                    this.gs=GameStatus.DRAW;
+                } else {
+                    this.gs = GameStatus.DRAW;
                 }
-            }else if(roterSchwarm==roteFischeAmount){
-                this.gs=GameStatus.RED_WIN;
+            } else if (roterSchwarm == roteFischeAmount) {
+                this.gs = GameStatus.RED_WIN;
                 return;
-            }else if(blauerSchwarm==blaueFischeAmount){
-                this.gs=GameStatus.BLUE_WIN;
+            } else if (blauerSchwarm == blaueFischeAmount) {
+                this.gs = GameStatus.BLUE_WIN;
                 return;
             }
         }
 
-        if(roundsPlayed==30){
-            this.gs=GameStatus.DRAW;
+        if (roundsPlayed == 30) {
+            //Ermittle größten Schwarm
+            int roterGroessterSchwarm = 0;
+            int blauerGroessterSchwarm = 0;
+            BitBoard rFischeClone = this.roteFische.clone();
+            while (!rFischeClone.equalsZero()) {
+                BitBoard b = GameLogic.getSchwarmBoard(rFischeClone, GameColor.RED);
+                int count = b.popCount();
+                if (count > roterGroessterSchwarm) {
+                    roterGroessterSchwarm = count;
+                }
+                rFischeClone.andEquals(b.not());
+            }
+            BitBoard bFischeClone = this.blaueFische.clone();
+            while (!bFischeClone.equalsZero()) {
+                BitBoard b = GameLogic.getSchwarmBoard(bFischeClone, GameColor.BLUE);
+                int count = b.popCount();
+                if (count > blauerGroessterSchwarm) {
+                    blauerGroessterSchwarm = count;
+                }
+                bFischeClone.andEquals(b.not());
+            }
+            if (roterGroessterSchwarm > blauerGroessterSchwarm) {
+                this.gs = GameStatus.RED_WIN;
+            } else if (roterGroessterSchwarm < blauerGroessterSchwarm) {
+                this.gs = GameStatus.BLUE_WIN;
+            } else {
+                this.gs = GameStatus.DRAW;
+            }
             return;
         }
 
-        GameLogic.getPossibleMoves(this,this.move);
-        if(this.gmro.instances==0){
-            if(this.move==GameColor.RED){
-                this.gs=GameStatus.BLUE_WIN;
-            }else{
-                this.gs=GameStatus.RED_WIN;
+        GameLogic.getPossibleMoves(this, this.move);
+        if (this.gmro.instances == 0) {
+            if (this.move == GameColor.RED) {
+                this.gs = GameStatus.BLUE_WIN;
+            } else {
+                this.gs = GameStatus.RED_WIN;
             }
         }
 
     }
+
     public static BitBoard generateRandomKraken() {
         int pos1;
         do {
@@ -129,11 +159,11 @@ public class MyGameState {
 
     @Override
     public MyGameState clone() {
-        return new MyGameState(this.roteFische.clone(), this.blaueFische.clone(), this.kraken.clone(),this.move,this.pliesPlayed,this.roundsPlayed);
+        return new MyGameState(this.roteFische.clone(), this.blaueFische.clone(), this.kraken.clone(), this.move, this.pliesPlayed, this.roundsPlayed);
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 10; i++) {
             sb.append("|");
@@ -142,15 +172,15 @@ public class MyGameState {
                 int num = 99 - (i * 10 + j);
                 sb.append("\t");
                 BitBoard roteFische = this.roteFische.rightShift(num);
-                BitBoard blaueFische= this.blaueFische.rightShift(num);
-                BitBoard kraken= this.kraken.rightShift(num);
-                if((roteFische.l1&1)!=0){
+                BitBoard blaueFische = this.blaueFische.rightShift(num);
+                BitBoard kraken = this.kraken.rightShift(num);
+                if ((roteFische.l1 & 1) != 0) {
                     sb.append(StringColor.RED);
                     sb.append("\uD83D\uDC1F");
-                }else if((blaueFische.l1&1)!=0){
+                } else if ((blaueFische.l1 & 1) != 0) {
                     sb.append(StringColor.BLUE);
                     sb.append("\uD83D\uDC1F");
-                }else if((kraken.l1&1)!=0){
+                } else if ((kraken.l1 & 1) != 0) {
                     sb.append(StringColor.GREEN);
                     sb.append("\uD83D\uDC19");
                 }

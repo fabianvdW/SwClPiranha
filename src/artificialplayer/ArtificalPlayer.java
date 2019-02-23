@@ -4,6 +4,7 @@ import datastructures.BitBoard;
 import game.BitBoardConstants;
 import game.GameMove;
 import game.MyGameState;
+import helpers.FEN;
 import helpers.logging.Log;
 import helpers.logging.LogLevel;
 
@@ -44,6 +45,7 @@ public abstract class ArtificalPlayer {
                     for (int i = 0; i < mg.gmro.instances; i++) {
                         if (mg.gmro.moves[i].from == from && mg.gmro.moves[i].to == to) {
                             mg = mg.gmro.states[i];
+                            l.log(LogLevel.INFO, "FEN:\n" + FEN.toFEN(mg));
                             break;
                         }
                     }
