@@ -36,11 +36,11 @@ public class GameLogic {
 
     //Diese Methode berechnet nicht den größten Schwarm, sondern nur den Schwarm ausgehend von dem Fisch am Weitesten rechts unten.
     public static BitBoard getSchwarmBoard(BitBoard meineFische, GameColor gc) {
-        meineFische=meineFische.clone();
+        meineFische = meineFische.clone();
         if (meineFische.equalsZero()) {
-            return new BitBoard(0,0);
+            return new BitBoard(0, 0);
         }
-        BitBoard result= new BitBoard(0,0);
+        BitBoard result = new BitBoard(0, 0);
         int fischBit;
         BitBoard neighboringFields = new BitBoard(0, 0);
         BitBoard neighboringFieldsAndMeineFische = meineFische.clone();
@@ -49,7 +49,7 @@ public class GameLogic {
             fischBit = neighboringFieldsAndMeineFische.numberOfTrailingZeros();
             meineFische.unsetBitEquals(fischBit);
 
-            result.orEquals(new BitBoard(0,1).leftShift(fischBit));
+            result.orEquals(new BitBoard(0, 1).leftShift(fischBit));
             neighboringFields.orEquals(BitBoardConstants.NACHBARN[fischBit]);
             //neighboringFieldsAndMeineFische = neighboringFields.and(meineFische);
             b = BitBoard.inplaceWithParameterAndEqualsZero(neighboringFieldsAndMeineFische, neighboringFields, meineFische);
@@ -105,7 +105,7 @@ public class GameLogic {
         int destination = fischPos + dir.getShift() * squares;
         if (destination <= 99 && destination >= 0) {
             //BitBoard destinationSquare = new BitBoard(0, 1).leftShift(destination);
-            BitBoard destinationSquare= BitBoardConstants.EINHEITS_UNIT_LEFT_SHIFT[destination];
+            BitBoard destinationSquare = BitBoardConstants.EINHEITS_UNIT_LEFT_SHIFT[destination];
             //Check that destinationSquare is on attackLine and destinationSquare is not fish of my color or Kraken
             if (destinationSquare.orEqualsZero(meineFische, gs.kraken) && !BitBoardConstants.SQUARE_ATTACK_DIRECTION_SQUARES_TWO_SIDED[fischPos][iOriginal].andEqualsZero(destinationSquare)) {
                 //Check that there is no enemy fish on the line
@@ -127,12 +127,30 @@ public class GameLogic {
             BitBoard newRed = gs.roteFische.and(leftShiftFromNot);
             newRed.orEquals(leftShiftTo);
             BitBoard newBlau = gs.blaueFische.and(leftShiftToNot);
-            return new MyGameState(newRed, newBlau, gs.kraken, GameColor.BLUE, gs.pliesPlayed + 1, gs.roundsPlayed);
+            //Update hash
+            long hash = gs.hash;
+            hash ^= ZobristHashing.zobristKeys[gm.from / 10][gm.from % 10][0];
+            hash ^= ZobristHashing.zobristKeys[gm.to / 10][gm.to % 10][0];
+            if (!gs.blaueFische.equals(newBlau)) {
+                hash ^= ZobristHashing.zobristKeys[gm.to / 10][gm.to % 10][1];
+            }
+            MyGameState newGameState = new MyGameState(newRed, newBlau, gs.kraken, GameColor.BLUE, gs.pliesPlayed + 1, gs.roundsPlayed);
+            newGameState.hash = hash;
+            return newGameState;
         } else {
             BitBoard newBlau = gs.blaueFische.and(leftShiftFromNot);
             newBlau.orEquals(leftShiftTo);
             BitBoard newRed = gs.roteFische.and(leftShiftToNot);
-            return new MyGameState(newRed, newBlau, gs.kraken, GameColor.RED, gs.pliesPlayed + 1, gs.roundsPlayed + 1);
+            //Update hash
+            long hash = gs.hash;
+            hash ^= ZobristHashing.zobristKeys[gm.from / 10][gm.from % 10][1];
+            hash ^= ZobristHashing.zobristKeys[gm.to / 10][gm.to % 10][1];
+            if (!gs.roteFische.equals(newRed)) {
+                hash ^= ZobristHashing.zobristKeys[gm.to / 10][gm.to % 10][0];
+            }
+            MyGameState newGameState = new MyGameState(newRed, newBlau, gs.kraken, GameColor.RED, gs.pliesPlayed + 1, gs.roundsPlayed + 1);
+            newGameState.hash = hash;
+            return newGameState;
         }
     }
 }

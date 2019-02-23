@@ -8,7 +8,7 @@ public class Perft {
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("SwClPiranha/src/game/data.txt");
         MyGameState g = StringToGameStateConverter.readGameState(StringToGameStateConverter.STANDARD_GAME_STATE);
         long t0=System.currentTimeMillis();
-        System.out.println(perft(g,1));
+        System.out.println(perft(g,3));
         //Perft 5: 250613480
         //Perft 6
         long t1=System.currentTimeMillis();

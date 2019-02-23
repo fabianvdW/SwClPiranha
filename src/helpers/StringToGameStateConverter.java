@@ -6,7 +6,7 @@ import game.MyGameState;
 
 public class StringToGameStateConverter {
 
-    /*
+
     public final static String[][] STANDARD_GAME_STATE = {
             {" ", "b", "b", "b", "b", "b", "b", "b", "b", " "},
             {"r", " ", " ", " ", " ", " ", " ", " ", " ", "r"},
@@ -19,9 +19,9 @@ public class StringToGameStateConverter {
             {"r", " ", " ", " ", " ", " ", " ", " ", " ", "r"},
             {" ", "b", "b", "b", "b", "b", "b", "b", "b", " "}
     };
-    */
+
     //Blau am Zug
-    public final static String[][] STANDARD_GAME_STATE = {
+    /*public final static String[][] STANDARD_GAME_STATE = {
             {" ", " ", " ", " ", " ", "b", " ", " ", " ", " "},
             {" ", " ", " ", " ", "r", " ", "b", " ", " ", " "},
             {" ", " ", " ", " ", " ", "b", " ", "r", " ", " "},
@@ -32,7 +32,7 @@ public class StringToGameStateConverter {
             {" ", " ", " ", "b", "k", "r", "b", " ", " ", " "},
             {" ", " ", " ", " ", "b", " ", " ", "r", " ", " "},
             {" ", " ", " ", "b", "b", "b", "b", " ", " ", " "}
-    };
+    };*/
 
     public static MyGameState readGameState(String[][] arr) {
         BitBoard roteFische = new BitBoard(0, 0);
@@ -52,6 +52,6 @@ public class StringToGameStateConverter {
             }
 
         }
-        return new MyGameState(roteFische, blaueFische, kraken, GameColor.RED,0,0);
+        return new MyGameState(roteFische, blaueFische, kraken, GameColor.RED, 0, 0);
     }
 }

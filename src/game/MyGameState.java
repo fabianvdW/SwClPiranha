@@ -16,6 +16,7 @@ public class MyGameState {
     //public ArrayList<GameMove> possibleMoves;
     //public ArrayList<MyGameState> possibleFollowingStates;
     public GameMoveResultObject gmro;
+    public long hash;
 
     public MyGameState() {
         //Pre calculated values from BitMasks
@@ -26,6 +27,7 @@ public class MyGameState {
         this.pliesPlayed = 0;
         this.roundsPlayed = 0;
         this.gs = GameStatus.INGAME;
+        this.hash = calculateHash(this);
     }
 
     public MyGameState(BitBoard kraken) {
@@ -37,6 +39,7 @@ public class MyGameState {
         this.pliesPlayed = 0;
         this.roundsPlayed = 0;
         this.gs = GameStatus.INGAME;
+        this.hash = calculateHash(this);
     }
 
     public MyGameState(BitBoard roteFische, BitBoard blaueFische, BitBoard kraken, GameColor move, int pliesPlayed, int roundsPlayed) {
@@ -48,6 +51,23 @@ public class MyGameState {
         this.pliesPlayed = pliesPlayed;
         this.roundsPlayed = roundsPlayed;
         this.gs = GameStatus.INGAME;
+    }
+
+    public static long calculateHash(MyGameState mg) {
+        long res = 0L;
+        for (int y = 0; y < 10; y++) {
+            for (int x = 0; x < 10; x++) {
+                int shift = y * 10 + x;
+                if ((mg.roteFische.rightShift(shift).l1 & 1) == 1) {
+                    res ^= ZobristHashing.zobristKeys[y][x][0];
+                } else if ((mg.blaueFische.rightShift(shift).l1 & 1) == 1) {
+                    res ^= ZobristHashing.zobristKeys[y][x][1];
+                } else if ((mg.kraken.rightShift(shift).l1 & 1) == 1) {
+                    res ^= ZobristHashing.zobristKeys[y][x][2];
+                }
+            }
+        }
+        return res;
     }
 
     public void analyze() {
