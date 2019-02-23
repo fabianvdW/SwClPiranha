@@ -42,7 +42,7 @@ public class BoardRating {
         //Schwarm abhängig von Distanz zur Mitte bestrafen
         for (int i = 0; i < roteSchwaerme.size(); i++) {
             double abstand = Math.sqrt(Math.pow(roteSchwaerme.get(i).averageX - 4.5, 2) + Math.pow(roteSchwaerme.get(i).averageY - 4.5, 2));
-            eval += -1.0 / 3.0 * Math.pow((abstand - 3.1), 2) * Math.signum(abstand - 3.1) * roteSchwaerme.get(i).size / (anzahlRoteFische + 0.0);
+            eval += -1.0 / 4.0 * Math.pow((abstand - 3.1), 2) * Math.signum(abstand - 3.1) * roteSchwaerme.get(i).size / (anzahlRoteFische + 0.0);
         }
         return eval;
     }

@@ -83,7 +83,7 @@ public class Logic implements IGameHandler {
         }
         MyGameState mg = new MyGameState(roteFische, blaueFische, kraken, player, this.gameState.getTurn(), this.gameState.getRound());
         log.info("FEN:\n" + FEN.toFEN(mg));
-        GameMove m = AlphaBeta.alphaBetaRoot(mg, 2, mg.move == GameColor.RED ? 1 : -1);
+        GameMove m = AlphaBeta.alphaBetaRoot(mg, 3, mg.move == GameColor.RED ? 1 : -1);
         Direction resultDirection;
         if (m.dir == GameDirection.DOWN) {
             resultDirection = Direction.DOWN;

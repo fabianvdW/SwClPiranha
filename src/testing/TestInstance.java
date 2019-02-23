@@ -75,17 +75,16 @@ public class TestInstance {
     public static void printErgebnisse(String p1Name, String p2Name, boolean zwischenergebniss) {
         System.out.println("-----------------------------------");
         System.out.println(zwischenergebniss ? "Zwischenergebnis: " : "Endergebnis: ");
-        System.out.println("Name \t\t Wins \t Draws \t Loss  Crashes    Think Time  Elo Gain");
+        System.out.println("Name \t\t Wins \t Draws \t Loss  Crashes   Think Time  Elo Gain");
         double N = (p1Wins + p2Wins + draws + 0.0);
         double score = p1Wins + draws / 2.0;
         double winrate = score / N;
-        double margin = 1.96 * Math.sqrt(N * winrate * (1 - winrate));
+        double margin = 1.64 * Math.sqrt(N * winrate * (1 - winrate));
 
         double eloGainP1 = -400.0 * Math.log10(N / score - 1.0);
         eloGainP1 = Math.round(eloGainP1 * 100.0) / 100.0;
-        double errorMargin = -400.0 * Math.log10(N / (N * winrate + margin) - 1);
+        double errorMargin = -400.0 * Math.log10(N / (N * winrate + margin) - 1) - eloGainP1;
         errorMargin = Math.round(errorMargin * 100.0) / 100.0;
-        System.out.println(Math.round(eloGainP1));
         System.out.println(p1Name + "\t " + p1Wins + "\t " + draws + " \t" + p2Wins + " \t" + p1Crashes + "\t " + Math.round((timeUsedP1 / (movesP1 + 0.0)) * 100.0) / 100.0 + "\t\t " + eloGainP1 + "\u00B1 " + errorMargin);
         System.out.println(p2Name + "\t " + p2Wins + "\t " + draws + " \t" + p1Wins + " \t" + p2Crashes + "\t " + Math.round((timeUsedP2 / (movesP2 + 0.0) * 100.0)) / 100.0 + "\t\t " + (-1.0 * eloGainP1) + "\u00B1 " + errorMargin);
     }
