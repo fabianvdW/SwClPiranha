@@ -6,6 +6,7 @@ import game.GameColor;
 import game.GameDirection;
 import game.GameMove;
 import game.MyGameState;
+import helpers.FEN;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sc.framework.plugins.Player;
@@ -63,44 +64,45 @@ public class Logic implements IGameHandler {
             for (int x = 0; x < 10; x++) {
                 Field f = this.gameState.getField(x, y);
                 FieldState fs = f.getState();
-                int shift = y*10+9-x;
-                if(fs==FieldState.BLUE) {
+                int shift = y * 10 + 9 - x;
+                if (fs == FieldState.BLUE) {
                     blaueFische.orEquals(new BitBoard(0, 1).leftShift(shift));
-                }else if(fs==FieldState.RED){
+                } else if (fs == FieldState.RED) {
                     roteFische.orEquals(new BitBoard(0, 1).leftShift(shift));
-                }else if(fs==FieldState.OBSTRUCTED){
+                } else if (fs == FieldState.OBSTRUCTED) {
                     kraken.orEquals(new BitBoard(0, 1).leftShift(shift));
                 }
             }
 
         }
         GameColor player;
-        if(this.currentPlayer.getColor()==PlayerColor.RED){
-            player=GameColor.RED;
-        }else{
-            player=GameColor.BLUE;
+        if (this.currentPlayer.getColor() == PlayerColor.RED) {
+            player = GameColor.RED;
+        } else {
+            player = GameColor.BLUE;
         }
         MyGameState mg = new MyGameState(roteFische, blaueFische, kraken, player, this.gameState.getTurn(), this.gameState.getRound());
-        GameMove m = AlphaBeta.alphaBetaRoot(mg, 1,mg.move==GameColor.RED?1:-1);
+        log.info("FEN:\n" + FEN.toFEN(mg));
+        GameMove m = AlphaBeta.alphaBetaRoot(mg, 2, mg.move == GameColor.RED ? 1 : -1);
         Direction resultDirection;
-        if(m.dir==GameDirection.DOWN){
-            resultDirection=Direction.DOWN;
-        }else if(m.dir==GameDirection.DOWN_LEFT){
-            resultDirection=Direction.DOWN_LEFT;
-        }else if(m.dir==GameDirection.LEFT){
-            resultDirection=Direction.LEFT;
-        }else if(m.dir==GameDirection.UP_LEFT){
-            resultDirection=Direction.UP_LEFT;
-        }else if(m.dir==GameDirection.UP){
-            resultDirection=Direction.UP;
-        }else if(m.dir==GameDirection.UP_RIGHT){
-            resultDirection=Direction.UP_RIGHT;
-        }else if(m.dir==GameDirection.RIGHT){
-            resultDirection=Direction.RIGHT;
-        }else{
-            resultDirection=Direction.DOWN_RIGHT;
+        if (m.dir == GameDirection.DOWN) {
+            resultDirection = Direction.DOWN;
+        } else if (m.dir == GameDirection.DOWN_LEFT) {
+            resultDirection = Direction.DOWN_LEFT;
+        } else if (m.dir == GameDirection.LEFT) {
+            resultDirection = Direction.LEFT;
+        } else if (m.dir == GameDirection.UP_LEFT) {
+            resultDirection = Direction.UP_LEFT;
+        } else if (m.dir == GameDirection.UP) {
+            resultDirection = Direction.UP;
+        } else if (m.dir == GameDirection.UP_RIGHT) {
+            resultDirection = Direction.UP_RIGHT;
+        } else if (m.dir == GameDirection.RIGHT) {
+            resultDirection = Direction.RIGHT;
+        } else {
+            resultDirection = Direction.DOWN_RIGHT;
         }
-        Move result = new Move(9-m.from%10, m.from/10, resultDirection);
+        Move result = new Move(9 - m.from % 10, m.from / 10, resultDirection);
         //log.info("Turn: "+this.gameState.getTurn());
         //log.info("Round: "+this.gameState.getRound());
         //sendAction(possibleMoves.get((int) (Math.random() * possibleMoves.size())));

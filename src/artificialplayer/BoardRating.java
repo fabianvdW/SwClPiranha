@@ -8,78 +8,48 @@ import game.MyGameState;
 import java.util.ArrayList;
 
 public class BoardRating {
-
     public static double rating(MyGameState g) {
-        //Größter momentaner Schwarm
-        //Schwarm-Anzahl
+        return redEval(g) - redEval(new MyGameState(g.blaueFische, g.roteFische, g.kraken, g.move, g.pliesPlayed, g.roundsPlayed));
+    }
+
+    public static double redEval(MyGameState g) {
+        double eval = 0.0;
+        int pliesPlayed = g.pliesPlayed;
         int anzahlRoteFische = g.roteFische.popCount();
         ArrayList<Schwarm> roteSchwaerme = berechneSchwaerme(g, GameColor.RED);
-        double redInsg= 0;
-        double redSchwarmSum = 0;
         for (Schwarm s : roteSchwaerme) {
-            redSchwarmSum += Math.pow(((s.size + 0.0) / anzahlRoteFische), 2);
+            s.calculateAverage();
         }
-        double redSchwarmDist=0;
-        for (int i0 = 0; i0 < roteSchwaerme.size(); i0++) {
-            Schwarm s0 = roteSchwaerme.get(i0);
-            for (int i1 = i0 + 1; i1 < roteSchwaerme.size(); i1++) {
-                Schwarm s1 = roteSchwaerme.get(i1);
-                double mittlereSchwarmGroesse= (s0.size+s1.size)/2.0;
-                //Minimale Distanz ausrechnen
-                int minDist = 9;
-                for (int p0 = 0; p0 < s0.size; p0++) {
-                    Pos pos0 = s0.positions.get(p0);
-                    for (int p1 = 0; p1 < s1.size; p1++) {
-                        Pos pos1 = s1.positions.get(p1);
-                        int dist = Math.max(Math.abs(pos0.x - pos1.x), Math.abs(pos0.y - pos1.y));
-                        if (dist < minDist) {
-                            minDist = dist;
-                        }
-                    }
-                }
-                redSchwarmDist += (1 - minDist / 9.0)/(anzahlRoteFische-mittlereSchwarmGroesse);
+        Schwarm biggestSchwarm = roteSchwaerme.get(0);
+        int biggestSchwarmIndex = 0;
+        for (int i = 1; i < roteSchwaerme.size(); i++) {
+            if (roteSchwaerme.get(i).size > biggestSchwarm.size) {
+                biggestSchwarm = roteSchwaerme.get(i);
+                biggestSchwarmIndex = i;
             }
         }
-        redInsg=redSchwarmDist+redSchwarmSum;
-
-
-        //System.out.println("RedSchwarmSum: "+redSchwarmSum);
-        //System.out.println("RedSchwarmDist: "+redSchwarmDist);
-        //System.out.println("RedInsg: "+redInsg);
-        int anzahlblaueFische = g.blaueFische.popCount();
-        ArrayList<Schwarm> blaueSchwaerme = berechneSchwaerme(g, GameColor.BLUE);
-        double blueInsg = 0;
-        double blueSchwarmSum=0;
-        double blueSchwarmDist=0;
-        for (Schwarm s : blaueSchwaerme) {
-            blueSchwarmSum += Math.pow(((s.size + 0.0) / anzahlblaueFische), 2);
-        }
-
-        for (int i0 = 0; i0 < blaueSchwaerme.size(); i0++) {
-            Schwarm s0 = blaueSchwaerme.get(i0);
-            for (int i1 = i0 + 1; i1 < blaueSchwaerme.size(); i1++) {
-                Schwarm s1 = blaueSchwaerme.get(i1);
-                double mittlereSchwarmGroesse= (s0.size+s1.size)/2.0;
-                //Minimale Distanz ausrechnen
-                int minDist = 9;
-                for (int p0 = 0; p0 < s0.size; p0++) {
-                    Pos pos0 = s0.positions.get(p0);
-                    for (int p1 = 0; p1 < s1.size; p1++) {
-                        Pos pos1 = s1.positions.get(p1);
-                        int dist = Math.max(Math.abs(pos0.x - pos1.x), Math.abs(pos0.y - pos1.y));
-                        if (dist < minDist) {
-                            minDist = dist;
-                        }
-                    }
-                }
-                blueSchwarmDist += (1 - minDist / 9.0)/(anzahlblaueFische-mittlereSchwarmGroesse);
+        double ratio = (biggestSchwarm.size + 0.0) / anzahlRoteFische;
+        double phase = (pliesPlayed + 1) / 61.0;
+        eval += phase * calculateBiggestSchwarmRatioBonus(ratio);
+        for (int i = 0; i < roteSchwaerme.size(); i++) {
+            if (i == biggestSchwarmIndex) {
+                continue;
             }
+            double abstand = Math.max(Math.abs(biggestSchwarm.averageX - roteSchwaerme.get(i).averageX), Math.abs(biggestSchwarm.averageY - roteSchwaerme.get(i).averageY));
+            double normedAbstand = abstand - 5.5;
+            eval += (1 - phase) * -1 * Math.pow(normedAbstand, 2) * Math.signum(normedAbstand) * (roteSchwaerme.get(i).size + 0.0) / (anzahlRoteFische + 0.0);
         }
-        blueInsg=blueSchwarmSum+blueSchwarmDist;
-        //System.out.println("BlueSchwarmSum: "+blueSchwarmSum);
-        //System.out.println("BlueSchwarmDist: "+blueSchwarmDist);
-        //System.out.println("BlueInsg: "+blueInsg);
-        return redInsg-blueInsg;
+        //Schwarm abhängig von Distanz zur Mitte bestrafen
+        for (int i = 0; i < roteSchwaerme.size(); i++) {
+            double abstand = Math.sqrt(Math.pow(roteSchwaerme.get(i).averageX - 4.5, 2) + Math.pow(roteSchwaerme.get(i).averageY - 4.5, 2));
+            eval += -1.0 / 4.0 * Math.pow((abstand - 3.1), 2) * Math.signum(abstand - 3.1) * roteSchwaerme.get(i).size / (anzahlRoteFische + 0.0);
+        }
+        return eval;
+    }
+
+    public static double calculateBiggestSchwarmRatioBonus(double ratio) {
+        double res = 5 * ratio - 2.5;
+        return Math.pow(res, 2) * Math.signum(res);
     }
 
     public static ArrayList<Schwarm> berechneSchwaerme(MyGameState g, GameColor gc) {
@@ -107,10 +77,24 @@ public class BoardRating {
 class Schwarm {
     int size;
     ArrayList<Pos> positions;
+    double averageX;
+    double averageY;
 
     public Schwarm(int size, ArrayList<Pos> positions) {
         this.size = size;
         this.positions = positions;
+
+    }
+
+    public void calculateAverage() {
+        averageX = 0;
+        averageY = 0;
+        for (Pos pos : this.positions) {
+            averageX += pos.x;
+            averageY += pos.y;
+        }
+        averageX /= this.size + 0.0;
+        averageY /= this.size + 0.0;
     }
 
 }

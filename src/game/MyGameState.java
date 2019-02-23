@@ -85,6 +85,7 @@ public class MyGameState {
                     return;
                 } else {
                     this.gs = GameStatus.DRAW;
+                    return;
                 }
             } else if (roterSchwarm == roteFischeAmount) {
                 this.gs = GameStatus.RED_WIN;
