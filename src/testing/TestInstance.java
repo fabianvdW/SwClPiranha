@@ -3,8 +3,12 @@ package testing;
 import game.*;
 
 import javax.print.DocFlavor;
+import javax.swing.*;
 import java.io.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class TestInstance {
     public static ArrayList<TestGames> threads = new ArrayList<>();
@@ -62,21 +66,10 @@ public class TestInstance {
         System.out.println(p2Name + "\t " + p2Wins + "\t " + draws + " \t" + p1Wins + " \t" + p2Crashes + "\t " + timeP2 / (movesP2 + 0.0));
     }
 
-    public static void printStream(InputStream in) {
-        String line;
-        BufferedReader input = new BufferedReader(new InputStreamReader(in));
-        try {
-            while ((line = input.readLine()) != null) {
-                System.out.println(line);
-            }
-            System.out.println("done");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public static GameMove parseGameMove(BufferedReader input) {
         long curr = System.currentTimeMillis();
+        DateFormat sdf = new SimpleDateFormat("dd-MM-yy HH:mm:ss.SSS");
+        String timeStamp1 = sdf.format(new Date());
         try {
             while (System.currentTimeMillis() - curr <= millisTime) {
                 if (input.ready()) {
@@ -88,6 +81,9 @@ public class TestInstance {
                 }
                 Thread.sleep(5);
             }
+            String timeStamp2 = sdf.format(new Date());
+            System.out.println(timeStamp1);
+            System.out.println(timeStamp2);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -141,13 +137,50 @@ class TestGames extends Thread {
     }
 
     public void cleanUp(Process p1, Process p2, BufferedWriter p1Writer, BufferedReader p1Reader, BufferedWriter p2Writer, BufferedReader p2Reader) {
-        p1.destroy();
-        p2.destroy();
         try {
+            p1Writer.write("end\n");
+            p1Writer.flush();
+            p2Writer.write("end\n");
+            p2Writer.flush();
+            Thread.sleep(5);
             p1Writer.close();
             p1Reader.close();
             p2Writer.close();
             p2Reader.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //Program has 5 seconds time for managing logs
+        new java.util.Timer().schedule(new java.util.TimerTask(){
+            @Override
+            public void run(){
+                p1.destroy();
+                p2.destroy();
+            }
+        }, 5000);
+    }
+
+    public void waitReady(BufferedReader input1, BufferedReader input2) {
+        //Terminate after 10 seconds
+        long curr = System.currentTimeMillis();
+        boolean ready1 = false;
+        boolean ready2 = false;
+        try {
+            while (System.currentTimeMillis() - curr <= 10000 && (!ready1 || !ready2)) {
+                if (!ready1 && input1.ready()) {
+                    String move = input1.readLine();
+                    if (move.equalsIgnoreCase("ready")) {
+                        ready1 = true;
+                    }
+                }
+                if (!ready2 && input2.ready()) {
+                    String move = input2.readLine();
+                    if (move.equalsIgnoreCase("ready")) {
+                        ready2 = true;
+                    }
+                }
+                Thread.sleep(5);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -160,21 +193,24 @@ class TestGames extends Thread {
                 if (this.name.equalsIgnoreCase("0") && i % 5 == 0) {
                     System.out.println("" + i + "/" + games);
                 }
-                Process p1 = Runtime.getRuntime().exec("java -jar " + this.p1 + " " + this.p1Name);
+                Process p1 = Runtime.getRuntime().exec("java -jar " + this.p1 + " ./logs/" + this.p1Name + "p" + this.name + "g" + i);
                 OutputStream os = p1.getOutputStream();
                 BufferedWriter p1Writer = new BufferedWriter(new OutputStreamWriter(os));
                 BufferedReader p1Input = new BufferedReader(new InputStreamReader(p1.getInputStream()));
 
-                Process p2 = Runtime.getRuntime().exec("java -jar " + this.p2 + " " + this.p2Name);
+                Process p2 = Runtime.getRuntime().exec("java -jar " + this.p2 + " ./logs/" + this.p2Name + "p" + this.name + "g" + i);
                 OutputStream p2os = p2.getOutputStream();
                 BufferedWriter p2Writer = new BufferedWriter(new OutputStreamWriter(p2os));
                 BufferedReader p2Input = new BufferedReader(new InputStreamReader(p2.getInputStream()));
 
+                //Wait for processes to be ready!
+                waitReady(p1Input, p2Input);
                 MyGameState mg = new MyGameState();
                 p1Writer.write("newgame " + mg.kraken.l0 + " " + mg.kraken.l1 + "\n");
                 p1Writer.flush();
                 p2Writer.write("newgame " + mg.kraken.l0 + " " + mg.kraken.l1 + "\n");
                 p2Writer.flush();
+                //Thread.sleep(500);
                 boolean player1IsRed = Math.random() * 2 < 1;
                 mg.analyze();
                 while (mg.gs == GameStatus.INGAME) {
@@ -187,7 +223,7 @@ class TestGames extends Thread {
                         GameMove move = TestInstance.parseGameMove(p1Input);
                         long afterTime = System.currentTimeMillis();
                         if (move == null) {
-                            System.out.println("Timeout " + p1Name);
+                            System.out.println("Timeout " + p1Name + "in p" + this.name + "g" + i);
                             p1Crashes++;
                             cleanUp(p1, p2, p1Writer, p1Input, p2Writer, p2Input);
                             continue A;
@@ -195,7 +231,7 @@ class TestGames extends Thread {
                         //Legality check
                         mg = TestInstance.checkGameMove(move, mg);
                         if (mg == null) {
-                            System.out.println("Illegal move " + p1Name);
+                            System.out.println("Illegal move " + p1Name + "in p" + this.name + "g" + i);
                             p1Crashes++;
                             cleanUp(p1, p2, p1Writer, p1Input, p2Writer, p2Input);
                             continue A;
@@ -214,7 +250,7 @@ class TestGames extends Thread {
                         GameMove move = TestInstance.parseGameMove(p2Input);
                         long afterTime = System.currentTimeMillis();
                         if (move == null) {
-                            System.out.println("Timeout " + p2Name);
+                            System.out.println("Timeout " + p2Name + "in p" + this.name + "g" + i);
                             p2Crashes++;
                             cleanUp(p1, p2, p1Writer, p1Input, p2Writer, p2Input);
                             continue A;
@@ -222,7 +258,7 @@ class TestGames extends Thread {
                         //Legality check
                         mg = TestInstance.checkGameMove(move, mg);
                         if (mg == null) {
-                            System.out.println("Illegal move " + p2Name);
+                            System.out.println("Illegal move " + p2Name + "in p" + this.name + "g" + i);
                             p2Crashes++;
                             cleanUp(p1, p2, p1Writer, p1Input, p2Writer, p2Input);
                             continue A;

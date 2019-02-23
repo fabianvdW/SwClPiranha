@@ -5,7 +5,7 @@ import game.GameMove;
 public class RandomPlayer extends ArtificalPlayer {
     public static void main(String[] args) {
         ArtificalPlayer a = new RandomPlayer();
-        a.main("random");
+        a.main(args[0]);
     }
 
     @Override

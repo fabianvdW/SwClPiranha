@@ -67,7 +67,7 @@ public class AlphaBeta extends ArtificalPlayer {
 
     @Override
     public GameMove requestMove() {
-        return AlphaBeta.alphaBetaRoot(this.mg, 2, this.mg.move == GameColor.RED ? 1 : -1);
+        return AlphaBeta.alphaBetaRoot(this.mg, 3, this.mg.move == GameColor.RED ? 1 : -1);
     }
 }
 
