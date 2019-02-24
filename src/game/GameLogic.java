@@ -66,6 +66,7 @@ public class GameLogic {
         gs.gmro.moves[gs.gmro.instances] = gm;
         gs.gmro.states[gs.gmro.instances] = ng;
         gs.gmro.instances++;
+        gs.gmro.attackBoard.orEquals(BitBoardConstants.EINHEITS_UNIT_LEFT_SHIFT[gm.to]);
     }
 
     public static void getPossibleMoves(MyGameState gs, GameColor gc) {
@@ -129,11 +130,12 @@ public class GameLogic {
             BitBoard newBlau = gs.blaueFische.and(leftShiftToNot);
             //Update hash
             long hash = gs.hash;
-            hash ^= ZobristHashing.zobristKeys[gm.from / 10][gm.from % 10][0];
-            hash ^= ZobristHashing.zobristKeys[gm.to / 10][gm.to % 10][0];
+            hash ^= ZobristHashing.ZOBRIST_KEYS[gm.from / 10][gm.from % 10][0];
+            hash ^= ZobristHashing.ZOBRIST_KEYS[gm.to / 10][gm.to % 10][0];
             if (!gs.blaueFische.equals(newBlau)) {
-                hash ^= ZobristHashing.zobristKeys[gm.to / 10][gm.to % 10][1];
+                hash ^= ZobristHashing.ZOBRIST_KEYS[gm.to / 10][gm.to % 10][1];
             }
+            hash ^= ZobristHashing.SIDE_TO_MOVE_IS_BLUE;
             MyGameState newGameState = new MyGameState(newRed, newBlau, gs.kraken, GameColor.BLUE, gs.pliesPlayed + 1, gs.roundsPlayed);
             newGameState.hash = hash;
             return newGameState;
@@ -143,11 +145,12 @@ public class GameLogic {
             BitBoard newRed = gs.roteFische.and(leftShiftToNot);
             //Update hash
             long hash = gs.hash;
-            hash ^= ZobristHashing.zobristKeys[gm.from / 10][gm.from % 10][1];
-            hash ^= ZobristHashing.zobristKeys[gm.to / 10][gm.to % 10][1];
+            hash ^= ZobristHashing.ZOBRIST_KEYS[gm.from / 10][gm.from % 10][1];
+            hash ^= ZobristHashing.ZOBRIST_KEYS[gm.to / 10][gm.to % 10][1];
             if (!gs.roteFische.equals(newRed)) {
-                hash ^= ZobristHashing.zobristKeys[gm.to / 10][gm.to % 10][0];
+                hash ^= ZobristHashing.ZOBRIST_KEYS[gm.to / 10][gm.to % 10][0];
             }
+            hash ^= ZobristHashing.SIDE_TO_MOVE_IS_BLUE;
             MyGameState newGameState = new MyGameState(newRed, newBlau, gs.kraken, GameColor.RED, gs.pliesPlayed + 1, gs.roundsPlayed + 1);
             newGameState.hash = hash;
             return newGameState;

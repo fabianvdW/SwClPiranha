@@ -59,13 +59,16 @@ public class MyGameState {
             for (int x = 0; x < 10; x++) {
                 int shift = y * 10 + x;
                 if ((mg.roteFische.rightShift(shift).l1 & 1) == 1) {
-                    res ^= ZobristHashing.zobristKeys[y][x][0];
+                    res ^= ZobristHashing.ZOBRIST_KEYS[y][x][0];
                 } else if ((mg.blaueFische.rightShift(shift).l1 & 1) == 1) {
-                    res ^= ZobristHashing.zobristKeys[y][x][1];
+                    res ^= ZobristHashing.ZOBRIST_KEYS[y][x][1];
                 } else if ((mg.kraken.rightShift(shift).l1 & 1) == 1) {
-                    res ^= ZobristHashing.zobristKeys[y][x][2];
+                    res ^= ZobristHashing.ZOBRIST_KEYS[y][x][2];
                 }
             }
+        }
+        if (mg.move == GameColor.BLUE) {
+            res ^= ZobristHashing.SIDE_TO_MOVE_IS_BLUE;
         }
         return res;
     }
@@ -85,6 +88,7 @@ public class MyGameState {
                     return;
                 } else {
                     this.gs = GameStatus.DRAW;
+                    return;
                 }
             } else if (roterSchwarm == roteFischeAmount) {
                 this.gs = GameStatus.RED_WIN;

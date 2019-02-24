@@ -9,8 +9,10 @@ public class RandomPlayer extends ArtificalPlayer {
     }
 
     @Override
-    public GameMove requestMove() {
+    public PrincipalVariation requestMove(int time) {
         this.mg.analyze();
-        return this.mg.gmro.moves[(int) (this.mg.gmro.instances * Math.random())];
+        PrincipalVariation pv = new PrincipalVariation(1);
+        pv.stack.add(this.mg.gmro.moves[(int) (this.mg.gmro.instances * Math.random())]);
+        return pv;
     }
 }

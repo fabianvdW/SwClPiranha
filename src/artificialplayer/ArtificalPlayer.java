@@ -17,7 +17,7 @@ public abstract class ArtificalPlayer {
     public ArtificalPlayer() {
     }
 
-    public abstract GameMove requestMove();
+    public abstract PrincipalVariation requestMove(int time);
 
     public void main(String logName) {
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("data.txt");
@@ -35,9 +35,12 @@ public abstract class ArtificalPlayer {
                     long l1 = Long.parseLong(arr[2]);
                     mg = new MyGameState(new BitBoard(l0, l1));
                 } else if (arr[0].equalsIgnoreCase("requestmove")) {
-                    GameMove res = this.requestMove();
+                    PrincipalVariation pv = this.requestMove(Integer.parseInt(arr[1]));
+                    GameMove res = pv.stack.get(0);
                     System.out.println(res.from + " " + res.to);
                     l.log(LogLevel.INFO, "sent " + res.from + " " + res.to);
+                    l.log(LogLevel.INFO, "Search to depth: " + pv.depthleft);
+                    l.log(LogLevel.INFO, "Search result: " + pv.score);
                 } else if (arr[0].equalsIgnoreCase("makemove")) {
                     int from = Integer.parseInt(arr[1]);
                     int to = Integer.parseInt(arr[2]);
@@ -45,12 +48,14 @@ public abstract class ArtificalPlayer {
                     for (int i = 0; i < mg.gmro.instances; i++) {
                         if (mg.gmro.moves[i].from == from && mg.gmro.moves[i].to == to) {
                             mg = mg.gmro.states[i];
+                            Search.birthTime += 1;
                             l.log(LogLevel.INFO, "FEN:\n" + FEN.toFEN(mg));
                             break;
                         }
                     }
                 } else if (arr[0].equalsIgnoreCase("end")) {
                     l.onClose();
+                    AlphaBeta.currentSearch.stop();
                     break;
                 }
             }

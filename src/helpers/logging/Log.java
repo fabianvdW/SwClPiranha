@@ -23,6 +23,14 @@ public class Log {
         }
     }
 
+    public void flush() {
+        try {
+            this.bw.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void log(LogLevel level, String message) {
         if (GlobalFlags.MAKE_LOGS) {
             DateFormat sdf = new SimpleDateFormat("dd-MM-yy HH:mm:ss.SSS");
