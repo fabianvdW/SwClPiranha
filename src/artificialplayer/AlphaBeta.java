@@ -9,26 +9,23 @@ public class AlphaBeta extends ArtificalPlayer {
     public static int nodesExamined;
     public static int depth0Nodes;
 
+    public static Search currentSearch;
+
     public static void main(String[] args) {
         ArtificalPlayer a = new AlphaBeta();
         a.main(args[0]);
     }
 
     public static PrincipalVariation search(MyGameState mg, int time) {
-        Search s = new Search(mg);
-        s.start();
+        currentSearch = new Search(mg);
+        currentSearch.start();
         try {
             Thread.sleep(time - 100);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        new java.util.Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                s.stop();
-            }
-        }, 1);
-        return s.currentBestPv;
+        currentSearch.stop();
+        return currentSearch.currentBestPv;
     }
 
     @Override
@@ -59,17 +56,50 @@ public class AlphaBeta extends ArtificalPlayer {
             currPv.score = BoardRating.rating(g) * maximizingPlayer;
             return currPv;
         }
+
         PrincipalVariation bestPv = new PrincipalVariation(depth);
         GameMoveResultObject gmro = g.gmro;
         g.gmro = null;
+        //Probe tablebase
+        if (depth >= 1) {
+            CacheEntry ce = Search.cache[(int) (g.hash & Search.mask)];
+            if (ce != null && ce.hash == g.hash) {
+                //Cache-hit
+                if (ce.depth >= depth) {
+                    ce.birth = Search.birthTime;
+                    currPv.stack.add(ce.gm);
+                    currPv.hashStack.add(ce.hash);
+                    currPv.score = ce.score;
+                    return currPv;
+                } else {
+                    //Move ordering
+                    //Swap move and state from pos 0
+                    int index = -1;
+                    for (int i = 0; i < gmro.instances; i++) {
+                        if (gmro.moves[i].from == ce.gm.from && gmro.moves[i].to == ce.gm.to) {
+                            index = i;
+                            break;
+                        }
+                    }
+                    GameMove atPos0 = gmro.moves[0];
+                    MyGameState atPos0S = gmro.states[0];
+                    gmro.moves[0] = gmro.moves[index];
+                    gmro.states[0] = gmro.states[index];
+                    gmro.moves[index] = atPos0;
+                    gmro.states[index] = atPos0S;
+                }
+            }
+        }
         for (int i = 0; i < gmro.instances; i++) {
             currPv.stack.add(gmro.moves[i]);
+            currPv.hashStack.add(g.hash);
             PrincipalVariation followingPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -beta, -alpha);
             double rat = followingPv.score * -1;
             if (rat > bestPv.score) {
                 bestPv = currPv.clone();
                 bestPv.score = rat;
                 bestPv.stack.addAll(followingPv.stack);
+                bestPv.hashStack.addAll(followingPv.hashStack);
             }
             if (bestPv.score > alpha) {
                 alpha = bestPv.score;
@@ -78,6 +108,19 @@ public class AlphaBeta extends ArtificalPlayer {
                 break;
             }
             currPv.stack.remove(currPv.stack.size() - 1);
+            currPv.hashStack.remove(currPv.hashStack.size() - 1);
+        }
+        //Make entry
+        if (depth >= 1) {
+            int cacheIndex = (int) (g.hash & Search.mask);
+            if (Search.cache[cacheIndex] == null) {
+                Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, Search.birthTime, (byte) depth, bestPv.stack.get(0));
+            } else {
+                CacheEntry ce = Search.cache[cacheIndex];
+                if (ce.depth - (Search.birthTime - ce.birth) <= depth) {
+                    Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, Search.birthTime, (byte) depth, bestPv.stack.get(0));
+                }
+            }
         }
         return bestPv;
 
@@ -96,36 +139,52 @@ public class AlphaBeta extends ArtificalPlayer {
         PrincipalVariation bestPv = new PrincipalVariation(depth);
         GameMoveResultObject gmro = g.gmro;
         g.gmro = null;
+        //Probe tablebase
+        if (depth >= 1) {
+            CacheEntry ce = Search.cache[(int) (g.hash & Search.mask)];
+            if (ce != null && ce.hash == g.hash) {
+                //Cache-hit
+                if (ce.depth >= depth) {
+                    ce.birth = Search.birthTime;
+                    pv.stack.add(ce.gm);
+                    pv.hashStack.add(ce.hash);
+                    pv.score = ce.score;
+                    return pv;
+                } else {
+                    //Move ordering
+                    //Swap move and state from pos 0
+                    int index = -1;
+                    for (int i = 0; i < gmro.instances; i++) {
+                        if (gmro.moves[i].from == ce.gm.from && gmro.moves[i].to == ce.gm.to) {
+                            index = i;
+                            break;
+                        }
+                    }
+                    GameMove atPos0 = gmro.moves[0];
+                    MyGameState atPos0S = gmro.states[0];
+                    gmro.moves[0] = gmro.moves[index];
+                    gmro.states[0] = gmro.states[index];
+                    gmro.moves[index] = atPos0;
+                    gmro.states[index] = atPos0S;
+                }
+            }
+        }
         for (int i = 0; i < gmro.instances; i++) {
             pv.stack.add(gmro.moves[i]);
+            pv.hashStack.add(g.hash);
             PrincipalVariation currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -1000, 1000);
             double rat = currentPv.score * -1;
             if (rat > bestPv.score) {
                 bestPv = pv.clone();
                 bestPv.score = rat;
                 bestPv.stack.addAll(currentPv.stack);
+                bestPv.hashStack.addAll(currentPv.hashStack);
             }
             pv.stack.remove(pv.stack.size() - 1);
+            pv.hashStack.remove(pv.hashStack.size() - 1);
         }
         return bestPv;
     }
 
 
-}
-
-class Search extends Thread {
-    public PrincipalVariation currentBestPv;
-
-    MyGameState mg;
-
-    public Search(MyGameState mg) {
-        this.mg = mg;
-    }
-
-    public void run() {
-        for (int depth = 1; depth < 100; depth++) {
-            currentBestPv = AlphaBeta.alphaBetaRoot(this.mg, depth, mg.move == GameColor.RED ? 1 : -1);
-            //System.out.println("Depth: "+depth+" searched!");
-        }
-    }
 }

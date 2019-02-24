@@ -2,6 +2,7 @@ package client;
 
 import artificialplayer.AlphaBeta;
 import artificialplayer.PrincipalVariation;
+import artificialplayer.Search;
 import datastructures.BitBoard;
 import game.GameColor;
 import game.GameDirection;
@@ -85,8 +86,9 @@ public class Logic implements IGameHandler {
         MyGameState mg = new MyGameState(roteFische, blaueFische, kraken, player, this.gameState.getTurn(), this.gameState.getRound());
         log.info("FEN:\n" + FEN.toFEN(mg));
         PrincipalVariation pv = AlphaBeta.search(mg, 1800);
+        Search.birthTime += 2;
         GameMove m = pv.stack.get(0);
-        log.info("Searched to depth: " + pv.stack.size() + "\n");
+        log.info("Searched to depth: " + pv.depthleft + "\n");
         log.info("Search score: " + pv.score + "\n");
         //GameMove m = AlphaBeta.alphaBetaRoot(mg, 3, mg.move == GameColor.RED ? 1 : -1);
         Direction resultDirection;

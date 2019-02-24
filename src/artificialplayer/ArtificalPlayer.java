@@ -39,7 +39,7 @@ public abstract class ArtificalPlayer {
                     GameMove res = pv.stack.get(0);
                     System.out.println(res.from + " " + res.to);
                     l.log(LogLevel.INFO, "sent " + res.from + " " + res.to);
-                    l.log(LogLevel.INFO, "Search to depth: " + pv.stack.size());
+                    l.log(LogLevel.INFO, "Search to depth: " + pv.depthleft);
                     l.log(LogLevel.INFO, "Search result: " + pv.score);
                 } else if (arr[0].equalsIgnoreCase("makemove")) {
                     int from = Integer.parseInt(arr[1]);
@@ -48,12 +48,14 @@ public abstract class ArtificalPlayer {
                     for (int i = 0; i < mg.gmro.instances; i++) {
                         if (mg.gmro.moves[i].from == from && mg.gmro.moves[i].to == to) {
                             mg = mg.gmro.states[i];
+                            Search.birthTime += 1;
                             l.log(LogLevel.INFO, "FEN:\n" + FEN.toFEN(mg));
                             break;
                         }
                     }
                 } else if (arr[0].equalsIgnoreCase("end")) {
                     l.onClose();
+                    AlphaBeta.currentSearch.stop();
                     break;
                 }
             }
