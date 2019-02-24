@@ -66,6 +66,7 @@ public class GameLogic {
         gs.gmro.moves[gs.gmro.instances] = gm;
         gs.gmro.states[gs.gmro.instances] = ng;
         gs.gmro.instances++;
+        gs.gmro.attackBoard.orEquals(BitBoardConstants.EINHEITS_UNIT_LEFT_SHIFT[gm.to]);
     }
 
     public static void getPossibleMoves(MyGameState gs, GameColor gc) {
