@@ -200,12 +200,12 @@ class TestGames extends Thread {
                 if (this.name.equalsIgnoreCase("0") && i % 5 == 0) {
                     System.out.println("" + i + "/" + games);
                 }
-                Process p1 = Runtime.getRuntime().exec("java -jar " + this.p1 + " ./logs/" + this.p1Name + "p" + this.name + "g" + i);
+                Process p1 = Runtime.getRuntime().exec("java -Dfile.encoding=UTF-8 -XX:MaxGCPauseMillis=100 -Xmx800m -Xms800m -Xmn700m -XX:+UseConcMarkSweepGC -XX:-UseParNewGC -XX:+ExplicitGCInvokesConcurrent -jar " + this.p1 + " ./logs/" + this.p1Name + "p" + this.name + "g" + i);
                 OutputStream os = p1.getOutputStream();
                 BufferedWriter p1Writer = new BufferedWriter(new OutputStreamWriter(os));
                 BufferedReader p1Input = new BufferedReader(new InputStreamReader(p1.getInputStream()));
 
-                Process p2 = Runtime.getRuntime().exec("java -jar " + this.p2 + " ./logs/" + this.p2Name + "p" + this.name + "g" + i);
+                Process p2 = Runtime.getRuntime().exec("java -Dfile.encoding=UTF-8 -XX:MaxGCPauseMillis=100 -Xmx800m -Xms800m -Xmn700m -XX:+UseConcMarkSweepGC -XX:-UseParNewGC -XX:+ExplicitGCInvokesConcurrent -jar " + this.p2 + " ./logs/" + this.p2Name + "p" + this.name + "g" + i);
                 OutputStream p2os = p2.getOutputStream();
                 BufferedWriter p2Writer = new BufferedWriter(new OutputStreamWriter(p2os));
                 BufferedReader p2Input = new BufferedReader(new InputStreamReader(p2.getInputStream()));

@@ -31,7 +31,7 @@ public class Logic implements IGameHandler {
     private GameState gameState;
     private Player currentPlayer;
 
-    private static final Logger log = LoggerFactory.getLogger(Logic.class);
+    public static final Logger log = LoggerFactory.getLogger(Logic.class);
 
     /**
      * Erzeugt ein neues Strategieobjekt, das zufaellige Zuege taetigt.
@@ -57,7 +57,6 @@ public class Logic implements IGameHandler {
     public void onRequestAction() {
         long startTime = System.currentTimeMillis();
         log.info("Es wurde ein Zug angefordert.");
-        ArrayList<Move> possibleMoves = GameRuleLogic.getPossibleMoves(gameState);
         //MyGameState mg = new MyGameState(, , , , , );
         BitBoard roteFische = new BitBoard(0, 0);
         BitBoard blaueFische = new BitBoard(0, 0);
@@ -84,6 +83,7 @@ public class Logic implements IGameHandler {
             player = GameColor.BLUE;
         }
         MyGameState mg = new MyGameState(roteFische, blaueFische, kraken, player, this.gameState.getTurn(), this.gameState.getRound());
+        mg.hash = MyGameState.calculateHash(mg);
         log.info("FEN:\n" + FEN.toFEN(mg));
         PrincipalVariation pv = AlphaBeta.search(mg, 1800);
         Search.birthTime += 2;

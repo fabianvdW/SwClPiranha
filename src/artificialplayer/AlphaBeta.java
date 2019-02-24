@@ -1,6 +1,8 @@
 package artificialplayer;
 
+import client.Logic;
 import game.*;
+import helpers.FEN;
 import helpers.StringToGameStateConverter;
 
 import java.util.TimerTask;
@@ -24,7 +26,7 @@ public class AlphaBeta extends ArtificalPlayer {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        currentSearch.stop();
+        currentSearch.stop = true;
         return currentSearch.currentBestPv;
     }
 
@@ -37,6 +39,9 @@ public class AlphaBeta extends ArtificalPlayer {
     //Rot ist 1, Blaue ist -1
     public static PrincipalVariation alphaBeta(MyGameState g, int depth, int maximizingPlayer, double alpha, double beta) {
         PrincipalVariation currPv = new PrincipalVariation(depth);
+        if (currentSearch.stop) {
+            return currPv;
+        }
         nodesExamined++;
         g.analyze();
         if (g.gs != GameStatus.INGAME) {
@@ -159,6 +164,17 @@ public class AlphaBeta extends ArtificalPlayer {
                             index = i;
                             break;
                         }
+                    }
+                    if (index == -1) {
+                        //Hash collision
+                        Logic.log.info("Index=-1 in Alphabeta. State: \n");
+                        Logic.log.info(FEN.toFEN(g));
+                        Logic.log.info("Hash: " + g.hash + "\n");
+                        Logic.log.info("Move: " + ce.gm.toString() + "\n");
+                        Logic.log.info("Birthtime(Hash): " + ce.birth + "\n");
+                        Logic.log.info("Current Birthtime: " + Search.birthTime + "\n");
+                        Logic.log.info("HashDepth: " + ce.depth + "\n");
+                        Logic.log.info("HashScore: " + ce.score + "\n");
                     }
                     GameMove atPos0 = gmro.moves[0];
                     MyGameState atPos0S = gmro.states[0];

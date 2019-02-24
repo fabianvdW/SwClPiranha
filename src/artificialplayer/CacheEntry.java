@@ -1,7 +1,6 @@
 package artificialplayer;
 
 import game.GameMove;
-import game.MyGameState;
 
 public class CacheEntry {
     //20Bytes

@@ -10,11 +10,11 @@ import helpers.Perft;
 public class Test {
     public static void main(String[] args) {
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("SwClPiranha/src/game/data.txt");
-        MyGameState mg = FEN.readFEN("33554464 1731076056188203008 20937968640 2251842763358398 0 70385924046848 r 16 8");
+        MyGameState mg = FEN.readFEN("33652832 722265891363357696 33957085184 4611686018427388414 0 17729624997888 b 3 1");
         System.out.println(mg);
         //System.out.println(Perft.perft(mg, 2));
         long curr = System.currentTimeMillis();
-        PrincipalVariation pv = AlphaBeta.search(mg,  3000);
+        PrincipalVariation pv = AlphaBeta.search(mg,  2000);
         System.out.println(pv.stack.get(0));
         System.out.println(pv.score);
         long now = System.currentTimeMillis();
