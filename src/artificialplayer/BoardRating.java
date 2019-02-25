@@ -101,6 +101,20 @@ public class BoardRating {
         return Math.pow(res, 2) * Math.signum(res);
     }
 
+    public static int getBiggestSchwarm(MyGameState g, GameColor gc) {
+        BitBoard fischClone = gc == GameColor.RED ? g.roteFische.clone() : g.blaueFische.clone();
+        int max = -1;
+        while (!fischClone.equalsZero()) {
+            BitBoard b = GameLogic.getSchwarmBoard(fischClone, gc);
+            int count = b.popCount();
+            if (count > max) {
+                max = count;
+            }
+            fischClone.andEquals(b.not());
+        }
+        return max;
+    }
+
     public static ArrayList<Schwarm> berechneSchwaerme(MyGameState g, GameColor gc) {
         BitBoard fischClone = gc == GameColor.RED ? g.roteFische.clone() : g.blaueFische.clone();
         ArrayList<Schwarm> res = new ArrayList<>();

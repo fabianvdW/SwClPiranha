@@ -1,16 +1,15 @@
 package artificialplayer;
 
-import client.Logic;
 import game.GameColor;
 import game.MyGameState;
 
 
 public class Search extends Thread {
     public PrincipalVariation currentBestPv;
-    public static CacheEntry[] cache = new CacheEntry[4194304];
+    public static CacheEntry[] cache = new CacheEntry[1048576];
+    public static int cacheMask = 1048576 - 1;
     //Power of 2
     public boolean stop = false;
-    public static int mask = 4194304 - 1;
     public static byte birthTime = 0;
     MyGameState mg;
 
@@ -29,11 +28,23 @@ public class Search extends Thread {
             currentBestPv = pv;
             //System.out.println("Depth: "+depth+" searched!");
             for (int i = currentBestPv.stack.size() - 1; i >= 0; i--) {
-                cache[(int) (currentBestPv.hashStack.get(i) & Search.mask)] = new CacheEntry(currentBestPv.hashStack.get(i), currentBestPv.score, Search.birthTime,
+                cache[(int) (currentBestPv.hashStack.get(i) & Search.cacheMask)] = new CacheEntry(currentBestPv.hashStack.get(i), currentBestPv.score, Search.birthTime,
                         (byte) (depth - i), currentBestPv.stack.get(i));
             }
             //
-            //cache[(int) (this.mg.hash & Search.mask)] = new CacheEntry(mg.hash, currentBestPv.score, Search.birthTime, (byte) depth, currentBestPv.stack.get(0));
+            //cache[(int) (this.mg.hash & Search.cacheMask)] = new CacheEntry(mg.hash, currentBestPv.score, Search.birthTime, (byte) depth, currentBestPv.stack.get(0));
         }
+    }
+
+    public static void investigateCache() {
+        int leer = 0;
+        for (int i = 0; i < cache.length; i++) {
+            if (cache[i] == null) {
+                leer++;
+            }
+        }
+        System.out.println("Cache: " + cache.length);
+        System.out.println("Leer: " + leer);
+        System.out.println((leer + 0.0) / cache.length);
     }
 }

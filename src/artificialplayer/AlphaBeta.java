@@ -3,15 +3,11 @@ package artificialplayer;
 import client.Logic;
 import game.*;
 import helpers.FEN;
-import helpers.StringToGameStateConverter;
-
-import java.util.TimerTask;
 
 public class AlphaBeta extends ArtificalPlayer {
     public static int nodesExamined;
     public static int depth0Nodes;
-
-    public static Search currentSearch;
+    public static Search currentSearch = new Search(null);
 
     public static void main(String[] args) {
         ArtificalPlayer a = new AlphaBeta();
@@ -66,8 +62,9 @@ public class AlphaBeta extends ArtificalPlayer {
         GameMoveResultObject gmro = g.gmro;
         g.gmro = null;
         //Probe tablebase
+        int moveOrderingIndex = 0;
         if (depth >= 1) {
-            CacheEntry ce = Search.cache[(int) (g.hash & Search.mask)];
+            CacheEntry ce = Search.cache[(int) (g.hash & Search.cacheMask)];
             if (ce != null && ce.hash == g.hash) {
                 //Cache-hit
                 if (ce.depth >= depth) {
@@ -79,6 +76,7 @@ public class AlphaBeta extends ArtificalPlayer {
                 } else {
                     //Move ordering
                     //Swap move and state from pos 0
+                    moveOrderingIndex = 1;
                     int index = -1;
                     for (int i = 0; i < gmro.instances; i++) {
                         if (gmro.moves[i].from == ce.gm.from && gmro.moves[i].to == ce.gm.to) {
@@ -93,6 +91,37 @@ public class AlphaBeta extends ArtificalPlayer {
                     gmro.moves[index] = atPos0;
                     gmro.states[index] = atPos0S;
                 }
+            }
+        }
+        //Search for Killer Moves and then for Captures
+        //Killer move
+        /*for (int i = moveOrderingIndex; i < gmro.instances; i++) {
+            GameMove move = gmro.moves[i];
+            MyGameState nextGameState = gmro.states[i];
+            if (GameLogic.getSchwarm(nextGameState, g.move) == (g.move == GameColor.RED ? nextGameState.roteFische.popCount() : nextGameState.blaueFische.popCount())) {
+                //Found Killer move
+                GameMove atPosIndex = gmro.moves[moveOrderingIndex];
+                MyGameState atPosIndexState = gmro.states[moveOrderingIndex];
+                gmro.moves[moveOrderingIndex] = move;
+                gmro.states[moveOrderingIndex] = nextGameState;
+                gmro.moves[i] = atPosIndex;
+                gmro.states[i] = atPosIndexState;
+                moveOrderingIndex++;
+            }
+        }*/
+        //Captures
+        for (int i = moveOrderingIndex; i < gmro.instances; i++) {
+            GameMove move = gmro.moves[i];
+            MyGameState nextGameState = gmro.states[i];
+            if (g.blaueFische.popCount() + g.roteFische.popCount() > nextGameState.blaueFische.popCount() + nextGameState.roteFische.popCount()) {
+                //Found Capture move
+                GameMove atPosIndex = gmro.moves[moveOrderingIndex];
+                MyGameState atPosIndexState = gmro.states[moveOrderingIndex];
+                gmro.moves[moveOrderingIndex] = move;
+                gmro.states[moveOrderingIndex] = nextGameState;
+                gmro.moves[i] = atPosIndex;
+                gmro.states[i] = atPosIndexState;
+                moveOrderingIndex++;
             }
         }
         for (int i = 0; i < gmro.instances; i++) {
@@ -117,7 +146,7 @@ public class AlphaBeta extends ArtificalPlayer {
         }
         //Make entry
         if (depth >= 1) {
-            int cacheIndex = (int) (g.hash & Search.mask);
+            int cacheIndex = (int) (g.hash & Search.cacheMask);
             if (Search.cache[cacheIndex] == null) {
                 Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, Search.birthTime, (byte) depth, bestPv.stack.get(0));
             } else {
@@ -144,9 +173,10 @@ public class AlphaBeta extends ArtificalPlayer {
         PrincipalVariation bestPv = new PrincipalVariation(depth);
         GameMoveResultObject gmro = g.gmro;
         g.gmro = null;
+        int moveOrderingIndex = 0;
         //Probe tablebase
         if (depth >= 1) {
-            CacheEntry ce = Search.cache[(int) (g.hash & Search.mask)];
+            CacheEntry ce = Search.cache[(int) (g.hash & Search.cacheMask)];
             if (ce != null && ce.hash == g.hash) {
                 //Cache-hit
                 if (ce.depth >= depth) {
@@ -158,23 +188,13 @@ public class AlphaBeta extends ArtificalPlayer {
                 } else {
                     //Move ordering
                     //Swap move and state from pos 0
+                    moveOrderingIndex = 1;
                     int index = -1;
                     for (int i = 0; i < gmro.instances; i++) {
                         if (gmro.moves[i].from == ce.gm.from && gmro.moves[i].to == ce.gm.to) {
                             index = i;
                             break;
                         }
-                    }
-                    if (index == -1) {
-                        //Hash collision
-                        Logic.log.info("Index=-1 in Alphabeta. State: \n");
-                        Logic.log.info(FEN.toFEN(g));
-                        Logic.log.info("Hash: " + g.hash + "\n");
-                        Logic.log.info("Move: " + ce.gm.toString() + "\n");
-                        Logic.log.info("Birthtime(Hash): " + ce.birth + "\n");
-                        Logic.log.info("Current Birthtime: " + Search.birthTime + "\n");
-                        Logic.log.info("HashDepth: " + ce.depth + "\n");
-                        Logic.log.info("HashScore: " + ce.score + "\n");
                     }
                     GameMove atPos0 = gmro.moves[0];
                     MyGameState atPos0S = gmro.states[0];
@@ -185,6 +205,39 @@ public class AlphaBeta extends ArtificalPlayer {
                 }
             }
         }
+        //Move ordering pt.2
+        //Search for Killer Moves and then for Captures
+        //Killer move
+        /*for (int i = moveOrderingIndex; i < gmro.instances; i++) {
+            GameMove move = gmro.moves[i];
+            MyGameState nextGameState = gmro.states[i];
+            if (GameLogic.getSchwarm(nextGameState, g.move) == (g.move == GameColor.RED ? nextGameState.roteFische.popCount() : nextGameState.blaueFische.popCount())) {
+                //Found Killer move
+                GameMove atPosIndex = gmro.moves[moveOrderingIndex];
+                MyGameState atPosIndexState = gmro.states[moveOrderingIndex];
+                gmro.moves[moveOrderingIndex] = move;
+                gmro.states[moveOrderingIndex] = nextGameState;
+                gmro.moves[i] = atPosIndex;
+                gmro.states[i] = atPosIndexState;
+                moveOrderingIndex++;
+            }
+        }*/
+        //Captures
+        for (int i = moveOrderingIndex; i < gmro.instances; i++) {
+            GameMove move = gmro.moves[i];
+            MyGameState nextGameState = gmro.states[i];
+            if (g.blaueFische.popCount() + g.roteFische.popCount() > nextGameState.blaueFische.popCount() + nextGameState.roteFische.popCount()) {
+                //Found Capture move
+                GameMove atPosIndex = gmro.moves[moveOrderingIndex];
+                MyGameState atPosIndexState = gmro.states[moveOrderingIndex];
+                gmro.moves[moveOrderingIndex] = move;
+                gmro.states[moveOrderingIndex] = nextGameState;
+                gmro.moves[i] = atPosIndex;
+                gmro.states[i] = atPosIndexState;
+                moveOrderingIndex++;
+            }
+        }
+
         for (int i = 0; i < gmro.instances; i++) {
             pv.stack.add(gmro.moves[i]);
             pv.hashStack.add(g.hash);
