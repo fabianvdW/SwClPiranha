@@ -1,6 +1,7 @@
 package artificialplayer;
 
 import client.Logic;
+import datastructures.BitBoard;
 import game.*;
 import helpers.FEN;
 
@@ -95,20 +96,27 @@ public class AlphaBeta extends ArtificalPlayer {
         }
         //Search for Killer Moves and then for Captures
         //Killer move
-        /*for (int i = moveOrderingIndex; i < gmro.instances; i++) {
-            GameMove move = gmro.moves[i];
-            MyGameState nextGameState = gmro.states[i];
-            if (GameLogic.getSchwarm(nextGameState, g.move) == (g.move == GameColor.RED ? nextGameState.roteFische.popCount() : nextGameState.blaueFische.popCount())) {
-                //Found Killer move
-                GameMove atPosIndex = gmro.moves[moveOrderingIndex];
-                MyGameState atPosIndexState = gmro.states[moveOrderingIndex];
-                gmro.moves[moveOrderingIndex] = move;
-                gmro.states[moveOrderingIndex] = nextGameState;
-                gmro.moves[i] = atPosIndex;
-                gmro.states[i] = atPosIndexState;
-                moveOrderingIndex++;
+        if (depth >= 2 && g.pliesPlayed > 20) {
+            for (int i = moveOrderingIndex; i < gmro.instances; i++) {
+                GameMove move = gmro.moves[i];
+                MyGameState nextGameState = gmro.states[i];
+
+                BitBoard gegnerFischeNow = g.move == GameColor.BLUE ? g.roteFische : g.blaueFische;
+                BitBoard gegnerFischeGleich = g.move == GameColor.BLUE ? nextGameState.roteFische : nextGameState.blaueFische;
+                if (BoardRating.getBiggestSchwarm(g, g.move) < BoardRating.getBiggestSchwarm(nextGameState, g.move)
+                        || (gegnerFischeNow.popCount() > gegnerFischeGleich.popCount())
+                        && BoardRating.getBiggestSchwarm(g, nextGameState.move) > BoardRating.getBiggestSchwarm(nextGameState, nextGameState.move)) {
+                    //Found Killer move
+                    GameMove atPosIndex = gmro.moves[moveOrderingIndex];
+                    MyGameState atPosIndexState = gmro.states[moveOrderingIndex];
+                    gmro.moves[moveOrderingIndex] = move;
+                    gmro.states[moveOrderingIndex] = nextGameState;
+                    gmro.moves[i] = atPosIndex;
+                    gmro.states[i] = atPosIndexState;
+                    moveOrderingIndex++;
+                }
             }
-        }*/
+        }
         //Captures
         for (int i = moveOrderingIndex; i < gmro.instances; i++) {
             GameMove move = gmro.moves[i];
@@ -124,6 +132,7 @@ public class AlphaBeta extends ArtificalPlayer {
                 moveOrderingIndex++;
             }
         }
+
         for (int i = 0; i < gmro.instances; i++) {
             currPv.stack.add(gmro.moves[i]);
             currPv.hashStack.add(g.hash);
@@ -208,10 +217,15 @@ public class AlphaBeta extends ArtificalPlayer {
         //Move ordering pt.2
         //Search for Killer Moves and then for Captures
         //Killer move
-        /*for (int i = moveOrderingIndex; i < gmro.instances; i++) {
+        for (int i = moveOrderingIndex; i < gmro.instances; i++) {
             GameMove move = gmro.moves[i];
             MyGameState nextGameState = gmro.states[i];
-            if (GameLogic.getSchwarm(nextGameState, g.move) == (g.move == GameColor.RED ? nextGameState.roteFische.popCount() : nextGameState.blaueFische.popCount())) {
+
+            BitBoard gegnerFischeNow = g.move == GameColor.BLUE ? g.roteFische : g.blaueFische;
+            BitBoard gegnerFischeGleich = g.move == GameColor.BLUE ? nextGameState.roteFische : nextGameState.blaueFische;
+            if (BoardRating.getBiggestSchwarm(g, g.move) < BoardRating.getBiggestSchwarm(nextGameState, g.move)
+                    || (gegnerFischeNow.popCount() > gegnerFischeGleich.popCount())
+                    && BoardRating.getBiggestSchwarm(g, nextGameState.move) > BoardRating.getBiggestSchwarm(nextGameState, nextGameState.move)) {
                 //Found Killer move
                 GameMove atPosIndex = gmro.moves[moveOrderingIndex];
                 MyGameState atPosIndexState = gmro.states[moveOrderingIndex];
@@ -221,7 +235,7 @@ public class AlphaBeta extends ArtificalPlayer {
                 gmro.states[i] = atPosIndexState;
                 moveOrderingIndex++;
             }
-        }*/
+        }
         //Captures
         for (int i = moveOrderingIndex; i < gmro.instances; i++) {
             GameMove move = gmro.moves[i];
