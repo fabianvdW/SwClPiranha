@@ -47,10 +47,10 @@ public class BoardRating {
                 biggestSchwarmIndex = i;
             }
         }
-        double fischEval = 0.15 * anzahlFische + Math.pow(2.0 * (biggestSchwarm.size + 0.0) / 16.0, 2);
+        double fischEval = 0.2 * anzahlFische + Math.pow(2.0 * (biggestSchwarm.size + 0.0) / 16.0, 2);
         double ratio = (biggestSchwarm.size + 0.0) / anzahlFische;
         double phase = (pliesPlayed + 1) / 61.0;
-        fischEval = phase < 0.5 ? fischEval * 0.5 : fischEval * phase;
+        //fischEval = phase < 0.5 ? fischEval * 0.5 : fischEval * phase;
         double biggestSchwarmEval = phase * calculateBiggestSchwarmRatioBonus(ratio) * 2.0;
         double abstandZuBiggestSchwarmEval = 0.0;
         for (int i = 0; i < schwaerme.size(); i++) {

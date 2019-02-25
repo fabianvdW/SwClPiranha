@@ -19,8 +19,8 @@ public class Test {
         System.out.println(i);
         long curr = System.currentTimeMillis();
         PrincipalVariation pv = AlphaBeta.alphaBetaRoot(mg, 5, mg.move == GameColor.RED ? 1 : -1);
-        //System.out.println(pv.stack.get(0));
-        //System.out.println(pv.score);
+        System.out.println(pv.stack.get(0));
+        System.out.println(pv.score);
         long now = System.currentTimeMillis();
         System.out.println((now - curr));
         System.out.println(AlphaBeta.nodesExamined);

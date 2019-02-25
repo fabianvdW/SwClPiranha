@@ -91,12 +91,15 @@ public class AlphaBeta extends ArtificalPlayer {
                     gmro.states[0] = gmro.states[index];
                     gmro.moves[index] = atPos0;
                     gmro.states[index] = atPos0S;
+
                 }
             }
         }
         //Search for Killer Moves and then for Captures
         //Killer move
-        if (depth >= 2 && g.pliesPlayed > 20) {
+        if (depth >= 2
+            //&& g.pliesPlayed > 20
+                ) {
             for (int i = moveOrderingIndex; i < gmro.instances; i++) {
                 GameMove move = gmro.moves[i];
                 MyGameState nextGameState = gmro.states[i];
@@ -157,11 +160,11 @@ public class AlphaBeta extends ArtificalPlayer {
         if (depth >= 1) {
             int cacheIndex = (int) (g.hash & Search.cacheMask);
             if (Search.cache[cacheIndex] == null) {
-                Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, Search.birthTime, (byte) depth, bestPv.stack.get(0));
+                Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, Search.birthTime, (byte) depth, bestPv.stack.get(0), false);
             } else {
                 CacheEntry ce = Search.cache[cacheIndex];
-                if (ce.depth - (Search.birthTime - ce.birth) <= depth) {
-                    Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, Search.birthTime, (byte) depth, bestPv.stack.get(0));
+                if (!ce.pvNode && ce.depth - (Search.birthTime - ce.birth) <= depth) {
+                    Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, Search.birthTime, (byte) depth, bestPv.stack.get(0), false);
                 }
             }
         }
@@ -211,6 +214,7 @@ public class AlphaBeta extends ArtificalPlayer {
                     gmro.states[0] = gmro.states[index];
                     gmro.moves[index] = atPos0;
                     gmro.states[index] = atPos0S;
+
                 }
             }
         }
