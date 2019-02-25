@@ -223,7 +223,7 @@ class TestGames extends Thread {
                 while (mg.gs == GameStatus.INGAME) {
                     //Request next move
                     if (player1IsRed && mg.move == GameColor.RED || !player1IsRed && mg.move == GameColor.BLUE) {
-                        p1Writer.write("requestmove " + (TestInstance.millisTime - 50) + "\n");
+                        p1Writer.write("requestmove " + (TestInstance.millisTime - 100) + "\n");
                         p1Writer.flush();
                         //Expect answer
                         long currentTime = System.currentTimeMillis();
@@ -252,7 +252,7 @@ class TestGames extends Thread {
                         p2Writer.write("makemove " + move.from + " " + move.to + "\n");
                         p2Writer.flush();
                     } else {
-                        p2Writer.write("requestmove " + (TestInstance.millisTime - 50) + "\n");
+                        p2Writer.write("requestmove " + (TestInstance.millisTime - 100) + "\n");
                         p2Writer.flush();
                         //Expect answer
                         long currentTime = System.currentTimeMillis();

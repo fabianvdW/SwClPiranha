@@ -47,8 +47,10 @@ public class BoardRating {
                 biggestSchwarmIndex = i;
             }
         }
+        double fischEval = 0.15 * anzahlFische + Math.pow(2.0 * (biggestSchwarm.size + 0.0) / 16.0, 2);
         double ratio = (biggestSchwarm.size + 0.0) / anzahlFische;
         double phase = (pliesPlayed + 1) / 61.0;
+        fischEval = phase < 0.5 ? fischEval * 0.5 : fischEval * phase;
         double biggestSchwarmEval = phase * calculateBiggestSchwarmRatioBonus(ratio) * 2.0;
         double abstandZuBiggestSchwarmEval = 0.0;
         for (int i = 0; i < schwaerme.size(); i++) {
@@ -84,13 +86,14 @@ public class BoardRating {
         */
         if (GlobalFlags.VERBOSE) {
             System.out.println("Eval for " + gc);
+            System.out.println("FischEval: " + fischEval);
             System.out.println("Biggest Schwarm: " + biggestSchwarmEval);
             System.out.println("Abstand zu BS: " + abstandZuBiggestSchwarmEval);
             System.out.println("Abstand zu Mitte: " + abstandZuMitteEval);
             System.out.println("Gegnergebiet: " + gegnerGebietEval);
-            System.out.println("Insg: " + (biggestSchwarmEval + abstandZuBiggestSchwarmEval + abstandZuMitteEval + gegnerGebietEval));
+            System.out.println("Insg: " + (biggestSchwarmEval + abstandZuBiggestSchwarmEval + abstandZuMitteEval + gegnerGebietEval + fischEval));
         }
-        return biggestSchwarmEval + abstandZuBiggestSchwarmEval + abstandZuMitteEval + gegnerGebietEval;
+        return biggestSchwarmEval + abstandZuBiggestSchwarmEval + abstandZuMitteEval + gegnerGebietEval + fischEval;
     }
 
     public static double calculateBiggestSchwarmRatioBonus(double ratio) {
