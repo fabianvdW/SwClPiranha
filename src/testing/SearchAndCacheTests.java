@@ -1,3 +1,5 @@
+package testing;
+
 import artificialplayer.AlphaBeta;
 import artificialplayer.BoardRating;
 import artificialplayer.PrincipalVariation;
@@ -7,7 +9,7 @@ import helpers.FEN;
 import helpers.Perft;
 import sun.misc.Perf;
 
-public class Test {
+public class SearchAndCacheTests {
     public static void main(String[] args) {
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("SwClPiranha/src/game/data.txt");
         MyGameState mg = FEN.readFEN("33620064 1875187945726018560 34225520640 510 1 34359738368 b 1 0");
