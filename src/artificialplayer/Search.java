@@ -6,8 +6,8 @@ import game.MyGameState;
 
 public class Search extends Thread {
     public PrincipalVariation currentBestPv;
-    public static CacheEntry[] cache = new CacheEntry[1048576];
-    public static int cacheMask = 1048576 - 1;
+    public static CacheEntry[] cache = new CacheEntry[2*524288];
+    public static int cacheMask = 2*524288 - 1;
     //Power of 2
     public boolean stop = false;
     public static byte birthTime = 0;
@@ -19,8 +19,8 @@ public class Search extends Thread {
 
     public void run() {
         for (int depth = 1; depth < 100; depth++) {
-            AlphaBeta.nodesExamined = 0;
-            AlphaBeta.depth0Nodes = 0;
+            //AlphaBeta.nodesExamined = 0;
+            //AlphaBeta.depth0Nodes = 0;
             PrincipalVariation pv = AlphaBeta.alphaBetaRoot(this.mg, depth, mg.move == GameColor.RED ? 1 : -1);
             if (stop) {
                 break;

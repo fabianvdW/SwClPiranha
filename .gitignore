@@ -8,6 +8,6 @@ out/artifacts/SoftwareChallenge_jar/SoftwareChallenge.jar
 out/artifacts/SoftwareChallenge_jar/data.txt
 out/production/SoftwareChallenge/META-INF2/META-INF/MANIFEST.MF
 out/production/SoftwareChallenge/META-INF3/META-INF/MANIFEST.MF
-out/artifacts/MyClient/logs/
+out/artifacts/MyClient/run/logs/
 *.MF
 out/artifacts/MyClient/spielleiter-error.log

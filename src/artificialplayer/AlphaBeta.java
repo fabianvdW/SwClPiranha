@@ -98,7 +98,7 @@ public class AlphaBeta extends ArtificalPlayer {
         //Search for Killer Moves and then for Captures
         //Killer move
         if (depth >= 2
-            //&& g.pliesPlayed > 20
+                && g.pliesPlayed > 20
                 ) {
             for (int i = moveOrderingIndex; i < gmro.instances; i++) {
                 GameMove move = gmro.moves[i];
@@ -221,23 +221,27 @@ public class AlphaBeta extends ArtificalPlayer {
         //Move ordering pt.2
         //Search for Killer Moves and then for Captures
         //Killer move
-        for (int i = moveOrderingIndex; i < gmro.instances; i++) {
-            GameMove move = gmro.moves[i];
-            MyGameState nextGameState = gmro.states[i];
+        if (depth >= 2
+                && g.pliesPlayed > 20
+                ) {
+            for (int i = moveOrderingIndex; i < gmro.instances; i++) {
+                GameMove move = gmro.moves[i];
+                MyGameState nextGameState = gmro.states[i];
 
-            BitBoard gegnerFischeNow = g.move == GameColor.BLUE ? g.roteFische : g.blaueFische;
-            BitBoard gegnerFischeGleich = g.move == GameColor.BLUE ? nextGameState.roteFische : nextGameState.blaueFische;
-            if (BoardRating.getBiggestSchwarm(g, g.move) < BoardRating.getBiggestSchwarm(nextGameState, g.move)
-                    || (gegnerFischeNow.popCount() > gegnerFischeGleich.popCount())
-                    && BoardRating.getBiggestSchwarm(g, nextGameState.move) > BoardRating.getBiggestSchwarm(nextGameState, nextGameState.move)) {
-                //Found Killer move
-                GameMove atPosIndex = gmro.moves[moveOrderingIndex];
-                MyGameState atPosIndexState = gmro.states[moveOrderingIndex];
-                gmro.moves[moveOrderingIndex] = move;
-                gmro.states[moveOrderingIndex] = nextGameState;
-                gmro.moves[i] = atPosIndex;
-                gmro.states[i] = atPosIndexState;
-                moveOrderingIndex++;
+                BitBoard gegnerFischeNow = g.move == GameColor.BLUE ? g.roteFische : g.blaueFische;
+                BitBoard gegnerFischeGleich = g.move == GameColor.BLUE ? nextGameState.roteFische : nextGameState.blaueFische;
+                if (BoardRating.getBiggestSchwarm(g, g.move) < BoardRating.getBiggestSchwarm(nextGameState, g.move)
+                        || (gegnerFischeNow.popCount() > gegnerFischeGleich.popCount())
+                        && BoardRating.getBiggestSchwarm(g, nextGameState.move) > BoardRating.getBiggestSchwarm(nextGameState, nextGameState.move)) {
+                    //Found Killer move
+                    GameMove atPosIndex = gmro.moves[moveOrderingIndex];
+                    MyGameState atPosIndexState = gmro.states[moveOrderingIndex];
+                    gmro.moves[moveOrderingIndex] = move;
+                    gmro.states[moveOrderingIndex] = nextGameState;
+                    gmro.moves[i] = atPosIndex;
+                    gmro.states[i] = atPosIndexState;
+                    moveOrderingIndex++;
+                }
             }
         }
         //Captures
