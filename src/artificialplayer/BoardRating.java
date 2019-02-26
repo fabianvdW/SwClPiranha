@@ -48,6 +48,8 @@ public class BoardRating {
             }
         }
         double fischEval = 0.2 * anzahlFische + Math.pow(2.0 * (biggestSchwarm.size + 0.0) / 16.0, 2);
+        fischEval -= 0.15 * fische.and(BitBoardConstants.RAND).popCount();
+        fischEval += 0.3 * fische.and(BitBoardConstants.CENTER).popCount();
         double ratio = (biggestSchwarm.size + 0.0) / anzahlFische;
         double phase = (pliesPlayed + 1) / 61.0;
         //fischEval = phase < 0.5 ? fischEval * 0.5 : fischEval * phase;

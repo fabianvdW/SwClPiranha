@@ -85,7 +85,7 @@ public class Logic implements IGameHandler {
         MyGameState mg = new MyGameState(roteFische, blaueFische, kraken, player, this.gameState.getTurn(), this.gameState.getRound());
         mg.hash = MyGameState.calculateHash(mg);
         log.info("FEN:\n" + FEN.toFEN(mg));
-        PrincipalVariation pv = AlphaBeta.search(mg, 1900);
+        PrincipalVariation pv = AlphaBeta.search(mg, 1800);
         Search.birthTime += 2;
         GameMove m = pv.stack.get(0);
         log.info("Searched to depth: " + pv.depthleft + "\n");
