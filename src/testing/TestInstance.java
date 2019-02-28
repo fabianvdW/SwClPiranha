@@ -1,5 +1,6 @@
 package testing;
 
+import datastructures.BitBoard;
 import game.*;
 import helpers.logging.Log;
 import helpers.logging.LogLevel;
@@ -15,9 +16,12 @@ import java.util.TimerTask;
 public class TestInstance {
     public static ArrayList<TestGames> threads = new ArrayList<>();
     public static int millisTime;
-
+    static boolean p1StartedLastTime = false;
+    static ArrayList<BitBoard> krakenPositionsPlayed = new ArrayList<>();
     static int p1Wins;
+    static int p1WinsOnRed;
     static int p2Wins;
+    static int p2WinsOnRed;
     static int p1Crashes;
     static int p2Crashes;
     static int draws;
@@ -75,7 +79,7 @@ public class TestInstance {
     public static void printErgebnisse(String p1Name, String p2Name, boolean zwischenergebniss) {
         System.out.println("-----------------------------------");
         System.out.println(zwischenergebniss ? "Zwischenergebnis: " : "Endergebnis: ");
-        System.out.println("Name \t\t Wins \t Draws \t Loss  Crashes   Think Time  Elo Gain");
+        System.out.println("Name \t\t Wins \t Draws \t Loss  Crashes  Think Time     Elo Gain");
         double N = (p1Wins + p2Wins + draws + 0.0);
         double score = p1Wins + draws / 2.0;
         double winrate = score / N;
@@ -85,8 +89,22 @@ public class TestInstance {
         eloGainP1 = Math.round(eloGainP1 * 100.0) / 100.0;
         double errorMargin = -400.0 * Math.log10(N / (N * winrate + margin) - 1) - eloGainP1;
         errorMargin = Math.round(errorMargin * 100.0) / 100.0;
-        System.out.println(p1Name + "\t " + p1Wins + "\t " + draws + " \t" + p2Wins + " \t" + p1Crashes + "\t " + Math.round((timeUsedP1 / (movesP1 + 0.0)) * 100.0) / 100.0 + "\t\t " + eloGainP1 + "\u00B1 " + errorMargin);
-        System.out.println(p2Name + "\t " + p2Wins + "\t " + draws + " \t" + p1Wins + " \t" + p2Crashes + "\t " + Math.round((timeUsedP2 / (movesP2 + 0.0) * 100.0)) / 100.0 + "\t\t " + (-1.0 * eloGainP1) + "\u00B1 " + errorMargin);
+        double p1WinsAreOfRed = 0;
+        double p2WinsAreOfRed = 0;
+        if (p1Wins != 0) {
+            p1WinsAreOfRed = (p1WinsOnRed + 0.0) / p1Wins;
+        }
+        if (p2Wins != 0) {
+            p2WinsAreOfRed = (p2WinsOnRed + 0.0) / p2Wins;
+        }
+        p1WinsAreOfRed = Math.round(p1WinsAreOfRed * 100) / 100.0;
+        p2WinsAreOfRed = Math.round(p2WinsAreOfRed * 100) / 100.0;
+        System.out.println(p1Name + "\t " + p1Wins + "\t " + draws + " \t" + p2Wins + " \t" + p1Crashes + "\t " + Math.round((timeUsedP1 / (movesP1 + 0.0)) * 100.0) / 100.0 + "\t" + eloGainP1 + "\u00B1 " + errorMargin);
+        System.out.println("WinPcOnRed");
+        System.out.println(""+p1WinsAreOfRed);
+        System.out.println(p2Name + "\t " + p2Wins + "\t " + draws + " \t" + p1Wins + " \t" + p2Crashes + "\t " + Math.round((timeUsedP2 / (movesP2 + 0.0) * 100.0)) / 100.0 + "\t" + (-1.0 * eloGainP1) + "\u00B1 " + errorMargin);
+        System.out.println("WinPcOnRed");
+        System.out.println(""+p2WinsAreOfRed);
     }
 
     public static GameMove parseGameMove(BufferedReader input) {
@@ -200,30 +218,37 @@ class TestGames extends Thread {
                 if (this.name.equalsIgnoreCase("0") && i % 5 == 0) {
                     System.out.println("" + i + "/" + games);
                 }
-                Process p1 = Runtime.getRuntime().exec("java -jar " + this.p1 + " ./logs/" + this.p1Name + "p" + this.name + "g" + i);
+                Process p1 = Runtime.getRuntime().exec("java -Dfile.encoding=UTF-8 -XX:MaxGCPauseMillis=100 -Xmx800m -Xms800m -Xmn700m -XX:+UseConcMarkSweepGC -XX:-UseParNewGC -XX:+ExplicitGCInvokesConcurrent -jar " + this.p1 + " ./logs/" + this.p1Name + "p" + this.name + "g" + i);
                 OutputStream os = p1.getOutputStream();
                 BufferedWriter p1Writer = new BufferedWriter(new OutputStreamWriter(os));
                 BufferedReader p1Input = new BufferedReader(new InputStreamReader(p1.getInputStream()));
 
-                Process p2 = Runtime.getRuntime().exec("java -jar " + this.p2 + " ./logs/" + this.p2Name + "p" + this.name + "g" + i);
+                Process p2 = Runtime.getRuntime().exec("java -Dfile.encoding=UTF-8 -XX:MaxGCPauseMillis=100 -Xmx800m -Xms800m -Xmn700m -XX:+UseConcMarkSweepGC -XX:-UseParNewGC -XX:+ExplicitGCInvokesConcurrent -jar " + this.p2 + " ./logs/" + this.p2Name + "p" + this.name + "g" + i);
                 OutputStream p2os = p2.getOutputStream();
                 BufferedWriter p2Writer = new BufferedWriter(new OutputStreamWriter(p2os));
                 BufferedReader p2Input = new BufferedReader(new InputStreamReader(p2.getInputStream()));
 
                 //Wait for processes to be ready!
                 waitReady(p1Input, p2Input);
-                MyGameState mg = new MyGameState();
+                MyGameState mg;
+                int count = 0;
+                do {
+                    mg = new MyGameState();
+                    count++;
+                } while (count < 50 && TestInstance.krakenPositionsPlayed.contains(mg.kraken));
+                TestInstance.krakenPositionsPlayed.add(mg.kraken);
                 p1Writer.write("newgame " + mg.kraken.l0 + " " + mg.kraken.l1 + "\n");
                 p1Writer.flush();
                 p2Writer.write("newgame " + mg.kraken.l0 + " " + mg.kraken.l1 + "\n");
                 p2Writer.flush();
                 //Thread.sleep(500);
-                boolean player1IsRed = Math.random() * 2 < 1;
+                boolean player1IsRed = TestInstance.p1StartedLastTime;
+                TestInstance.p1StartedLastTime = !TestInstance.p1StartedLastTime;
                 mg.analyze();
                 while (mg.gs == GameStatus.INGAME) {
                     //Request next move
                     if (player1IsRed && mg.move == GameColor.RED || !player1IsRed && mg.move == GameColor.BLUE) {
-                        p1Writer.write("requestmove " + (TestInstance.millisTime - 50) + "\n");
+                        p1Writer.write("requestmove " + (TestInstance.millisTime - 100) + "\n");
                         p1Writer.flush();
                         //Expect answer
                         long currentTime = System.currentTimeMillis();
@@ -252,7 +277,7 @@ class TestGames extends Thread {
                         p2Writer.write("makemove " + move.from + " " + move.to + "\n");
                         p2Writer.flush();
                     } else {
-                        p2Writer.write("requestmove " + (TestInstance.millisTime - 50) + "\n");
+                        p2Writer.write("requestmove " + (TestInstance.millisTime - 100) + "\n");
                         p2Writer.flush();
                         //Expect answer
                         long currentTime = System.currentTimeMillis();
@@ -287,8 +312,10 @@ class TestGames extends Thread {
                     TestInstance.draws += 1;
                 } else if (mg.gs == GameStatus.RED_WIN) {
                     if (player1IsRed) {
+                        TestInstance.p1WinsOnRed++;
                         TestInstance.p1Wins++;
                     } else {
+                        TestInstance.p2WinsOnRed++;
                         TestInstance.p2Wins++;
                     }
                 } else if (mg.gs == GameStatus.BLUE_WIN) {

@@ -1,6 +1,7 @@
 package helpers;
 
 import datastructures.BitBoard;
+import game.BitBoardConstants;
 import game.GameDirection;
 
 import javax.print.DocFlavor;
@@ -8,13 +9,14 @@ import javax.print.DocFlavor;
 public class BitMasks {
 
     public static void main(String[] args) {
-        System.out.println(generateEinheitsUnitsLeftShiftMasksNot());
+        //System.out.println(BitBoardConstants.RAND);
     }
-    public static String generateEinheitsUnitsLeftShiftMasksNot(){
-        StringBuilder sb= new StringBuilder();
+
+    public static String generateEinheitsUnitsLeftShiftMasksNot() {
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
-        for(int i=0;i<100;i++){
-            BitBoard b= new BitBoard(0,1).leftShift(i).not();
+        for (int i = 0; i < 100; i++) {
+            BitBoard b = new BitBoard(0, 1).leftShift(i).not();
             sb.append("new BitBoard(");
             sb.append(String.format("0x%016x", b.l0) + "L,");
             sb.append(String.format("0x%016x", b.l1) + "L");
@@ -23,11 +25,12 @@ public class BitMasks {
         sb.append("};");
         return sb.toString();
     }
-    public static String generateEinheitsUnitsLeftShiftMasks(){
-        StringBuilder sb= new StringBuilder();
+
+    public static String generateEinheitsUnitsLeftShiftMasks() {
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
-        for(int i=0;i<100;i++){
-            BitBoard b= new BitBoard(0,1).leftShift(i);
+        for (int i = 0; i < 100; i++) {
+            BitBoard b = new BitBoard(0, 1).leftShift(i);
             sb.append("new BitBoard(");
             sb.append(String.format("0x%016x", b.l0) + "L,");
             sb.append(String.format("0x%016x", b.l1) + "L");
@@ -36,6 +39,7 @@ public class BitMasks {
         sb.append("};");
         return sb.toString();
     }
+
     public static String generateRichtungsBitBoardsEinSeitigWithDestinationSquareAttackLine() {
         StringBuilder sb = new StringBuilder();
         //sb.append("{");
@@ -212,6 +216,42 @@ public class BitMasks {
                 sb.append("), ");
                 System.out.println(res);
             }
+        }
+        sb.append("};");
+        return sb.toString();
+    }
+
+    public static String getColumns() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        for (int i = 0; i < 10; i++) {
+            sb.append("new BitBoard(");
+            BitBoard b = new BitBoard(0, 0);
+            for (int j = 0; j < 10; j++) {
+                int shift = 9 - i + j * 10;
+                b.orEquals(new BitBoard(0, 1).leftShift(shift));
+            }
+            sb.append(String.format("0x%016x", b.l0) + "L,");
+            sb.append(String.format("0x%016x", b.l1) + "L");
+            sb.append("), ");
+        }
+        sb.append("};");
+        return sb.toString();
+    }
+
+    public static String getRows() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        for (int i = 0; i < 10; i++) {
+            sb.append("new BitBoard(");
+            BitBoard b = new BitBoard(0, 0);
+            for (int j = 0; j < 10; j++) {
+                int shift = i * 10 + j;
+                b.orEquals(new BitBoard(0, 1).leftShift(shift));
+            }
+            sb.append(String.format("0x%016x", b.l0) + "L,");
+            sb.append(String.format("0x%016x", b.l1) + "L");
+            sb.append("), ");
         }
         sb.append("};");
         return sb.toString();
