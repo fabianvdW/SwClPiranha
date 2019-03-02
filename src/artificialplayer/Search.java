@@ -6,8 +6,8 @@ import game.MyGameState;
 
 public class Search extends Thread {
     public PrincipalVariation currentBestPv;
-    public static CacheEntry[] cache = new CacheEntry[2*524288];
-    public static int cacheMask = 2*524288 - 1;
+    public static CacheEntry[] cache = new CacheEntry[2 * 524288];
+    public static int cacheMask = 2 * 524288 - 1;
     //Power of 2
     public boolean stop = false;
     public static byte birthTime = 0;
@@ -26,7 +26,8 @@ public class Search extends Thread {
                 break;
             }
             currentBestPv = pv;
-            //System.out.println("Depth: "+depth+" searched!");
+            //System.out.println("Depth: " + depth + " searched!");
+            //System.out.println("Score: " + pv.score);
             for (int i = currentBestPv.stack.size() - 1; i >= 0; i--) {
                 cache[(int) (currentBestPv.hashStack.get(i) & Search.cacheMask)] = new CacheEntry(currentBestPv.hashStack.get(i), currentBestPv.score, Search.birthTime,
                         (byte) (depth - i), currentBestPv.stack.get(i), true);
