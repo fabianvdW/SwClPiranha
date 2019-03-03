@@ -17,11 +17,14 @@ public class Evolution {
     public ArrayList<Match> matchResultsQueue = new ArrayList<>(32);
 
     public Evolution() {
-        this.mutateStaerke = 1.5;
+        this.mutateStaerke = 1.0;
+        Genome stdGenome = new Genome(Genome.standardDna);
         this.population = new Genome[64];
         this.best8 = new Genome[8];
-        for (int i = 0; i < this.population.length; i++) {
-            this.population[i] = new Genome();
+        this.population[0] = stdGenome;
+        for (int i = 1; i < this.population.length; i++) {
+            this.population[i] = stdGenome.mutate(this.mutateStaerke);
+            //new Genome();
         }
     }
 
@@ -59,7 +62,7 @@ public class Evolution {
         this.population = winnersAndLosers[0];
         Genome[] top4ToTop3 = winnersAndLosers[1];
 
-        makeQueue(this.population, fillIndex(2), 3);
+        makeQueue(this.population, fillIndex(2), 10);
         winnersAndLosers = playQueue();
         this.population = winnersAndLosers[0];
         Genome top2 = winnersAndLosers[1][0];
@@ -75,7 +78,8 @@ public class Evolution {
         //Re seed next generation
         this.population = new Genome[64];
         this.population[0] = best8[0];
-        for (int i = 1; i <= 9; i++) {
+        this.population[1] = new Genome(Genome.standardDna);
+        for (int i = 2; i <= 9; i++) {
             this.population[i] = best8[0].mutate(this.mutateStaerke);
         }
         for (int i = 10; i <= 15; i++) {
@@ -127,8 +131,8 @@ public class Evolution {
         this.population[63] = best8[7];
         this.generation += 1;
         this.mutateStaerke -= 0.01;
-        if (this.mutateStaerke < 0.3) {
-            this.mutateStaerke = 0.3;
+        if (this.mutateStaerke < 0.1) {
+            this.mutateStaerke = 0.1;
         }
     }
 
@@ -195,7 +199,7 @@ public class Evolution {
                 place = "1";
             } else if (i == 1) {
                 place = "2";
-            } else if (i == 2) {
+            } else if (i == 2 || i == 3) {
                 place = "3-4";
             } else {
                 place = "5-8";
@@ -208,7 +212,7 @@ public class Evolution {
     public static void main(String[] args) {
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("SwClPiranha/src/game/data.txt");
         Evolution ev = new Evolution();
-        for (int i = 0; i < 300; i++) {
+        for (int i = 0; i < 600; i++) {
             long now = System.currentTimeMillis();
             ev.doGeneration();
             long curr = System.currentTimeMillis();

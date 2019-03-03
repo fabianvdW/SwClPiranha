@@ -31,7 +31,17 @@ public class Genome {
         int mutate = Math.random() < 0.4 ? 2 : 1;
         for (int i = 0; i < mutate; i++) {
             int index = (int) (Math.random() * this.dna.length);
-            nextDna[index] += r.nextGaussian() * mutate_staerke;
+            //10% neuer Wert
+            //40% gestreckter Wert
+            //50% Addition
+            double x = Math.random();
+            if (x < 0.05) {
+                nextDna[index] = r.nextGaussian() * mutate_staerke;
+            } else if (x < 0.5) {
+                nextDna[index] *= Math.random() + 0.5;
+            } else {
+                nextDna[index] += r.nextGaussian() * mutate_staerke;
+            }
         }
         return new Genome(nextDna);
     }

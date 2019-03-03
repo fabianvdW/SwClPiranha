@@ -8,7 +8,8 @@ import helpers.FEN;
 public class AlphaBeta extends ArtificalPlayer {
     public static int nodesExamined;
     public static int depth0Nodes;
-    public static BoardRatingConstants brc = new BoardRatingConstants();
+    public static double[] gaDna = {0.9025510163556673, 2.657765703271754, -0.6639782702608146, 4.614780818192207, 1.2196253480425627, 5.049480353040995, 0.38931830719247384, -2.081605428423991, -2.3353965528221905, -5.049202306669282, -2.727337976086494};
+    public static BoardRatingConstants brc = new BoardRatingConstants(gaDna);
     public static Search currentSearch = new Search(null, -1);
 
     public static void main(String[] args) {

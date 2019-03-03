@@ -1,3 +1,4 @@
+import artificialplayer.AlphaBeta;
 import game.*;
 
 public class Main {
