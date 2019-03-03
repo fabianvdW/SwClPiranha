@@ -9,16 +9,18 @@ public class Search extends Thread {
     public static CacheEntry[] cache = new CacheEntry[2 * 524288];
     public static int cacheMask = 2 * 524288 - 1;
     //Power of 2
+    public int depth;
     public boolean stop = false;
     public static byte birthTime = 0;
     MyGameState mg;
 
-    public Search(MyGameState mg) {
+    public Search(MyGameState mg, int depth) {
         this.mg = mg;
+        this.depth = depth;
     }
 
     public void run() {
-        for (int depth = 1; depth < 100; depth++) {
+        for (int depth = 1; depth <= this.depth; depth++) {
             //AlphaBeta.nodesExamined = 0;
             //AlphaBeta.depth0Nodes = 0;
             PrincipalVariation pv = AlphaBeta.alphaBetaRoot(this.mg, depth, mg.move == GameColor.RED ? 1 : -1);
