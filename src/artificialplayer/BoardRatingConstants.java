@@ -1,6 +1,8 @@
 package artificialplayer;
 
-public class BoardRatingConstants {
+import java.io.Serializable;
+
+public class BoardRatingConstants implements Serializable {
     public static int size= 11;
     public double anzahlFischeMultiplier = 0.2;
     public double biggestSchwarmDurch16PowMultiplier = 2.0;

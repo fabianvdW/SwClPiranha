@@ -5,9 +5,10 @@ import artificialplayer.PrincipalVariation;
 import artificialplayer.Search;
 import game.*;
 
+import java.io.*;
 import java.util.ArrayList;
 
-public class Evolution {
+public class Evolution implements Serializable {
     public final static int processes = 4;
     public Genome[] population;
     public Genome[] best8;
@@ -212,12 +213,14 @@ public class Evolution {
     public static void main(String[] args) {
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("SwClPiranha/src/game/data.txt");
         Evolution ev = new Evolution();
+        ev.savePopulation();
         for (int i = 0; i < 1000; i++) {
             long now = System.currentTimeMillis();
             ev.doGeneration();
             long curr = System.currentTimeMillis();
             System.out.println("Generation " + (i + 1) + " done in " + (curr - now) + " ms! Best 8: ");
             System.out.println(ev.printBest8());
+            ev.savePopulation();
         }
     }
 
@@ -281,6 +284,33 @@ public class Evolution {
         }
         return p1Score > p2Score;
     }
+
+    public void savePopulation() {
+        String path = "checkpoint.txt";
+        try {
+            FileOutputStream f = new FileOutputStream(new File(path));
+            ObjectOutputStream o = new ObjectOutputStream(f);
+            o.writeObject(this);
+            o.close();
+            f.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Evolution loadPopulation() {
+        String path = "checkpoint.txt";
+        try {
+            FileInputStream fis = new FileInputStream(new File(path));
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            Evolution ev = (Evolution) ois.readObject();
+            return ev;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        assert (false);
+        return null;
+    }
 }
 
 class QueuePlayer extends Thread {
@@ -300,7 +330,7 @@ class QueuePlayer extends Thread {
     }
 }
 
-class Match {
+class Match implements Serializable {
     Genome g1;
     Genome g2;
     int firstTo;

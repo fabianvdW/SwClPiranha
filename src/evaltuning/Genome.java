@@ -1,13 +1,12 @@
 package evaltuning;
 
 import artificialplayer.BoardRatingConstants;
-import sun.security.jgss.wrapper.GSSNameElement;
 
-import java.security.SecureRandom;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Random;
 
-public class Genome {
+public class Genome implements Serializable {
     public static double[] standardDna = {0.2, 2.0, -0.15, 0.3, 2.0, 5.0, -2.5, -0.25, -3.1, -5.5, -1.3};
     public static Random r = new Random();
     public double[] dna;
