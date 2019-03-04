@@ -2,6 +2,7 @@ package artificialplayer;
 
 import client.Logic;
 import datastructures.BitBoard;
+import evaltuning.Genome;
 import game.*;
 import helpers.FEN;
 
@@ -9,7 +10,9 @@ public class AlphaBeta extends ArtificalPlayer {
     public static int nodesExamined;
     public static int depth0Nodes;
     //public static double[] gaDna = {0.9025510163556673, 2.657765703271754, -0.6639782702608146, 4.614780818192207, 1.2196253480425627, 5.049480353040995, 0.38931830719247384, -2.081605428423991, -2.3353965528221905, -5.049202306669282, -2.727337976086494};
-    public static double[] gaDna = {0.11574546378222712, -0.07257960137971395, -0.02589816978425911, 0.7361787925306954, 0.20392160516771846, 7.205857172121344, -1.8707970159460117, -0.1599954301371371, -0.1253664821091645, -9.571692778767243, -0.046159350880481065};
+    //public static double[] gaDna = {0.11574546378222712, -0.07257960137971395, -0.02589816978425911, 0.7361787925306954, 0.20392160516771846, 7.205857172121344, -1.8707970159460117, -0.1599954301371371, -0.1253664821091645, -9.571692778767243, -0.046159350880481065};
+    public static double[] gaDna = {0.0, 0.0, 0.2, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.15, 0.6378353091927226, 0.0, 0.0, 0.0, 0.0, 0.3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, 5.0, -2.5, -0.25, -3.1, 0.0, 0.0, 0.0, 0.0, -1.3, -5.5, 0.0, 0.0, 0.3011242124044544, 0.0};
+
     public static BoardRatingConstants brc = new BoardRatingConstants(gaDna);
     public static Search currentSearch = new Search(null, -1);
 
@@ -49,10 +52,10 @@ public class AlphaBeta extends ArtificalPlayer {
                 currPv.score = 0;
                 return currPv;
             } else if (g.gs == GameStatus.RED_WIN) {
-                currPv.score = maximizingPlayer * 300;
+                currPv.score = maximizingPlayer * 30000;
                 return currPv;
             } else {
-                currPv.score = maximizingPlayer * -300;
+                currPv.score = maximizingPlayer * -30000;
                 return currPv;
             }
         }

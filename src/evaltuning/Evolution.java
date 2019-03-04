@@ -9,7 +9,7 @@ import java.io.*;
 import java.util.ArrayList;
 
 public class Evolution implements Serializable {
-    public final static int processes = 4;
+    public final static int processes = 1;
     public Genome[] population;
     public Genome[] best8;
     public int generation = 0;
@@ -145,7 +145,7 @@ public class Evolution implements Serializable {
         res[0] = winners;
         res[1] = losers;
         //Start the processes
-        QueuePlayer[] processes = new QueuePlayer[4];
+        QueuePlayer[] processes = new QueuePlayer[Evolution.processes];
         for (int i = 0; i < Evolution.processes; i++) {
             processes[i] = new QueuePlayer(this);
         }

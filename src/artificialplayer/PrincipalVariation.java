@@ -14,7 +14,7 @@ public class PrincipalVariation {
         this.depthleft = depthleft;
         stack = new ArrayList<>(depthleft);
         hashStack = new ArrayList<>(depthleft);
-        this.score = -10000.0;
+        this.score = -1000000.0;
     }
 
     public PrincipalVariation clone() {
