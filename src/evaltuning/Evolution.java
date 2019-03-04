@@ -212,7 +212,7 @@ public class Evolution {
     public static void main(String[] args) {
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("SwClPiranha/src/game/data.txt");
         Evolution ev = new Evolution();
-        for (int i = 0; i < 600; i++) {
+        for (int i = 0; i < 1000; i++) {
             long now = System.currentTimeMillis();
             ev.doGeneration();
             long curr = System.currentTimeMillis();
