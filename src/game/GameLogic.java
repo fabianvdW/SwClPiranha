@@ -63,10 +63,15 @@ public class GameLogic {
     }
 
     public static void addToGmro(MyGameState gs, GameMove gm, MyGameState ng) {
-        gs.gmro.moves[gs.gmro.instances] = gm;
-        gs.gmro.states[gs.gmro.instances] = ng;
-        gs.gmro.instances++;
-        gs.gmro.attackBoard.orEquals(BitBoardConstants.EINHEITS_UNIT_LEFT_SHIFT[gm.to]);
+        try {
+            gs.gmro.moves[gs.gmro.instances] = gm;
+            gs.gmro.states[gs.gmro.instances] = ng;
+            gs.gmro.instances++;
+            gs.gmro.attackBoard.orEquals(BitBoardConstants.EINHEITS_UNIT_LEFT_SHIFT[gm.to]);
+        }catch (Exception e){
+            e.printStackTrace();
+            System.out.println(gs);
+        }
     }
 
     public static void getPossibleMoves(MyGameState gs, GameColor gc) {
