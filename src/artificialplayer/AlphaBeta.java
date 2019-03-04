@@ -9,7 +9,7 @@ public class AlphaBeta extends ArtificalPlayer {
     public static int nodesExamined;
     public static int depth0Nodes;
     //public static double[] gaDna = {0.9025510163556673, 2.657765703271754, -0.6639782702608146, 4.614780818192207, 1.2196253480425627, 5.049480353040995, 0.38931830719247384, -2.081605428423991, -2.3353965528221905, -5.049202306669282, -2.727337976086494};
-    public static double[] gaDna={0.11574546378222712, -0.07257960137971395, -0.02589816978425911, 0.7361787925306954, 0.20392160516771846, 7.205857172121344, -1.8707970159460117, -0.1599954301371371, -0.1253664821091645, -9.571692778767243, -0.046159350880481065};
+    public static double[] gaDna = {0.11574546378222712, -0.07257960137971395, -0.02589816978425911, 0.7361787925306954, 0.20392160516771846, 7.205857172121344, -1.8707970159460117, -0.1599954301371371, -0.1253664821091645, -9.571692778767243, -0.046159350880481065};
     public static BoardRatingConstants brc = new BoardRatingConstants(gaDna);
     public static Search currentSearch = new Search(null, -1);
 
@@ -139,7 +139,6 @@ public class AlphaBeta extends ArtificalPlayer {
                 moveOrderingIndex++;
             }
         }
-
         for (int i = 0; i < gmro.instances; i++) {
             currPv.stack.add(gmro.moves[i]);
             currPv.hashStack.add(g.hash);
@@ -185,7 +184,7 @@ public class AlphaBeta extends ArtificalPlayer {
 
     }
 
-    public static PrincipalVariation alphaBetaRoot(MyGameState g, int depth, int maximizingPlayer) {
+    public static PrincipalVariation alphaBetaRoot(MyGameState g, int depth, int maximizingPlayer, double alpha, double beta) {
         PrincipalVariation pv = new PrincipalVariation(depth);
         nodesExamined++;
         g.analyze();
@@ -282,15 +281,15 @@ public class AlphaBeta extends ArtificalPlayer {
             PrincipalVariation currentPv;
             if (depth <= 2 || !pvmoveFound || i == 0) {
                 if (i != 0) {
-                    currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -bestPv.score, 1000);
+                    currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -bestPv.score, beta);
                 } else {
-                    currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -1000, 1000);
+                    currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, alpha, beta);
                 }
             } else {
                 currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -bestPv.score - 1, -bestPv.score);
                 double rat = currentPv.score * -1;
                 if (rat >= bestPv.score) {
-                    currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -1000, -rat);
+                    currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, alpha, beta);
                 }
             }
             double rat = currentPv.score * -1;
@@ -299,6 +298,12 @@ public class AlphaBeta extends ArtificalPlayer {
                 bestPv.score = rat;
                 bestPv.stack.addAll(currentPv.stack);
                 bestPv.hashStack.addAll(currentPv.hashStack);
+            }
+            if (bestPv.score > alpha) {
+                alpha = bestPv.score;
+            }
+            if (alpha > beta) {
+                break;
             }
             pv.stack.remove(pv.stack.size() - 1);
             pv.hashStack.remove(pv.hashStack.size() - 1);

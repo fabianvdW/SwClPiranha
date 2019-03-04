@@ -158,11 +158,12 @@ public class BoardRating {
     }
 
     public static Schwarm toSchwarm(BitBoard b) {
-        Schwarm s = new Schwarm(0, new ArrayList<>(), b);
+        Schwarm s = new Schwarm(0, new ArrayList<>(16), b);
         while (!b.equalsZero()) {
             s.size++;
-            s.positions.add(new Pos(b.numberOfTrailingZeros()));
-            b.unsetBitEquals(b.numberOfTrailingZeros());
+            int i = b.numberOfTrailingZeros();
+            s.positions.add(new Pos(i));
+            b.unsetBitEquals(i);
         }
         return s;
     }

@@ -23,7 +23,7 @@ public class Search extends Thread {
         for (int depth = 1; depth <= this.depth; depth++) {
             //AlphaBeta.nodesExamined = 0;
             //AlphaBeta.depth0Nodes = 0;
-            PrincipalVariation pv = AlphaBeta.alphaBetaRoot(this.mg, depth, mg.move == GameColor.RED ? 1 : -1);
+            PrincipalVariation pv = AlphaBeta.alphaBetaRoot(this.mg, depth, mg.move == GameColor.RED ? 1 : -1, -1000, 1000);
             if (stop) {
                 break;
             }
