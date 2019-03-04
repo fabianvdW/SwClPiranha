@@ -1,4 +1,0 @@
-Historie: - +300 -Etwas schlechter als Imger
-	  - +300 -Ungetestet
-Aktuell hochgeladener Client: OldClient.jar (Keine Ahnung wv plus) 4-8 gegen Imger
-Aktuell hochgeladener Client: OldClient.jar (+120) Eval-Verbesserungen 6-6 gegen Imger
