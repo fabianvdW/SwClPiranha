@@ -77,15 +77,21 @@ public class AlphaBeta extends ArtificalPlayer {
             if (ce != null && ce.hash == g.hash) {
                 //Cache-hit
                 if (ce.depth >= depth) {
-                    if (!ce.betaNode) {
+                    if (!ce.betaNode && !ce.alphaNode) {
                         ce.birth = Search.birthTime;
                         currPv.stack.add(ce.gm);
                         currPv.hashStack.add(ce.hash);
                         currPv.score = ce.score;
                         return currPv;
                     } else {
-                        if (ce.score > alpha) {
-                            alpha = ce.score;
+                        if (ce.betaNode) {
+                            if (ce.score > alpha) {
+                                alpha = ce.score;
+                            }
+                        } else {
+                            if (ce.score < beta) {
+                                beta = ce.score;
+                            }
                         }
                     }
                 }
@@ -182,14 +188,16 @@ public class AlphaBeta extends ArtificalPlayer {
         //Make entry
         if (depth >= 1) {
             boolean betaNode = bestPv.score > beta;
+            boolean alphaNode = bestPv.score < alpha;
+
             bestPv.isBetaCutOff = betaNode;
             int cacheIndex = (int) (g.hash & Search.cacheMask);
             if (Search.cache[cacheIndex] == null) {
-                Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, Search.birthTime, (byte) depth, bestPv.stack.get(0), false, betaNode);
+                Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, Search.birthTime, (byte) depth, bestPv.stack.get(0), false, betaNode, alphaNode);
             } else {
                 CacheEntry ce = Search.cache[cacheIndex];
                 if (!ce.pvNode && ce.depth - (Search.birthTime - ce.birth) <= depth) {
-                    Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, Search.birthTime, (byte) depth, bestPv.stack.get(0), false, betaNode);
+                    Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, Search.birthTime, (byte) depth, bestPv.stack.get(0), false, betaNode, alphaNode);
                 }
             }
         }
@@ -218,15 +226,21 @@ public class AlphaBeta extends ArtificalPlayer {
             if (ce != null && ce.hash == g.hash) {
                 //Cache-hit
                 if (ce.depth >= depth) {
-                    if (!ce.betaNode) {
+                    if (!ce.betaNode && !ce.alphaNode) {
                         ce.birth = Search.birthTime;
                         pv.stack.add(ce.gm);
                         pv.hashStack.add(ce.hash);
                         pv.score = ce.score;
                         return pv;
                     } else {
-                        if (ce.score > alpha) {
-                            alpha = ce.score;
+                        if (ce.betaNode) {
+                            if (ce.score > alpha) {
+                                alpha = ce.score;
+                            }
+                        } else {
+                            if (ce.score < beta) {
+                                beta = ce.score;
+                            }
                         }
                     }
                 }

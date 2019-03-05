@@ -32,8 +32,9 @@ public class Search extends Thread {
             //System.out.println("Depth: " + depth + " searched!");
             //System.out.println("Score: " + pv.score);
             for (int i = currentBestPv.stack.size() - 1; i >= 0; i--) {
+                boolean betaNode = (i == currentBestPv.stack.size() - 1) && currentBestPv.stack.size() < depth;
                 cache[(int) (currentBestPv.hashStack.get(i) & Search.cacheMask)] = new CacheEntry(currentBestPv.hashStack.get(i), currentBestPv.score, Search.birthTime,
-                        (byte) (depth - i), currentBestPv.stack.get(i), true, false);
+                        (byte) (depth - i), currentBestPv.stack.get(i), true, betaNode, false);
             }
             //
             //cache[(int) (this.mg.hash & Search.cacheMask)] = new CacheEntry(mg.hash, currentBestPv.score, Search.birthTime, (byte) depth, currentBestPv.stack.get(0));
