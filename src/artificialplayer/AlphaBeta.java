@@ -43,8 +43,6 @@ public class AlphaBeta extends ArtificalPlayer {
 
     //Rot ist 1, Blaue ist -1
     public static PrincipalVariation alphaBeta(MyGameState g, int depth, int maximizingPlayer, double alpha, double beta) {
-        double oAlpha = alpha;
-        double oBeta = beta;
         PrincipalVariation currPv = new PrincipalVariation(depth);
         if (currentSearch.stop) {
             return currPv;
@@ -79,37 +77,43 @@ public class AlphaBeta extends ArtificalPlayer {
             if (ce != null && ce.hash == g.hash) {
                 //Cache-hit
                 if (ce.depth >= depth) {
-                    if (!ce.betaNode) {
+                    if (!ce.betaNode && !ce.alphaNode) {
                         ce.birth = Search.birthTime;
                         currPv.stack.add(ce.gm);
                         currPv.hashStack.add(ce.hash);
                         currPv.score = ce.score;
                         return currPv;
                     } else {
-                        if (ce.score > alpha) {
-                            alpha = ce.score;
+                        if (ce.betaNode) {
+                            if (ce.score > alpha) {
+                                alpha = ce.score;
+                            }
+                        } else {
+                            if (ce.score < beta) {
+                                beta = ce.score;
+                            }
                         }
                     }
-                } else {
-                    //Move ordering
-                    //Swap move and state from pos 0
-                    moveOrderingIndex = 1;
-                    int index = -1;
-                    for (int i = 0; i < gmro.instances; i++) {
-                        if (gmro.moves[i].from == ce.gm.from && gmro.moves[i].to == ce.gm.to) {
-                            index = i;
-                            break;
-                        }
-                    }
-                    pvmoveFound = ce.pvNode && ce.birth == Search.birthTime;
-                    GameMove atPos0 = gmro.moves[0];
-                    MyGameState atPos0S = gmro.states[0];
-                    gmro.moves[0] = gmro.moves[index];
-                    gmro.states[0] = gmro.states[index];
-                    gmro.moves[index] = atPos0;
-                    gmro.states[index] = atPos0S;
-
                 }
+                //Move ordering
+                //Swap move and state from pos 0
+                moveOrderingIndex = 1;
+                int index = -1;
+                for (int i = 0; i < gmro.instances; i++) {
+                    if (gmro.moves[i].from == ce.gm.from && gmro.moves[i].to == ce.gm.to) {
+                        index = i;
+                        break;
+                    }
+                }
+                pvmoveFound = ce.pvNode && ce.birth == Search.birthTime;
+                GameMove atPos0 = gmro.moves[0];
+                MyGameState atPos0S = gmro.states[0];
+                gmro.moves[0] = gmro.moves[index];
+                gmro.states[0] = gmro.states[index];
+                gmro.moves[index] = atPos0;
+                gmro.states[index] = atPos0S;
+
+
             }
         }
         //Search for Killer Moves and then for Captures
@@ -184,14 +188,16 @@ public class AlphaBeta extends ArtificalPlayer {
         //Make entry
         if (depth >= 1) {
             boolean betaNode = bestPv.score > beta;
+            boolean alphaNode = bestPv.score < alpha;
+
             bestPv.isBetaCutOff = betaNode;
             int cacheIndex = (int) (g.hash & Search.cacheMask);
             if (Search.cache[cacheIndex] == null) {
-                Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, Search.birthTime, (byte) depth, bestPv.stack.get(0), false, betaNode);
+                Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, Search.birthTime, (byte) depth, bestPv.stack.get(0), false, betaNode, alphaNode);
             } else {
                 CacheEntry ce = Search.cache[cacheIndex];
                 if (!ce.pvNode && ce.depth - (Search.birthTime - ce.birth) <= depth) {
-                    Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, Search.birthTime, (byte) depth, bestPv.stack.get(0), false, betaNode);
+                    Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, Search.birthTime, (byte) depth, bestPv.stack.get(0), false, betaNode, alphaNode);
                 }
             }
         }
@@ -220,31 +226,43 @@ public class AlphaBeta extends ArtificalPlayer {
             if (ce != null && ce.hash == g.hash) {
                 //Cache-hit
                 if (ce.depth >= depth) {
-                    ce.birth = Search.birthTime;
-                    pv.stack.add(ce.gm);
-                    pv.hashStack.add(ce.hash);
-                    pv.score = ce.score;
-                    return pv;
-                } else {
-                    //Move ordering
-                    //Swap move and state from pos 0
-                    moveOrderingIndex = 1;
-                    int index = -1;
-                    for (int i = 0; i < gmro.instances; i++) {
-                        if (gmro.moves[i].from == ce.gm.from && gmro.moves[i].to == ce.gm.to) {
-                            index = i;
-                            break;
+                    if (!ce.betaNode && !ce.alphaNode) {
+                        ce.birth = Search.birthTime;
+                        pv.stack.add(ce.gm);
+                        pv.hashStack.add(ce.hash);
+                        pv.score = ce.score;
+                        return pv;
+                    } else {
+                        if (ce.betaNode) {
+                            if (ce.score > alpha) {
+                                alpha = ce.score;
+                            }
+                        } else {
+                            if (ce.score < beta) {
+                                beta = ce.score;
+                            }
                         }
                     }
-                    pvmoveFound = ce.pvNode && ce.birth == Search.birthTime;
-                    GameMove atPos0 = gmro.moves[0];
-                    MyGameState atPos0S = gmro.states[0];
-                    gmro.moves[0] = gmro.moves[index];
-                    gmro.states[0] = gmro.states[index];
-                    gmro.moves[index] = atPos0;
-                    gmro.states[index] = atPos0S;
-
                 }
+                //Move ordering
+                //Swap move and state from pos 0
+                moveOrderingIndex = 1;
+                int index = -1;
+                for (int i = 0; i < gmro.instances; i++) {
+                    if (gmro.moves[i].from == ce.gm.from && gmro.moves[i].to == ce.gm.to) {
+                        index = i;
+                        break;
+                    }
+                }
+                pvmoveFound = ce.pvNode && ce.birth == Search.birthTime;
+                GameMove atPos0 = gmro.moves[0];
+                MyGameState atPos0S = gmro.states[0];
+                gmro.moves[0] = gmro.moves[index];
+                gmro.states[0] = gmro.states[index];
+                gmro.moves[index] = atPos0;
+                gmro.states[index] = atPos0S;
+
+
             }
         }
         //Move ordering pt.2
