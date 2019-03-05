@@ -21,6 +21,7 @@ public class FEN {
         int pliesPlayed = Integer.parseInt(arr[7]);
         int roundsPlayed = Integer.parseInt(arr[8]);
         MyGameState mg = new MyGameState(roteFische, blaueFische, kraken, move, pliesPlayed, roundsPlayed);
+        mg.hash = MyGameState.calculateHash(mg);
         return mg;
     }
 

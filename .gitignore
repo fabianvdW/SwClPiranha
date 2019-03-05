@@ -11,3 +11,5 @@ out/production/SoftwareChallenge/META-INF3/META-INF/MANIFEST.MF
 out/artifacts/MyClient/run/logs/
 *.MF
 out/artifacts/MyClient/spielleiter-error.log
+out/artifacts/MyClient/run/Aspiring2.jar
+out/artifacts/MyClient/run/Aspiring1.jar

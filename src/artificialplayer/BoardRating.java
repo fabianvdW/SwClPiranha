@@ -59,25 +59,24 @@ public class BoardRating {
         }
         double phase = (pliesPlayed + 1) / 61.0;
 
-        //biggestSchwarm
-        //double fischEval = 0.2 * anzahlFische + Math.pow(2.0 * (biggestSchwarm.size + 0.0) / 16.0, 2);
-        double fischEval = brc.anzahlFischeMultiplier * anzahlFische + Math.pow(brc.biggestSchwarmDurch16PowMultiplier * (biggestSchwarm.size + 0.0) / 16.0, 2);
-        //fischEval += -0.15 * fische.and(BitBoardConstants.RAND).popCount();
-        fischEval += brc.fischAmRandMultiplier * fische.and(BitBoardConstants.RAND).popCount();
-        //fischEval += 0.3 * fische.and(BitBoardConstants.CENTER).popCount();
-        fischEval += brc.fischeImCenterMultiplier * fische.and(BitBoardConstants.CENTER).popCount();
+
+        double fischEval = brc.anzahlFische.getOutput(anzahlFische, phase);
+
+        fischEval += brc.biggestSchwarmDurch16.getOutput((biggestSchwarm.size + 0.0) / 16.0, phase);
+
+        fischEval += brc.randFische.getOutput(fische.and(BitBoardConstants.RAND).popCount(), phase);
+
+        fischEval += brc.centerFische.getOutput(fische.and(BitBoardConstants.CENTER).popCount(), phase);
 
 
         double ratio = (biggestSchwarm.size + 0.0) / anzahlFische;
-        //double biggestSchwarmEval= phase * calculateBiggestSchwarmRatioBonus(ratio)* 2.0
-        double biggestSchwarmEval = phase * calculateBiggestSchwarmRatioBonus(ratio, brc) * brc.schwarmRatioMultiplier;
+        double biggestSchwarmEval = brc.schwarmRatio.getOutput(ratio, phase);
 
         double abstandZuMitteEval = 0.0;
         //Schwarm abhängig von Distanz zur Mitte bestrafen
         for (int i = 0; i < schwaerme.size(); i++) {
             double abstand = Math.sqrt(Math.pow(schwaerme.get(i).averageX - 4.5, 2) + Math.pow(schwaerme.get(i).averageY - 4.5, 2));
-            //abstandZuMitteEval += -1.0 / 4.0 * Math.pow((abstand - 3.1), 2) * Math.signum(abstand - 3.1) * schwaerme.get(i).size / (anzahlFische + 0.0);
-            abstandZuMitteEval += brc.abstandZuMitteMultiplier * Math.pow((abstand + brc.abstandZuMitteVerschiebung), 2) * Math.signum(abstand + brc.abstandZuMitteVerschiebung) * schwaerme.get(i).size / (anzahlFische + 0.0);
+            abstandZuMitteEval += brc.abstandZuMitte.getOutput(abstand, phase) * schwaerme.get(i).size / (anzahlFische + 0.0);
         }
         if (phase > 0.5 && biggestSchwarm.size > 4) {
             biggestSchwarm.averageX = averageXBS / biggestSchwaermeFound;
@@ -89,31 +88,12 @@ public class BoardRating {
                 continue;
             }
             double abstand = Math.max(Math.abs(biggestSchwarm.averageX - schwaerme.get(i).averageX), Math.abs(biggestSchwarm.averageY - schwaerme.get(i).averageY));
-            //System.out.println(schwaerme.get(i).size);
-            //System.out.println(abstand);
-            //double normedAbstand = abstand - 5.5;
-            double normedAbstand = abstand + brc.normedAbstandZuBiggestSchwarmVerschiebung;
-            //abstandZuBiggestSchwarmEval += (1 - phase) * -1.3 * Math.pow(normedAbstand, 2) * Math.signum(normedAbstand) * (schwaerme.get(i).size + 0.0) / (anzahlFische + 0.0);
-            abstandZuBiggestSchwarmEval += (1 - phase) * brc.abstandZuBiggestMultiplier * Math.pow(normedAbstand, 2) * Math.signum(normedAbstand) * (schwaerme.get(i).size + 0.0) / (anzahlFische + 0.0);
-            //abstandZuBiggestSchwarmEval -= (1 - phase) * 1.3 * Math.pow(abstand, 2) * 1 / 6.0 * (schwaerme.get(i).size + 0.0) / (anzahlFische + 0.0);
+
+            abstandZuBiggestSchwarmEval += brc.schwarmAbstand.getOutput(abstand, phase) * (schwaerme.get(i).size + 0.0) / (anzahlFische + 0.0);
         }
-        //Gegnergebiet Berechnungen
-        //Bonus, wenn man Felder in gegnerischem Gebiet kontrolliert.
+
+
         double gegnerGebietEval = 0.0;
-        //Kleiner Abzug, wenn man in gegnerischem Gebiet ist
-        //gegnerGebietEval -= 0.1 * fische.and(gegnerGebiet).popCount();
-        /*int treffer = gmro.attackBoard.and(gegnerGebiet).popCount();
-        double anzahlGegnerFische = gegnerFische.popCount();
-        gegnerGebietEval += 0.03 * treffer;
-        if (treffer >= 1) {
-            for (Schwarm s : gegnerSchwaerme) {
-                if (!s.gebiet.and(gmro.attackBoard).equalsZero()) {
-                    gegnerGebietEval += 4.0 * Math.pow((s.size + 0.0) / 16.0, 2);
-                }
-            }
-        }
-        //gegnerGebietEval = (phase + 0.2) * gegnerGebietEval;
-        */
         if (GlobalFlags.VERBOSE) {
             System.out.println("Eval for " + gc);
             System.out.println("FischEval: " + fischEval);
@@ -124,12 +104,6 @@ public class BoardRating {
             System.out.println("Insg: " + (biggestSchwarmEval + abstandZuBiggestSchwarmEval + abstandZuMitteEval + gegnerGebietEval + fischEval));
         }
         return biggestSchwarmEval + abstandZuBiggestSchwarmEval + abstandZuMitteEval + gegnerGebietEval + fischEval;
-    }
-
-    public static double calculateBiggestSchwarmRatioBonus(double ratio, BoardRatingConstants brc) {
-        //double res = 5* ratio -2.5;
-        double res = brc.schwarmRatioM * ratio + brc.schwarmRatioB;
-        return Math.pow(res, 2) * Math.signum(res);
     }
 
     public static int getBiggestSchwarm(MyGameState g, GameColor gc) {
@@ -158,11 +132,12 @@ public class BoardRating {
     }
 
     public static Schwarm toSchwarm(BitBoard b) {
-        Schwarm s = new Schwarm(0, new ArrayList<>(), b);
+        Schwarm s = new Schwarm(0, new ArrayList<>(16), b);
         while (!b.equalsZero()) {
             s.size++;
-            s.positions.add(new Pos(b.numberOfTrailingZeros()));
-            b.unsetBitEquals(b.numberOfTrailingZeros());
+            int i = b.numberOfTrailingZeros();
+            s.positions.add(new Pos(i));
+            b.unsetBitEquals(i);
         }
         return s;
     }

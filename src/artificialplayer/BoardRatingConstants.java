@@ -3,34 +3,26 @@ package artificialplayer;
 import java.io.Serializable;
 
 public class BoardRatingConstants implements Serializable {
-    public static int size= 11;
-    public double anzahlFischeMultiplier = 0.2;
-    public double biggestSchwarmDurch16PowMultiplier = 2.0;
-    public double fischAmRandMultiplier = -0.15;
-    public double fischeImCenterMultiplier = 0.3;
-    public double schwarmRatioMultiplier = 2.0;
-    public double schwarmRatioM = 5.0;
-    public double schwarmRatioB = -2.5;
-    public double abstandZuMitteMultiplier = -0.25;
-    public double abstandZuMitteVerschiebung = -3.1;
-    public double normedAbstandZuBiggestSchwarmVerschiebung = -5.5;
-    public double abstandZuBiggestMultiplier = -1.3;
+    static final long serialVersionUID = 42L;
 
-    public BoardRatingConstants() {
+    public static int size = 21;
+    Feature anzahlFische;
+    Feature biggestSchwarmDurch16;
+    Feature randFische;
+    Feature centerFische;
+    Feature schwarmRatio;
+    Feature abstandZuMitte;
+    Feature schwarmAbstand;
 
-    }
 
     public BoardRatingConstants(double[] consts) {
-        this.anzahlFischeMultiplier = consts[0];
-        this.biggestSchwarmDurch16PowMultiplier = consts[1];
-        this.fischAmRandMultiplier = consts[2];
-        this.fischeImCenterMultiplier = consts[3];
-        this.schwarmRatioMultiplier = consts[4];
-        this.schwarmRatioM = consts[5];
-        this.schwarmRatioB = consts[6];
-        this.abstandZuMitteMultiplier = consts[7];
-        this.abstandZuMitteVerschiebung = consts[8];
-        this.normedAbstandZuBiggestSchwarmVerschiebung = consts[9];
-        this.abstandZuBiggestMultiplier = consts[10];
+
+        this.anzahlFische = new Feature(consts[0], consts[1], consts[2]);
+        this.biggestSchwarmDurch16 = new Feature(consts[3], consts[4], consts[5]);
+        this.randFische = new Feature(consts[6], consts[7], consts[8]);
+        this.centerFische = new Feature(consts[9], consts[10], consts[11]);
+        this.schwarmRatio = new Feature(consts[12], consts[13], consts[14]);
+        this.abstandZuMitte = new Feature(consts[15], consts[16], consts[17]);
+        this.schwarmAbstand = new Feature(consts[18], consts[19], consts[20]);
     }
 }

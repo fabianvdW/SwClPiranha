@@ -9,14 +9,16 @@ public class CacheEntry {
     public byte depth;//1 Byte
     public GameMove gm; //12 Byte
     public boolean pvNode;
+    public boolean betaNode;
     //28 Byte
 
-    public CacheEntry(long hash, double score, byte birth, byte depth, GameMove gm, boolean pvNode) {
+    public CacheEntry(long hash, double score, byte birth, byte depth, GameMove gm, boolean pvNode, boolean betaNode) {
         this.hash = hash;
         this.score = score;
         this.birth = birth;
         this.depth = depth;
         this.gm = gm;
         this.pvNode = pvNode;
+        this.betaNode = betaNode;
     }
 }

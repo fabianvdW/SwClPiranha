@@ -88,6 +88,7 @@ public class Logic implements IGameHandler {
         PrincipalVariation pv = AlphaBeta.search(mg, 1800);
         Search.birthTime += 2;
         GameMove m = pv.stack.get(0);
+        log.info("Move: " + m.toString() + "\n" + " Direction: " + m.dir);
         log.info("Searched to depth: " + pv.depthleft + "\n");
         log.info("Search score: " + pv.score + "\n");
         //GameMove m = AlphaBeta.alphaBetaRoot(mg, 3, mg.move == GameColor.RED ? 1 : -1);

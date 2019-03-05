@@ -4,28 +4,32 @@ import artificialplayer.AlphaBeta;
 import artificialplayer.PrincipalVariation;
 import artificialplayer.Search;
 import game.*;
+import sun.reflect.annotation.ExceptionProxy;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Evolution implements Serializable {
-    public final static int processes = 4;
+    static final long serialVersionUID = 42L;
+    public static int processes = 4;
     public Genome[] population;
     public Genome[] best8;
+
+    public Genome sufiWinner;
+    public int consecutiveWins;
+
     public int generation = 0;
     public double mutateStaerke;
     public ArrayList<Match> matchQueue = new ArrayList<>(32);
     public ArrayList<Match> matchResultsQueue = new ArrayList<>(32);
 
     public Evolution() {
-        this.mutateStaerke = 1.0;
-        Genome stdGenome = new Genome(Genome.standardDna);
+        this.mutateStaerke = 1;
         this.population = new Genome[64];
         this.best8 = new Genome[8];
-        this.population[0] = stdGenome;
-        for (int i = 1; i < this.population.length; i++) {
-            this.population[i] = stdGenome.mutate(this.mutateStaerke);
-            //new Genome();
+        for (int i = 0; i < this.population.length; i++) {
+            this.population[i] = new Genome();
         }
     }
 
@@ -52,6 +56,7 @@ public class Evolution implements Serializable {
         makeQueue(this.population, fillIndex(16), 2);
         winnersAndLosers = playQueue();
         this.population = winnersAndLosers[0];
+        Genome[] top16toTop9 = winnersAndLosers[1];
 
         makeQueue(this.population, fillIndex(8), 2);
         winnersAndLosers = playQueue();
@@ -78,58 +83,70 @@ public class Evolution implements Serializable {
         best8[7] = top8toTop5[3];
         //Re seed next generation
         this.population = new Genome[64];
-        this.population[0] = best8[0];
-        this.population[1] = new Genome(Genome.standardDna);
-        for (int i = 2; i <= 9; i++) {
-            this.population[i] = best8[0].mutate(this.mutateStaerke);
+        for (int i = 0; i < 8; i++) {
+            this.population[i] = best8[i];
         }
-        for (int i = 10; i <= 15; i++) {
-            this.population[i] = best8[0].crossover(best8[1]);
+        for (int i = 0; i < 8; i++) {
+            this.population[8 + i] = top16toTop9[i];
         }
-        for (int i = 16; i <= 19; i++) {
-            this.population[i] = best8[0].crossover(best8[2]);
+        int index = 16;
+        for (int i = 0; i < 16; i++) {
+            this.population[index + 2 * i] = this.population[i].mutate(this.mutateStaerke, 1);
+            this.population[index + 2 * i + 1] = this.population[i].mutate(this.mutateStaerke, 2);
         }
-        for (int i = 20; i <= 23; i++) {
-            this.population[i] = best8[0].crossover(best8[3]);
+        index = 48;
+        Random r = new Random();
+        for (int i = 0; i < 15; i++) {
+            int index1 = (int) (Math.abs(r.nextGaussian() * 5));
+            index1 = Math.min(15, index1);
+            int index2;
+            do {
+                index2 = (int) (Math.abs(r.nextGaussian() * 5));
+                index2 = Math.min(15, index2);
+            } while (index1 == index2);
+            this.population[index + i] = this.population[index1].crossover(this.population[index2]);
         }
-        int index = 24;
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 2; j++) {
-                this.population[index + j + i * 2] = best8[0].crossover(best8[4 + i]);
+
+        //Sufi
+        Match sufi = null;
+        if (this.sufiWinner == null) {
+            this.sufiWinner = this.population[0];
+        } else {
+            sufi = new Match(this.sufiWinner, this.population[0], 50);
+            int gProProcessor = 50 / processes;
+            int p1Additional = 50 % processes;
+            MatchPlayer[] matches = new MatchPlayer[processes];
+            for (int i = 0; i < processes; i++) {
+                matches[i] = new MatchPlayer(new Match(sufi.g1, sufi.g2, gProProcessor + (i == 0 ? p1Additional : 0)));
+            }
+            for (int i = 0; i < processes; i++) {
+                try {
+                    matches[i].join();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            for (int i = 0; i < processes; i++) {
+                sufi.g1Score += matches[i].m.g1Score;
+                sufi.g2Score += matches[i].m.g2Score;
+            }
+
+            if (sufi.g1Score >= sufi.g2Score) {
+                consecutiveWins++;
+            } else {
+                this.sufiWinner = this.population[0];
+                consecutiveWins = 1;
             }
         }
-        assert (this.population[32] == null);
-        this.population[32] = best8[1];
-        for (int i = 33; i <= 39; i++) {
-            this.population[i] = best8[1].mutate(this.mutateStaerke);
+
+        System.out.println("Super final has been played! Winner:");
+        System.out.println(this.sufiWinner.toString());
+        System.out.println("Consecutive Wins: " + this.consecutiveWins);
+        if (sufi != null) {
+            System.out.println("Last Win: " + sufi.g1Score + " -" + sufi.g2Score);
         }
-        index = 40;
-        for (int i = 0; i < 2; i++) {
-            for (int j = 0; j < 2; j++) {
-                this.population[index + j + i * 2] = best8[1].crossover(best8[2 + i]);
-            }
-        }
-        index = 44;
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 1; j++) {
-                this.population[index + j + i] = best8[1].crossover(best8[4 + i]);
-            }
-        }
-        assert (this.population[48] == null);
-        this.population[48] = best8[2];
-        for (int i = 49; i <= 52; i++) {
-            this.population[i] = best8[2].mutate(this.mutateStaerke);
-        }
-        this.population[53] = best8[2].crossover(best8[3]);
-        this.population[54] = best8[3];
-        for (int i = 55; i <= 58; i++) {
-            this.population[i] = best8[3].mutate(this.mutateStaerke);
-        }
-        this.population[59] = best8[3].crossover(best8[4]);
-        this.population[60] = best8[4];
-        this.population[61] = best8[5];
-        this.population[62] = best8[6];
-        this.population[63] = best8[7];
+
+        this.population[63] = this.sufiWinner.mutate(this.mutateStaerke, 1);
         this.generation += 1;
         this.mutateStaerke -= 0.01;
         if (this.mutateStaerke < 0.1) {
@@ -145,7 +162,7 @@ public class Evolution implements Serializable {
         res[0] = winners;
         res[1] = losers;
         //Start the processes
-        QueuePlayer[] processes = new QueuePlayer[4];
+        QueuePlayer[] processes = new QueuePlayer[Evolution.processes];
         for (int i = 0; i < Evolution.processes; i++) {
             processes[i] = new QueuePlayer(this);
         }
@@ -213,12 +230,13 @@ public class Evolution implements Serializable {
     public static void main(String[] args) {
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("SwClPiranha/src/game/data.txt");
         Evolution ev = new Evolution();
-        ev.savePopulation();
+        //ev.savePopulation();
+        ev = Evolution.loadPopulation();
         for (int i = 0; i < 1000; i++) {
             long now = System.currentTimeMillis();
             ev.doGeneration();
             long curr = System.currentTimeMillis();
-            System.out.println("Generation " + (i + 1) + " done in " + (curr - now) + " ms! Best 8: ");
+            System.out.println("Generation " + (ev.generation) + " done in " + (curr - now) + " ms! Best 8: ");
             System.out.println(ev.printBest8());
             ev.savePopulation();
         }
@@ -282,6 +300,8 @@ public class Evolution implements Serializable {
             }
             g1Starts = !g1Starts;
         }
+        m.g1Score = p1Score;
+        m.g2Score = p2Score;
         return p1Score > p2Score;
     }
 
@@ -298,7 +318,7 @@ public class Evolution implements Serializable {
         }
     }
 
-    public Evolution loadPopulation() {
+    public static Evolution loadPopulation() {
         String path = "checkpoint.txt";
         try {
             FileInputStream fis = new FileInputStream(new File(path));
@@ -310,6 +330,19 @@ public class Evolution implements Serializable {
         }
         assert (false);
         return null;
+    }
+}
+
+class MatchPlayer extends Thread {
+    Match m;
+
+    public MatchPlayer(Match m) {
+        this.m = m;
+        this.start();
+    }
+
+    public void run() {
+        Evolution.playGame(m);
     }
 }
 
@@ -331,8 +364,11 @@ class QueuePlayer extends Thread {
 }
 
 class Match implements Serializable {
+    static final long serialVersionUID = 42L;
     Genome g1;
     Genome g2;
+    double g1Score;
+    double g2Score;
     int firstTo;
     boolean result;
 

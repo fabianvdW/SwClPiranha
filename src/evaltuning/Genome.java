@@ -7,28 +7,33 @@ import java.util.Arrays;
 import java.util.Random;
 
 public class Genome implements Serializable {
-    public static double[] standardDna = {0.2, 2.0, -0.15, 0.3, 2.0, 5.0, -2.5, -0.25, -3.1, -5.5, -1.3};
+    static final long serialVersionUID = 42L;
+
+    public static double[] standardDna = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     public static Random r = new Random();
     public double[] dna;
     public BoardRatingConstants brc;
 
+    private int name;
+
     public Genome(double[] dna) {
         this.dna = dna;
         this.brc = new BoardRatingConstants(this.dna);
+        this.name = (int) (Math.random() * 100000);
     }
 
     public Genome() {
         this.dna = new double[BoardRatingConstants.size];
         for (int i = 0; i < this.dna.length; i++) {
-            this.dna[i] = Math.random() * 6 - 3.0;
+            this.dna[i] = Math.random() * 2 - 1.0;
         }
         this.brc = new BoardRatingConstants(this.dna);
+        this.name = (int) (Math.random() * 100000);
     }
 
-    public Genome mutate(double mutate_staerke) {
+    public Genome mutate(double mutate_staerke, int amount) {
         double[] nextDna = this.dna.clone();
-        int mutate = Math.random() < 0.4 ? 2 : 1;
-        for (int i = 0; i < mutate; i++) {
+        for (int i = 0; i < amount; i++) {
             int index = (int) (Math.random() * this.dna.length);
             //10% neuer Wert
             //40% gestreckter Wert
@@ -37,7 +42,11 @@ public class Genome implements Serializable {
             if (x < 0.05) {
                 nextDna[index] = r.nextGaussian() * mutate_staerke;
             } else if (x < 0.5) {
-                nextDna[index] *= Math.random() + 0.5;
+                if (nextDna[index] != 0.0) {
+                    nextDna[index] *= Math.random() + 0.5;
+                } else {
+                    nextDna[index] = r.nextGaussian() * mutate_staerke;
+                }
             } else {
                 nextDna[index] += r.nextGaussian() * mutate_staerke;
             }
@@ -76,7 +85,8 @@ public class Genome implements Serializable {
         String res = "";
         res += Arrays.toString(this.dna) + "\n";
         res += "L1 Distance: " + this.l1Distance() + "\n";
-        res += "L2 Distance: " + this.l2Distance();
+        res += "L2 Distance: " + this.l2Distance() + "\n";
+        res += "Name: " + this.name;
         return res;
     }
 }

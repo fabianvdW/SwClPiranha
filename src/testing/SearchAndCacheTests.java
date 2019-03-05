@@ -1,13 +1,11 @@
 package testing;
 
 import artificialplayer.AlphaBeta;
-import artificialplayer.BoardRating;
 import artificialplayer.PrincipalVariation;
 import artificialplayer.Search;
 import game.*;
 import helpers.FEN;
-import helpers.Perft;
-import sun.misc.Perf;
+
 
 public class SearchAndCacheTests {
     public static void main(String[] args) {
@@ -23,7 +21,7 @@ public class SearchAndCacheTests {
                 mg = gmro.states[0];
                 mg.analyze();
             } else {
-                Search s = new Search(mg,5);
+                Search s = new Search(mg, 5);
                 s.run();
                 PrincipalVariation pv = s.currentBestPv;
                 GameMove mv = pv.stack.get(0);

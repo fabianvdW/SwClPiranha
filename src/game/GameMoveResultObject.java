@@ -10,8 +10,8 @@ public class GameMoveResultObject {
 
     public GameMoveResultObject() {
         this.attackBoard = new BitBoard(0, 0);
-        this.moves = new GameMove[95];
-        this.states = new MyGameState[95];
+        this.moves = new GameMove[105];
+        this.states = new MyGameState[105];
         instances = 0;
     }
 }

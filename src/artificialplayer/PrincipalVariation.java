@@ -9,12 +9,13 @@ public class PrincipalVariation {
     public ArrayList<Long> hashStack;
     public double score;
     public int depthleft;
+    public boolean isBetaCutOff;
 
     public PrincipalVariation(int depthleft) {
         this.depthleft = depthleft;
         stack = new ArrayList<>(depthleft);
         hashStack = new ArrayList<>(depthleft);
-        this.score = -10000.0;
+        this.score = -1000000.0;
     }
 
     public PrincipalVariation clone() {
