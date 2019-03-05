@@ -1,7 +1,6 @@
 package testing;
 
 
-import artificialplayer.AlphaBeta;
 import artificialplayer.PrincipalVariation;
 import artificialplayer.Search;
 import game.BitBoardConstants;

@@ -43,8 +43,6 @@ public class AlphaBeta extends ArtificalPlayer {
 
     //Rot ist 1, Blaue ist -1
     public static PrincipalVariation alphaBeta(MyGameState g, int depth, int maximizingPlayer, double alpha, double beta) {
-        double oAlpha = alpha;
-        double oBeta = beta;
         PrincipalVariation currPv = new PrincipalVariation(depth);
         if (currentSearch.stop) {
             return currPv;
@@ -90,26 +88,26 @@ public class AlphaBeta extends ArtificalPlayer {
                             alpha = ce.score;
                         }
                     }
-                } else {
-                    //Move ordering
-                    //Swap move and state from pos 0
-                    moveOrderingIndex = 1;
-                    int index = -1;
-                    for (int i = 0; i < gmro.instances; i++) {
-                        if (gmro.moves[i].from == ce.gm.from && gmro.moves[i].to == ce.gm.to) {
-                            index = i;
-                            break;
-                        }
-                    }
-                    pvmoveFound = ce.pvNode && ce.birth == Search.birthTime;
-                    GameMove atPos0 = gmro.moves[0];
-                    MyGameState atPos0S = gmro.states[0];
-                    gmro.moves[0] = gmro.moves[index];
-                    gmro.states[0] = gmro.states[index];
-                    gmro.moves[index] = atPos0;
-                    gmro.states[index] = atPos0S;
-
                 }
+                //Move ordering
+                //Swap move and state from pos 0
+                moveOrderingIndex = 1;
+                int index = -1;
+                for (int i = 0; i < gmro.instances; i++) {
+                    if (gmro.moves[i].from == ce.gm.from && gmro.moves[i].to == ce.gm.to) {
+                        index = i;
+                        break;
+                    }
+                }
+                pvmoveFound = ce.pvNode && ce.birth == Search.birthTime;
+                GameMove atPos0 = gmro.moves[0];
+                MyGameState atPos0S = gmro.states[0];
+                gmro.moves[0] = gmro.moves[index];
+                gmro.states[0] = gmro.states[index];
+                gmro.moves[index] = atPos0;
+                gmro.states[index] = atPos0S;
+
+
             }
         }
         //Search for Killer Moves and then for Captures
@@ -220,31 +218,37 @@ public class AlphaBeta extends ArtificalPlayer {
             if (ce != null && ce.hash == g.hash) {
                 //Cache-hit
                 if (ce.depth >= depth) {
-                    ce.birth = Search.birthTime;
-                    pv.stack.add(ce.gm);
-                    pv.hashStack.add(ce.hash);
-                    pv.score = ce.score;
-                    return pv;
-                } else {
-                    //Move ordering
-                    //Swap move and state from pos 0
-                    moveOrderingIndex = 1;
-                    int index = -1;
-                    for (int i = 0; i < gmro.instances; i++) {
-                        if (gmro.moves[i].from == ce.gm.from && gmro.moves[i].to == ce.gm.to) {
-                            index = i;
-                            break;
+                    if (!ce.betaNode) {
+                        ce.birth = Search.birthTime;
+                        pv.stack.add(ce.gm);
+                        pv.hashStack.add(ce.hash);
+                        pv.score = ce.score;
+                        return pv;
+                    } else {
+                        if (ce.score > alpha) {
+                            alpha = ce.score;
                         }
                     }
-                    pvmoveFound = ce.pvNode && ce.birth == Search.birthTime;
-                    GameMove atPos0 = gmro.moves[0];
-                    MyGameState atPos0S = gmro.states[0];
-                    gmro.moves[0] = gmro.moves[index];
-                    gmro.states[0] = gmro.states[index];
-                    gmro.moves[index] = atPos0;
-                    gmro.states[index] = atPos0S;
-
                 }
+                //Move ordering
+                //Swap move and state from pos 0
+                moveOrderingIndex = 1;
+                int index = -1;
+                for (int i = 0; i < gmro.instances; i++) {
+                    if (gmro.moves[i].from == ce.gm.from && gmro.moves[i].to == ce.gm.to) {
+                        index = i;
+                        break;
+                    }
+                }
+                pvmoveFound = ce.pvNode && ce.birth == Search.birthTime;
+                GameMove atPos0 = gmro.moves[0];
+                MyGameState atPos0S = gmro.states[0];
+                gmro.moves[0] = gmro.moves[index];
+                gmro.states[0] = gmro.states[index];
+                gmro.moves[index] = atPos0;
+                gmro.states[index] = atPos0S;
+
+
             }
         }
         //Move ordering pt.2
