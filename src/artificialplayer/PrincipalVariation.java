@@ -9,6 +9,7 @@ public class PrincipalVariation {
     public ArrayList<Long> hashStack;
     public double score;
     public int depthleft;
+    public boolean isBetaCutOff;
 
     public PrincipalVariation(int depthleft) {
         this.depthleft = depthleft;

@@ -43,6 +43,8 @@ public class AlphaBeta extends ArtificalPlayer {
 
     //Rot ist 1, Blaue ist -1
     public static PrincipalVariation alphaBeta(MyGameState g, int depth, int maximizingPlayer, double alpha, double beta) {
+        double oAlpha = alpha;
+        double oBeta = beta;
         PrincipalVariation currPv = new PrincipalVariation(depth);
         if (currentSearch.stop) {
             return currPv;
@@ -77,11 +79,17 @@ public class AlphaBeta extends ArtificalPlayer {
             if (ce != null && ce.hash == g.hash) {
                 //Cache-hit
                 if (ce.depth >= depth) {
-                    ce.birth = Search.birthTime;
-                    currPv.stack.add(ce.gm);
-                    currPv.hashStack.add(ce.hash);
-                    currPv.score = ce.score;
-                    return currPv;
+                    if (!ce.betaNode) {
+                        ce.birth = Search.birthTime;
+                        currPv.stack.add(ce.gm);
+                        currPv.hashStack.add(ce.hash);
+                        currPv.score = ce.score;
+                        return currPv;
+                    } else {
+                        if (ce.score > alpha) {
+                            alpha = ce.score;
+                        }
+                    }
                 } else {
                     //Move ordering
                     //Swap move and state from pos 0
@@ -175,13 +183,15 @@ public class AlphaBeta extends ArtificalPlayer {
         }
         //Make entry
         if (depth >= 1) {
+            boolean betaNode = bestPv.score > beta;
+            bestPv.isBetaCutOff = betaNode;
             int cacheIndex = (int) (g.hash & Search.cacheMask);
             if (Search.cache[cacheIndex] == null) {
-                Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, Search.birthTime, (byte) depth, bestPv.stack.get(0), false);
+                Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, Search.birthTime, (byte) depth, bestPv.stack.get(0), false, betaNode);
             } else {
                 CacheEntry ce = Search.cache[cacheIndex];
                 if (!ce.pvNode && ce.depth - (Search.birthTime - ce.birth) <= depth) {
-                    Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, Search.birthTime, (byte) depth, bestPv.stack.get(0), false);
+                    Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, Search.birthTime, (byte) depth, bestPv.stack.get(0), false, betaNode);
                 }
             }
         }
