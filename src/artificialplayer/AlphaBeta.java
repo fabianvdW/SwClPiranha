@@ -10,6 +10,7 @@ import testing.Fix;
 public class AlphaBeta extends ArtificalPlayer {
     public static int nodesExamined;
     public static int depth0Nodes;
+
     //public static double[] gaDna = {0.9025510163556673, 2.657765703271754, -0.6639782702608146, 4.614780818192207, 1.2196253480425627, 5.049480353040995, 0.38931830719247384, -2.081605428423991, -2.3353965528221905, -5.049202306669282, -2.727337976086494};
     //public static double[] gaDna = {0.11574546378222712, -0.07257960137971395, -0.02589816978425911, 0.7361787925306954, 0.20392160516771846, 7.205857172121344, -1.8707970159460117, -0.1599954301371371, -0.1253664821091645, -9.571692778767243, -0.046159350880481065};
     //public static double[] gaDna = {0.8852835659011121, -0.19056148413398566, -0.2751304122215384, 0.8801229550653944, -0.05722176773584106, 0.05000721632742493, 0.8250244175932502, -0.4031217265653704, -0.3272060761468655, 0.9162996886969947, 0.3070632221889533, 0.2689495522580865, -0.4817318710600673, 0.5532767967852428, 0.9026973039998654, -2.102267087470157, -0.8720734113523638, -0.7064984701028318, -1.0885779449064283, -1.1311317901443596, -0.8548301880079731};
@@ -44,6 +45,7 @@ public class AlphaBeta extends ArtificalPlayer {
 
     //Rot ist 1, Blaue ist -1
     public static PrincipalVariation alphaBeta(MyGameState g, int depth, int maximizingPlayer, double alpha, double beta) {
+
         PrincipalVariation currPv = new PrincipalVariation(depth);
         if (currentSearch.stop) {
             return currPv;
@@ -81,6 +83,7 @@ public class AlphaBeta extends ArtificalPlayer {
 
                 if (ce.depth >= depth && !(g.pliesPlayed + depth >= 60 && g.pliesPlayed - deltaBirth + ce.depth < 60)) {
                     if (!ce.betaNode && !ce.alphaNode) {
+
                         ce.birth = Search.birthTime;
                         currPv.stack.add(ce.gm);
                         currPv.hashStack.add(ce.hash);
@@ -191,10 +194,11 @@ public class AlphaBeta extends ArtificalPlayer {
         }
         //Make entry
         if (depth >= 1) {
-            boolean betaNode = bestPv.score > beta;
+            boolean betaNode = bestPv.score >= beta;
             boolean alphaNode = bestPv.score < alpha;
 
             bestPv.isBetaCutOff = betaNode;
+
             int cacheIndex = (int) (g.hash & Search.cacheMask);
             if (Search.cache[cacheIndex] == null) {
                 Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, Search.birthTime, (byte) depth, bestPv.stack.get(0), false, betaNode, alphaNode);

@@ -11,19 +11,22 @@ import helpers.FEN;
 
 public class Fix {
     public static String[] fens = {
-            "4609 4648348134143950848 1073758208 422349904019456 256 9007199254740992 b 51 25",
-            "4609 4647785459068436480 1073741824 288652726055731200 256 9007199254740992 b 53 26"
+            "2056 144150441167421440 8705 18023332108566528 0 72075186223972352 r 48 24",
+            "8 180179238186385408 10241 18023332108566528 0 72075186223972352 r 50 25",
     };
     public static int[] depths = {
-            6, 7};
+            9, 7};
 
     public static void main(String[] args) {
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("SwClPiranha/src/game/data.txt");
-        /*MyGameState g = FEN.readFEN("4609 4647785459068436480 1073741824 288652726055731200 256 9007199254740992 b 53 26");
-        PrincipalVariation p = AlphaBeta.alphaBetaRoot(g, 7, -1, -100000, 100000);
+/*
+        MyGameState g = FEN.readFEN("8 180179238186385408 10241 18023332108566528 0 72075186223972352 r 50 25");
+        g = FEN.readFEN("8 180284791302651904 10241 18023332108566528 0 72075186223972352 b 51 25");
+        PrincipalVariation p = AlphaBeta.alphaBetaRoot(g, 6, -1, -100000, 100000);
         System.out.println(p.score);
         printPV(p);
-        System.exit(-1);*/
+        System.exit(-1);
+*/
         for (int i = 0; i < fens.length; i++) {
             MyGameState mg = FEN.readFEN(fens[i]);
             System.out.println(mg);
