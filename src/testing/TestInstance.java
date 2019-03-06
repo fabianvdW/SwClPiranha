@@ -101,10 +101,10 @@ public class TestInstance {
         p2WinsAreOfRed = Math.round(p2WinsAreOfRed * 100) / 100.0;
         System.out.println(p1Name + "\t " + p1Wins + "\t " + draws + " \t" + p2Wins + " \t" + p1Crashes + "\t " + Math.round((timeUsedP1 / (movesP1 + 0.0)) * 100.0) / 100.0 + "\t" + eloGainP1 + "\u00B1 " + errorMargin);
         System.out.println("WinPcOnRed");
-        System.out.println(""+p1WinsAreOfRed);
+        System.out.println("" + p1WinsAreOfRed);
         System.out.println(p2Name + "\t " + p2Wins + "\t " + draws + " \t" + p1Wins + " \t" + p2Crashes + "\t " + Math.round((timeUsedP2 / (movesP2 + 0.0) * 100.0)) / 100.0 + "\t" + (-1.0 * eloGainP1) + "\u00B1 " + errorMargin);
         System.out.println("WinPcOnRed");
-        System.out.println(""+p2WinsAreOfRed);
+        System.out.println("" + p2WinsAreOfRed);
     }
 
     public static GameMove parseGameMove(BufferedReader input) {
@@ -213,6 +213,7 @@ class TestGames extends Thread {
 
     public void run() {
         try {
+            MyGameState startState = null;
             A:
             for (int i = 0; i < games; i++) {
                 if (this.name.equalsIgnoreCase("0") && i % 5 == 0) {
@@ -231,19 +232,24 @@ class TestGames extends Thread {
                 //Wait for processes to be ready!
                 waitReady(p1Input, p2Input);
                 MyGameState mg;
-                int count = 0;
-                do {
-                    mg = new MyGameState();
-                    count++;
-                } while (count < 50 && TestInstance.krakenPositionsPlayed.contains(mg.kraken));
-                TestInstance.krakenPositionsPlayed.add(mg.kraken);
+                if (i % 2 == 0) {
+                    int count = 0;
+                    do {
+                        mg = new MyGameState();
+                        count++;
+                    } while (count < 50 && TestInstance.krakenPositionsPlayed.contains(mg.kraken));
+                    TestInstance.krakenPositionsPlayed.add(mg.kraken);
+                    startState = mg.clone();
+                } else {
+                    mg = startState;
+                }
+
                 p1Writer.write("newgame " + mg.kraken.l0 + " " + mg.kraken.l1 + "\n");
                 p1Writer.flush();
                 p2Writer.write("newgame " + mg.kraken.l0 + " " + mg.kraken.l1 + "\n");
                 p2Writer.flush();
                 //Thread.sleep(500);
-                boolean player1IsRed = TestInstance.p1StartedLastTime;
-                TestInstance.p1StartedLastTime = !TestInstance.p1StartedLastTime;
+                boolean player1IsRed = i % 2 == 0;
                 mg.analyze();
                 while (mg.gs == GameStatus.INGAME) {
                     //Request next move
