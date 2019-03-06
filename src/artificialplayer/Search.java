@@ -24,7 +24,7 @@ public class Search extends Thread {
             //AlphaBeta.nodesExamined = 0;
             //AlphaBeta.depth0Nodes = 0;
             //System.out.println("Depth: " + depth + " searched");
-            PrincipalVariation pv = AlphaBeta.alphaBetaRoot(this.mg, depth, mg.move == GameColor.RED ? 1 : -1, -1000, 1000);
+            PrincipalVariation pv = AlphaBeta.alphaBetaRoot(this.mg, depth, mg.move == GameColor.RED ? 1 : -1, -100000, 100000);
             if (stop) {
                 break;
             }

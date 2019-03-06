@@ -54,10 +54,10 @@ public class AlphaBeta extends ArtificalPlayer {
                 currPv.score = 0;
                 return currPv;
             } else if (g.gs == GameStatus.RED_WIN) {
-                currPv.score = maximizingPlayer * 30000;
+                currPv.score = maximizingPlayer * (30000 - g.pliesPlayed);
                 return currPv;
             } else {
-                currPv.score = maximizingPlayer * -30000;
+                currPv.score = maximizingPlayer * (-30000 + g.pliesPlayed);
                 return currPv;
             }
         }
@@ -179,7 +179,7 @@ public class AlphaBeta extends ArtificalPlayer {
             if (bestPv.score > alpha) {
                 alpha = bestPv.score;
             }
-            if (alpha > beta) {
+            if (alpha > beta || alpha >= 29000) {
                 break;
             }
             currPv.stack.remove(currPv.stack.size() - 1);
@@ -335,7 +335,7 @@ public class AlphaBeta extends ArtificalPlayer {
             if (bestPv.score > alpha) {
                 alpha = bestPv.score;
             }
-            if (alpha > beta) {
+            if (alpha > beta || alpha > 29900) {
                 break;
             }
             pv.stack.remove(pv.stack.size() - 1);
