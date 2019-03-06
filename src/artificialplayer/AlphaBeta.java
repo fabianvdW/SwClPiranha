@@ -5,6 +5,7 @@ import datastructures.BitBoard;
 import evaltuning.Genome;
 import game.*;
 import helpers.FEN;
+import testing.Fix;
 
 public class AlphaBeta extends ArtificalPlayer {
     public static int nodesExamined;
@@ -76,7 +77,9 @@ public class AlphaBeta extends ArtificalPlayer {
             CacheEntry ce = Search.cache[(int) (g.hash & Search.cacheMask)];
             if (ce != null && ce.hash == g.hash) {
                 //Cache-hit
-                if (ce.depth >= depth) {
+                int deltaBirth = Search.birthTime - ce.birth;
+
+                if (ce.depth >= depth && !(g.pliesPlayed + depth >= 60 && g.pliesPlayed - deltaBirth + ce.depth < 60)) {
                     if (!ce.betaNode && !ce.alphaNode) {
                         ce.birth = Search.birthTime;
                         currPv.stack.add(ce.gm);
@@ -170,6 +173,7 @@ public class AlphaBeta extends ArtificalPlayer {
                 }
             }
             double rat = followingPv.score * -1;
+
             if (rat > bestPv.score) {
                 bestPv = currPv.clone();
                 bestPv.score = rat;
@@ -179,7 +183,7 @@ public class AlphaBeta extends ArtificalPlayer {
             if (bestPv.score > alpha) {
                 alpha = bestPv.score;
             }
-            if (alpha > beta || alpha >= 29000) {
+            if (alpha >= beta) {
                 break;
             }
             currPv.stack.remove(currPv.stack.size() - 1);
@@ -225,7 +229,8 @@ public class AlphaBeta extends ArtificalPlayer {
             CacheEntry ce = Search.cache[(int) (g.hash & Search.cacheMask)];
             if (ce != null && ce.hash == g.hash) {
                 //Cache-hit
-                if (ce.depth >= depth) {
+                int deltaBirth = Search.birthTime - ce.birth;
+                if (ce.depth >= depth && !(g.pliesPlayed + depth >= 60 && g.pliesPlayed - deltaBirth + ce.depth < 60)) {
                     if (!ce.betaNode && !ce.alphaNode) {
                         ce.birth = Search.birthTime;
                         pv.stack.add(ce.gm);
@@ -314,18 +319,19 @@ public class AlphaBeta extends ArtificalPlayer {
             PrincipalVariation currentPv;
             if (depth <= 2 || !pvmoveFound || i == 0) {
                 if (i != 0) {
-                    currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -bestPv.score, beta);
+                    currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -beta, -bestPv.score);
                 } else {
-                    currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, alpha, beta);
+                    currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -beta, -alpha);
                 }
             } else {
                 currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -bestPv.score - 1, -bestPv.score);
                 double rat = currentPv.score * -1;
                 if (rat >= bestPv.score) {
-                    currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, alpha, beta);
+                    currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -beta, -alpha);
                 }
             }
             double rat = currentPv.score * -1;
+
             if (rat > bestPv.score) {
                 bestPv = pv.clone();
                 bestPv.score = rat;
@@ -335,7 +341,7 @@ public class AlphaBeta extends ArtificalPlayer {
             if (bestPv.score > alpha) {
                 alpha = bestPv.score;
             }
-            if (alpha > beta || alpha > 29900) {
+            if (alpha >= beta) {
                 break;
             }
             pv.stack.remove(pv.stack.size() - 1);
