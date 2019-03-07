@@ -60,31 +60,31 @@ public class BoardRating {
         double phase = (pliesPlayed + 1) / 61.0;
 
 
-        //double fischEval = brc.anzahlFische.getOutput(anzahlFische, phase);
-        //fischEval += brc.biggestSchwarmDurch16.getOutput((biggestSchwarm.size + 0.0) / 16.0, phase);
+        double fischEval = brc.anzahlFische.getOutput(anzahlFische, phase);
+        fischEval += brc.biggestSchwarmDurch16.getOutput((biggestSchwarm.size + 0.0) / 16.0, phase);
 
-        double fischEval = 0.2 * anzahlFische + Math.pow(2.0 * (biggestSchwarm.size + 0.0) / 16.0, 2);
+        //double fischEval = 0.2 * anzahlFische + Math.pow(2.0 * (biggestSchwarm.size + 0.0) / 16.0, 2);
 
-        //fischEval += brc.randFische.getOutput(fische.and(BitBoardConstants.RAND).popCount(), phase);
+        fischEval += brc.randFische.getOutput(fische.and(BitBoardConstants.RAND).popCount(), phase);
 
-        fischEval += -0.15 * fische.and(BitBoardConstants.RAND).popCount();
+        //fischEval += -0.15 * fische.and(BitBoardConstants.RAND).popCount();
 
-        //fischEval += brc.centerFische.getOutput(fische.and(BitBoardConstants.CENTER).popCount(), phase);
+        fischEval += brc.centerFische.getOutput(fische.and(BitBoardConstants.CENTER).popCount(), phase);
 
-        fischEval += 0.3 * fische.and(BitBoardConstants.CENTER).popCount();
+        //fischEval += 0.3 * fische.and(BitBoardConstants.CENTER).popCount();
 
         double ratio = (biggestSchwarm.size + 0.0) / anzahlFische;
 
-        //double biggestSchwarmEval = brc.schwarmRatio.getOutput(ratio, phase);
-        double biggestSchwarmEval = phase * 2.0 * Math.pow(5 * ratio - 2.5, 2) * Math.signum(5 * ratio - 2.5);
+        double biggestSchwarmEval = brc.schwarmRatio.getOutput(ratio, phase);
+        //double biggestSchwarmEval = phase * 2.0 * Math.pow(5 * ratio - 2.5, 2) * Math.signum(5 * ratio - 2.5);
 
         double abstandZuMitteEval = 0.0;
         //Schwarm abhängig von Distanz zur Mitte bestrafen
         for (int i = 0; i < schwaerme.size(); i++) {
             double abstand = Math.sqrt(Math.pow(schwaerme.get(i).averageX - 4.5, 2) + Math.pow(schwaerme.get(i).averageY - 4.5, 2));
 
-            //abstandZuMitteEval += brc.abstandZuMitte.getOutput(abstand, phase) * schwaerme.get(i).size / (anzahlFische + 0.0);
-            abstandZuMitteEval += -1.0 / 4.0 * Math.pow((abstand - 3.1), 2) * Math.signum(abstand - 3.1) * schwaerme.get(i).size / (anzahlFische + 0.0);
+            abstandZuMitteEval += brc.abstandZuMitte.getOutput(abstand, phase) * schwaerme.get(i).size / (anzahlFische + 0.0);
+            //abstandZuMitteEval += -1.0 / 4.0 * Math.pow((abstand - 3.1), 2) * Math.signum(abstand - 3.1) * schwaerme.get(i).size / (anzahlFische + 0.0);
         }
         if (phase > 0.5 && biggestSchwarm.size > 4) {
             biggestSchwarm.averageX = averageXBS / biggestSchwaermeFound;
@@ -97,9 +97,9 @@ public class BoardRating {
             }
             double abstand = Math.max(Math.abs(biggestSchwarm.averageX - schwaerme.get(i).averageX), Math.abs(biggestSchwarm.averageY - schwaerme.get(i).averageY));
 
-            //abstandZuBiggestSchwarmEval += brc.schwarmAbstand.getOutput(abstand, phase) * (schwaerme.get(i).size + 0.0) / (anzahlFische + 0.0);
-            double normedAbstand = abstand - 5.5;
-            abstandZuBiggestSchwarmEval += (1 - phase) * -1.3 * Math.pow(normedAbstand, 2) * Math.signum(normedAbstand) * (schwaerme.get(i).size + 0.0) / (anzahlFische + 0.0);
+            abstandZuBiggestSchwarmEval += brc.schwarmAbstand.getOutput(abstand, phase) * (schwaerme.get(i).size + 0.0) / (anzahlFische + 0.0);
+            //double normedAbstand = abstand - 5.5;
+            //abstandZuBiggestSchwarmEval += (1 - phase) * -1.3 * Math.pow(normedAbstand, 2) * Math.signum(normedAbstand) * (schwaerme.get(i).size + 0.0) / (anzahlFische + 0.0);
         }
 
 

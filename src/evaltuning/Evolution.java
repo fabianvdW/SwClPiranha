@@ -4,6 +4,8 @@ import artificialplayer.AlphaBeta;
 import artificialplayer.PrincipalVariation;
 import artificialplayer.Search;
 import game.*;
+import helpers.logging.Log;
+import helpers.logging.LogLevel;
 import sun.reflect.annotation.ExceptionProxy;
 
 import java.io.*;
@@ -24,8 +26,10 @@ public class Evolution implements Serializable {
     public ArrayList<Match> matchQueue = new ArrayList<>(32);
     public ArrayList<Match> matchResultsQueue = new ArrayList<>(32);
 
+    public static Log l;
+
     public Evolution() {
-        this.mutateStaerke = 1;
+        this.mutateStaerke = 0.8;
         this.population = new Genome[64];
         this.best8 = new Genome[8];
         for (int i = 0; i < this.population.length; i++) {
@@ -138,18 +142,26 @@ public class Evolution implements Serializable {
                 consecutiveWins = 1;
             }
         }
-
-        System.out.println("Super final has been played! Winner:");
-        System.out.println(this.sufiWinner.toString());
-        System.out.println("Consecutive Wins: " + this.consecutiveWins);
-        if (sufi != null) {
-            System.out.println("Last Win: " + sufi.g1Score + " -" + sufi.g2Score);
+        if (l == null) {
+            System.out.println("Super final has been played! Winner:");
+            System.out.println(this.sufiWinner.toString());
+            System.out.println("Consecutive Wins: " + this.consecutiveWins);
+            if (sufi != null) {
+                System.out.println("Last Win: " + sufi.g1Score + " - " + sufi.g2Score);
+            }
+        } else {
+            l.log(LogLevel.INFO, "Super final has been played! Winner:\n");
+            l.log(LogLevel.INFO, this.sufiWinner.toString() + "\n");
+            l.log(LogLevel.INFO, "Consecutive Wins: " + this.consecutiveWins);
+            if (sufi != null) {
+                l.log(LogLevel.INFO, "Last Win: " + sufi.g1Score + " - " + sufi.g2Score);
+            }
         }
 
         this.population[63] = this.sufiWinner.mutate(this.mutateStaerke, 1);
         this.generation += 1;
-        this.mutateStaerke -= 0.01;
-        if (this.mutateStaerke < 0.1) {
+        this.mutateStaerke -= 0.003;
+        if (this.mutateStaerke < 0.3) {
             this.mutateStaerke = 0.1;
         }
     }
@@ -229,17 +241,25 @@ public class Evolution implements Serializable {
 
     public static void main(String[] args) {
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("SwClPiranha/src/game/data.txt");
+        Evolution.l = new Log("evolution.log");
         Evolution ev = new Evolution();
-        //ev.savePopulation();
-        ev = Evolution.loadPopulation();
+        ev.savePopulation();
+        //ev = Evolution.loadPopulation();
         for (int i = 0; i < 1000; i++) {
             long now = System.currentTimeMillis();
             ev.doGeneration();
             long curr = System.currentTimeMillis();
-            System.out.println("Generation " + (ev.generation) + " done in " + (curr - now) + " ms! Best 8: ");
-            System.out.println(ev.printBest8());
+            if (l == null) {
+                System.out.println("Generation " + (ev.generation) + " done in " + (curr - now) + " ms! Best 8: ");
+                System.out.println(ev.printBest8());
+            } else {
+                l.log(LogLevel.INFO, "Generation " + (ev.generation) + " done in " + (curr - now) + " ms! Best 8: \n");
+                l.log(LogLevel.INFO, ev.printBest8() + "\n");
+            }
             ev.savePopulation();
+            l.flush();
         }
+        l.onClose();
     }
 
     public static boolean playGame(Match m) {
@@ -248,57 +268,60 @@ public class Evolution implements Serializable {
         Genome g2 = m.g2;
         double p1Score = 0;
         double p2Score = 0;
-        boolean g1Starts = Math.random() < 0.5;
         while (p1Score == p2Score || p1Score < firstTo && p2Score < firstTo) {
             //Play a game
-            MyGameState mg = new MyGameState();
-            mg.analyze();
-            A:
-            while (mg.gs == GameStatus.INGAME) {
-                GameMoveResultObject gmro = mg.gmro;
-                Search s = new Search(mg, 3);
-                if (mg.move == GameColor.RED) {
-                    if (g1Starts) {
-                        AlphaBeta.brc = g1.brc;
+            MyGameState originalState = new MyGameState();
+            for (int i = 0; i < 2; i++) {
+                boolean g1Starts = (i % 2 == 0);
+                MyGameState mg = originalState.clone();
+                mg.hash = MyGameState.calculateHash(mg);
+                mg.analyze();
+                A:
+                while (mg.gs == GameStatus.INGAME) {
+                    GameMoveResultObject gmro = mg.gmro;
+                    Search s = new Search(mg, 3);
+                    if (mg.move == GameColor.RED) {
+                        if (g1Starts) {
+                            AlphaBeta.brc = g1.brc;
+                        } else {
+                            AlphaBeta.brc = g2.brc;
+                        }
                     } else {
-                        AlphaBeta.brc = g2.brc;
+                        if (g1Starts) {
+                            AlphaBeta.brc = g2.brc;
+                        } else {
+                            AlphaBeta.brc = g1.brc;
+                        }
                     }
-                } else {
+                    s.run();
+                    PrincipalVariation pv = s.currentBestPv;
+                    GameMove mv = pv.stack.get(0);
+                    for (int j = 0; j < gmro.instances; j++) {
+                        if (gmro.moves[j].to == mv.to && gmro.moves[j].from == mv.from) {
+                            mg = gmro.states[j];
+                            mg.analyze();
+                            continue A;
+                        }
+                    }
+                    System.exit(-1);
+                }
+                if (mg.gs == GameStatus.DRAW) {
+                    p1Score += 0.5;
+                    p2Score += 0.5;
+                } else if (mg.gs == GameStatus.RED_WIN) {
                     if (g1Starts) {
-                        AlphaBeta.brc = g2.brc;
+                        p1Score += 1;
                     } else {
-                        AlphaBeta.brc = g1.brc;
+                        p2Score += 1;
+                    }
+                } else if (mg.gs == GameStatus.BLUE_WIN) {
+                    if (g1Starts) {
+                        p2Score += 1;
+                    } else {
+                        p1Score += 1;
                     }
                 }
-                s.run();
-                PrincipalVariation pv = s.currentBestPv;
-                GameMove mv = pv.stack.get(0);
-                for (int i = 0; i < gmro.instances; i++) {
-                    if (gmro.moves[i].to == mv.to && gmro.moves[i].from == mv.from) {
-                        mg = gmro.states[i];
-                        mg.analyze();
-                        continue A;
-                    }
-                }
-                System.exit(-1);
             }
-            if (mg.gs == GameStatus.DRAW) {
-                p1Score += 0.5;
-                p2Score += 0.5;
-            } else if (mg.gs == GameStatus.RED_WIN) {
-                if (g1Starts) {
-                    p1Score += 1;
-                } else {
-                    p2Score += 1;
-                }
-            } else if (mg.gs == GameStatus.BLUE_WIN) {
-                if (g1Starts) {
-                    p2Score += 1;
-                } else {
-                    p1Score += 1;
-                }
-            }
-            g1Starts = !g1Starts;
         }
         m.g1Score = p1Score;
         m.g2Score = p2Score;
