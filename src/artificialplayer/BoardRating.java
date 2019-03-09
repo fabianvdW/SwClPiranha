@@ -142,11 +142,12 @@ public class BoardRating {
     }
 
     public static Schwarm toSchwarm(BitBoard b) {
-        Schwarm s = new Schwarm(0, new ArrayList<>(16), b);
+        Schwarm s = new Schwarm(0);
         while (!b.equalsZero()) {
             s.size++;
             int i = b.numberOfTrailingZeros();
-            s.positions.add(new Pos(i));
+            s.averageX += (i % 10);
+            s.averageY += (i / 10);
             b.unsetBitEquals(i);
         }
         return s;
@@ -155,24 +156,16 @@ public class BoardRating {
 
 class Schwarm {
     int size;
-    ArrayList<Pos> positions;
     double averageX;
     double averageY;
-    BitBoard gebiet;
 
-    public Schwarm(int size, ArrayList<Pos> positions, BitBoard gebiet) {
+    public Schwarm(int size) {
         this.size = size;
-        this.positions = positions;
-        this.gebiet = gebiet.clone();
     }
 
     public void calculateAverage() {
-        averageX = 0;
-        averageY = 0;
-        for (Pos pos : this.positions) {
-            averageX += pos.x;
-            averageY += pos.y;
-        }
+        //averageX = 0;
+        //averageY = 0;
         averageX /= this.size + 0.0;
         averageY /= this.size + 0.0;
     }

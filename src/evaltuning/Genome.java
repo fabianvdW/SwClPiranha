@@ -9,7 +9,16 @@ import java.util.Random;
 public class Genome implements Serializable {
     static final long serialVersionUID = 42L;
 
-    public static double[] standardDna = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    public static double[] standardDna = {
+            0.3, 0.4, 0,
+            0.5, 1.5, 0,
+            0, 0, -0.15,
+            0, 0, 0.2,
+            0, 2.8, 0,
+            -0.1, 0, -0.5,
+            -0.4, -2.3, 0
+    };
+
     public static Random r = new Random();
     public double[] dna;
     public BoardRatingConstants brc;

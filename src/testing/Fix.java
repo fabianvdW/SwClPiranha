@@ -27,6 +27,12 @@ public class Fix {
         printPV(p);
         System.exit(-1);
 */
+        MyGameState g= new MyGameState();
+        Search se = new Search(g, 6);
+        se.run();
+        System.out.println(AlphaBeta.nodesExamined);
+        System.out.println(AlphaBeta.depth0Nodes);
+        System.exit(-1);
         for (int i = 0; i < fens.length; i++) {
             MyGameState mg = FEN.readFEN(fens[i]);
             System.out.println(mg);

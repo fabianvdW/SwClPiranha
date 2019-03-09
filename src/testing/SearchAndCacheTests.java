@@ -21,7 +21,7 @@ public class SearchAndCacheTests {
                 mg = gmro.states[0];
                 mg.analyze();
             } else {
-                Search s = new Search(mg, 6);
+                Search s = new Search(mg, 5);
                 s.run();
                 PrincipalVariation pv = s.currentBestPv;
                 GameMove mv = pv.stack.get(0);
