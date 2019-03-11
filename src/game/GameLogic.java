@@ -4,7 +4,6 @@ import datastructures.BitBoard;
 
 public class GameLogic {
     static GameDirection[] directions = GameDirection.values();
-    static int someValue;
 
     //Diese Methode berechnet nicht den größten Schwarm, sondern nur den Schwarm ausgehend von dem Fisch am Weitesten rechts unten.
     public static int getSchwarm(MyGameState gs, GameColor gc) {
@@ -35,7 +34,7 @@ public class GameLogic {
     }
 
     //Diese Methode berechnet nicht den größten Schwarm, sondern nur den Schwarm ausgehend von dem Fisch am Weitesten rechts unten.
-    public static BitBoard getSchwarmBoard(BitBoard meineFische, GameColor gc) {
+    public static BitBoard getSchwarmBoard(BitBoard meineFische) {
         meineFische = meineFische.clone();
         if (meineFische.equalsZero()) {
             return new BitBoard(0, 0);
@@ -68,7 +67,7 @@ public class GameLogic {
             gs.gmro.states[gs.gmro.instances] = ng;
             gs.gmro.instances++;
             gs.gmro.attackBoard.orEquals(BitBoardConstants.EINHEITS_UNIT_LEFT_SHIFT[gm.to]);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             System.out.println(gs);
         }
@@ -123,6 +122,13 @@ public class GameLogic {
                 }
             }
         }
+    }
+
+    public static MyGameState makeNullMove(MyGameState gs) {
+        MyGameState newState = new MyGameState(gs.roteFische.clone(), gs.blaueFische.clone(), gs.kraken, (gs.move == GameColor.RED ? GameColor.BLUE :
+                GameColor.RED), gs.pliesPlayed + 1, gs.roundsPlayed + (gs.move == GameColor.BLUE ? 1 : 0));
+        newState.hash = gs.hash ^ ZobristHashing.SIDE_TO_MOVE_IS_BLUE;
+        return newState;
     }
 
     public static MyGameState makeMove(MyGameState gs, GameMove gm, GameColor gc) {

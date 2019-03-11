@@ -14,12 +14,12 @@ public class BoardRating {
         //GameMoveResultObject roteZuege = g.move == GameColor.RED ? currMove : enemyMove;
         //GameMoveResultObject blaueZuege = g.move == GameColor.BLUE ? currMove : enemyMove;
         BitBoard roteFische = g.roteFische;
-        ArrayList<Schwarm> roteSchwaerme = berechneSchwaerme(g, GameColor.RED);
+        ArrayList<Schwarm> roteSchwaerme = berechneSchwaerme(g.roteFische);
         //BitBoard rotKontrolliertesGebiet = berechneKontrolliertesGebiet(roteFische, g.kraken);
         BitBoard blaueFische = g.blaueFische;
-        ArrayList<Schwarm> blaueSchwaerme = berechneSchwaerme(g, GameColor.BLUE);
+        ArrayList<Schwarm> blaueSchwaerme = berechneSchwaerme(g.blaueFische);
         //BitBoard blauKontrolliertesGebiet = berechneKontrolliertesGebiet(blaueFische, g.kraken);
-        return redEval(g.pliesPlayed, roteFische, roteSchwaerme, GameColor.RED, brc) - redEval(g.pliesPlayed, blaueFische, blaueSchwaerme, GameColor.BLUE, brc);
+        return redEval(g.pliesPlayed, roteFische, roteSchwaerme, GameColor.RED, brc, blaueFische.popCount()) - redEval(g.pliesPlayed, blaueFische, blaueSchwaerme, GameColor.BLUE, brc, roteFische.popCount());
     }
 
     public static BitBoard berechneKontrolliertesGebiet(BitBoard fische, BitBoard kraken) {
@@ -34,7 +34,7 @@ public class BoardRating {
         return res;
     }
 
-    public static double redEval(int pliesPlayed, BitBoard fische, ArrayList<Schwarm> schwaerme, GameColor gc, BoardRatingConstants brc) {
+    public static double redEval(int pliesPlayed, BitBoard fische, ArrayList<Schwarm> schwaerme, GameColor gc, BoardRatingConstants brc, int gegnerFische) {
         int anzahlFische = fische.popCount();
         for (Schwarm s : schwaerme) {
             s.calculateAverage();
@@ -61,6 +61,7 @@ public class BoardRating {
 
 
         double fischEval = brc.anzahlFische.getOutput(anzahlFische, phase);
+
         fischEval += brc.biggestSchwarmDurch16.getOutput((biggestSchwarm.size + 0.0) / 16.0, phase);
 
         //double fischEval = 0.2 * anzahlFische + Math.pow(2.0 * (biggestSchwarm.size + 0.0) / 16.0, 2);
@@ -76,6 +77,11 @@ public class BoardRating {
         double ratio = (biggestSchwarm.size + 0.0) / anzahlFische;
 
         double biggestSchwarmEval = brc.schwarmRatio.getOutput(ratio, phase);
+        //Make own feature
+        double biggestSchwarmBonusEval = 0;
+        /*if (ratio > 0.5 && biggestSchwarm.size > 3) {
+            biggestSchwarmBonusEval = brc.biggestSchwarmBonus.getOutput(biggestSchwarm.calculateSichereFische() / (anzahlFische + 0.0), phase);
+        }*/
         //double biggestSchwarmEval = phase * 2.0 * Math.pow(5 * ratio - 2.5, 2) * Math.signum(5 * ratio - 2.5);
 
         double abstandZuMitteEval = 0.0;
@@ -97,30 +103,32 @@ public class BoardRating {
             }
             double abstand = Math.max(Math.abs(biggestSchwarm.averageX - schwaerme.get(i).averageX), Math.abs(biggestSchwarm.averageY - schwaerme.get(i).averageY));
 
-            abstandZuBiggestSchwarmEval += brc.schwarmAbstand.getOutput(abstand, phase) * (schwaerme.get(i).size + 0.0) / (anzahlFische + 0.0);
+            //v3
+            //abstandZuBiggestSchwarmEval += brc.schwarmAbstand.getOutput(abstand, phase) * (schwaerme.get(i).size + 0.0) / (anzahlFische + 0.0);
+            //Neu
+            abstandZuBiggestSchwarmEval += brc.schwarmAbstand.getOutput(abstand, phase) * (schwaerme.get(i).size + 0.0) / (8.0);
             //double normedAbstand = abstand - 5.5;
             //abstandZuBiggestSchwarmEval += (1 - phase) * -1.3 * Math.pow(normedAbstand, 2) * Math.signum(normedAbstand) * (schwaerme.get(i).size + 0.0) / (anzahlFische + 0.0);
         }
 
 
-        double gegnerGebietEval = 0.0;
         if (GlobalFlags.VERBOSE) {
             System.out.println("Eval for " + gc);
             System.out.println("FischEval: " + fischEval);
             System.out.println("Biggest Schwarm: " + biggestSchwarmEval);
+            System.out.println("Biggest Schwarm Bonus: " + biggestSchwarmBonusEval);
             System.out.println("Abstand zu BS: " + abstandZuBiggestSchwarmEval);
             System.out.println("Abstand zu Mitte: " + abstandZuMitteEval);
-            System.out.println("Gegnergebiet: " + gegnerGebietEval);
-            System.out.println("Insg: " + (biggestSchwarmEval + abstandZuBiggestSchwarmEval + abstandZuMitteEval + gegnerGebietEval + fischEval));
+            System.out.println("Insg: " + (biggestSchwarmEval + abstandZuBiggestSchwarmEval + abstandZuMitteEval + biggestSchwarmBonusEval + fischEval));
         }
-        return biggestSchwarmEval + abstandZuBiggestSchwarmEval + abstandZuMitteEval + gegnerGebietEval + fischEval;
+        return biggestSchwarmEval + abstandZuBiggestSchwarmEval + abstandZuMitteEval + biggestSchwarmBonusEval + fischEval;
     }
 
     public static int getBiggestSchwarm(MyGameState g, GameColor gc) {
         BitBoard fischClone = gc == GameColor.RED ? g.roteFische.clone() : g.blaueFische.clone();
         int max = -1;
         while (!fischClone.equalsZero()) {
-            BitBoard b = GameLogic.getSchwarmBoard(fischClone, gc);
+            BitBoard b = GameLogic.getSchwarmBoard(fischClone);
             int count = b.popCount();
             if (count > max) {
                 max = count;
@@ -130,11 +138,11 @@ public class BoardRating {
         return max;
     }
 
-    public static ArrayList<Schwarm> berechneSchwaerme(MyGameState g, GameColor gc) {
-        BitBoard fischClone = gc == GameColor.RED ? g.roteFische.clone() : g.blaueFische.clone();
-        ArrayList<Schwarm> res = new ArrayList<>();
+    public static ArrayList<Schwarm> berechneSchwaerme(BitBoard fische) {
+        BitBoard fischClone = fische.clone();
+        ArrayList<Schwarm> res = new ArrayList<>(8);
         while (!fischClone.equalsZero()) {
-            BitBoard b = GameLogic.getSchwarmBoard(fischClone, gc);
+            BitBoard b = GameLogic.getSchwarmBoard(fischClone);
             fischClone.andEquals(b.not());
             res.add(toSchwarm(b));
         }
@@ -142,7 +150,7 @@ public class BoardRating {
     }
 
     public static Schwarm toSchwarm(BitBoard b) {
-        Schwarm s = new Schwarm(0);
+        Schwarm s = new Schwarm(0, b.clone());
         while (!b.equalsZero()) {
             s.size++;
             int i = b.numberOfTrailingZeros();
@@ -155,12 +163,14 @@ public class BoardRating {
 }
 
 class Schwarm {
+    BitBoard gebiet;
     int size;
     double averageX;
     double averageY;
 
-    public Schwarm(int size) {
+    public Schwarm(int size, BitBoard gebiet) {
         this.size = size;
+        this.gebiet = gebiet;
     }
 
     public void calculateAverage() {
@@ -169,6 +179,23 @@ class Schwarm {
         averageX /= this.size + 0.0;
         averageY /= this.size + 0.0;
     }
+
+
+    public double calculateSichereFische() {
+        double res = 0;
+        BitBoard fischIt = this.gebiet.clone();
+        while (!fischIt.equalsZero()) {
+            int fisch = fischIt.numberOfTrailingZeros();
+            BitBoard ohneFische = this.gebiet.and(BitBoardConstants.EINHEITS_UNIT_LEFT_SHIFT_NOT[fisch]);
+            int x = GameLogic.getSchwarmBoard(ohneFische).popCount();
+            if (x == this.size - 1) {
+                res += 1;
+            }
+            fischIt.unsetBitEquals(fisch);
+        }
+        return res;
+    }
+
 
 }
 

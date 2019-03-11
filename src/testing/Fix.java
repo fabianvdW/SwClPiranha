@@ -2,12 +2,17 @@ package testing;
 
 
 import artificialplayer.AlphaBeta;
+import artificialplayer.BoardRating;
 import artificialplayer.PrincipalVariation;
 import artificialplayer.Search;
+import datastructures.BitBoard;
 import game.BitBoardConstants;
 import game.GameMove;
 import game.MyGameState;
 import helpers.FEN;
+import helpers.GlobalFlags;
+import helpers.StringToGameStateConverter;
+import sc.plugin2019.Board;
 
 public class Fix {
     public static String[] fens = {
@@ -18,6 +23,7 @@ public class Fix {
             9, 7};
 
     public static void main(String[] args) {
+        GlobalFlags.VERBOSE = true;
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("SwClPiranha/src/game/data.txt");
 /*
         MyGameState g = FEN.readFEN("8 180179238186385408 10241 18023332108566528 0 72075186223972352 r 50 25");
@@ -27,11 +33,18 @@ public class Fix {
         printPV(p);
         System.exit(-1);
 */
-        MyGameState g= new MyGameState();
+        //MyGameState g = new MyGameState(new BitBoard(4096L, 140737488355328L));
+
+        MyGameState g = FEN.readFEN("527107 36046393500631040 2098176 -4591375839622323964 0 4644337115725824 r 40 20");
+        System.out.println(g);
+        System.out.println(BoardRating.rating(g, AlphaBeta.brc));
+        System.exit(0);
+        System.out.println(g);
         Search se = new Search(g, 6);
         se.run();
         System.out.println(AlphaBeta.nodesExamined);
         System.out.println(AlphaBeta.depth0Nodes);
+        System.out.println(se.currentBestPv.score);
         System.exit(-1);
         for (int i = 0; i < fens.length; i++) {
             MyGameState mg = FEN.readFEN(fens[i]);

@@ -105,7 +105,7 @@ public class MyGameState {
             int blauerGroessterSchwarm = 0;
             BitBoard rFischeClone = this.roteFische.clone();
             while (!rFischeClone.equalsZero()) {
-                BitBoard b = GameLogic.getSchwarmBoard(rFischeClone, GameColor.RED);
+                BitBoard b = GameLogic.getSchwarmBoard(rFischeClone);
                 int count = b.popCount();
                 if (count > roterGroessterSchwarm) {
                     roterGroessterSchwarm = count;
@@ -114,7 +114,7 @@ public class MyGameState {
             }
             BitBoard bFischeClone = this.blaueFische.clone();
             while (!bFischeClone.equalsZero()) {
-                BitBoard b = GameLogic.getSchwarmBoard(bFischeClone, GameColor.BLUE);
+                BitBoard b = GameLogic.getSchwarmBoard(bFischeClone);
                 int count = b.popCount();
                 if (count > blauerGroessterSchwarm) {
                     blauerGroessterSchwarm = count;
@@ -173,12 +173,6 @@ public class MyGameState {
             return g.roteFische == this.roteFische && g.blaueFische == this.blaueFische && g.kraken == this.kraken;
         }
         return false;
-    }
-
-    @Override
-    public int hashCode() {
-        BitBoard b = this.kraken.xOr(this.roteFische).xOr(this.blaueFische);
-        return Long.hashCode(b.l1) + Long.hashCode(b.l0);
     }
 
     @Override
