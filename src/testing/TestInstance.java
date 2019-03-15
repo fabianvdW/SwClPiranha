@@ -2,7 +2,10 @@ package testing;
 
 import artificialplayer.BoardRating;
 import datastructures.BitBoard;
+import evaltuning.TexelTuning;
 import game.*;
+import helpers.FEN;
+import helpers.GlobalFlags;
 import helpers.logging.Log;
 import helpers.logging.LogLevel;
 
@@ -38,6 +41,16 @@ public class TestInstance {
         int gamesPerProcessors = games / processors;
         System.out.println("Games per Processor: " + gamesPerProcessors);
         System.out.println("Time per Move (in millis): " + millisTime);
+
+        File file = new File(GlobalFlags.TEXEL_PATH);
+        FileWriter fr = null;
+        try {
+            fr = new FileWriter(file, true);
+            TexelTuning.br = new BufferedWriter(fr);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         for (int i = 0; i < processors; i++) {
             threads.add(new TestGames(i + "", jarFile, jarFile2, gamesPerProcessors, p1Name, p2Name));
         }
@@ -60,6 +73,8 @@ public class TestInstance {
         printErgebnisse(p1Name, p2Name, false);
         l.onClose();
         try {
+            TexelTuning.br.close();
+            fr.close();
             Thread.sleep(5000);
         } catch (Exception e) {
             e.printStackTrace();
@@ -110,7 +125,7 @@ public class TestInstance {
         TestInstance.ergebnisLog.flush();
     }
 
-    public static GameMove parseGameMove(BufferedReader input) {
+    public static GameMove parseGameMove(BufferedReader input, TestGames thread) {
         long curr = System.currentTimeMillis();
         DateFormat sdf = new SimpleDateFormat("dd-MM-yy HH:mm:ss.SSS");
         String timeStamp1 = sdf.format(new Date());
@@ -121,6 +136,10 @@ public class TestInstance {
                     String[] parsedMove = move.split(" ");
                     int from = Integer.parseInt(parsedMove[0]);
                     int to = Integer.parseInt(parsedMove[1]);
+                    if (parsedMove.length == 3) {
+                        boolean isMate = Boolean.parseBoolean(parsedMove[2]);
+                        thread.mateFound = isMate;
+                    }
                     return new GameMove(from, to, GameDirection.UP);
                 }
                 Thread.sleep(5);
@@ -155,6 +174,7 @@ class TestGames extends Thread {
     private int games;
     PlayerStatistics p1Stats;
     PlayerStatistics p2Stats;
+    boolean mateFound;
 
     public TestGames(String name, String p1, String p2, int games, String p1Name, String p2Name) {
         this.name = name;
@@ -165,6 +185,7 @@ class TestGames extends Thread {
         this.games = games;
         this.p1Stats = new PlayerStatistics();
         this.p2Stats = new PlayerStatistics();
+        mateFound = false;
         start();
     }
 
@@ -223,6 +244,8 @@ class TestGames extends Thread {
             MyGameState startState = null;
             A:
             for (int i = 0; i < games; i++) {
+                StringBuilder sb = new StringBuilder();
+                mateFound = false;
                 if (this.name.equalsIgnoreCase("0") && i % 5 == 0) {
                     System.out.println("" + i + "/" + games);
                 }
@@ -265,7 +288,7 @@ class TestGames extends Thread {
                         p1Writer.flush();
                         //Expect answer
                         long currentTime = System.currentTimeMillis();
-                        GameMove move = TestInstance.parseGameMove(p1Input);
+                        GameMove move = TestInstance.parseGameMove(p1Input, this);
                         long afterTime = System.currentTimeMillis();
                         if (move == null) {
                             System.out.println("Timeout " + p1Name + "in p" + this.name + "g" + i);
@@ -294,7 +317,7 @@ class TestGames extends Thread {
                         p2Writer.flush();
                         //Expect answer
                         long currentTime = System.currentTimeMillis();
-                        GameMove move = TestInstance.parseGameMove(p2Input);
+                        GameMove move = TestInstance.parseGameMove(p2Input, this);
                         long afterTime = System.currentTimeMillis();
                         if (move == null) {
                             System.out.println("Timeout " + p2Name + "in p" + this.name + "g" + i);
@@ -319,6 +342,9 @@ class TestGames extends Thread {
                         p2Writer.write("makemove " + move.from + " " + move.to + "\n");
                         p2Writer.flush();
                     }
+                    if (mg.pliesPlayed > 4 && !mateFound) {
+                        sb.append(FEN.toFEN(mg) + "\n");
+                    }
                     mg.analyze();
                 }
                 int roteFische = mg.roteFische.popCount();
@@ -326,6 +352,7 @@ class TestGames extends Thread {
                 int blaueFische = mg.blaueFische.popCount();
                 int blauerSchwarm = BoardRating.getBiggestSchwarm(mg, GameColor.BLUE);
                 if (mg.gs == GameStatus.DRAW) {
+                    sb.append("Draw\n");
                     this.p1Stats.draws += 1;
                     this.p2Stats.draws += 1;
                     if (player1IsRed) {
@@ -336,6 +363,7 @@ class TestGames extends Thread {
                         this.p2Stats.drawsOnRed++;
                     }
                 } else if (mg.gs == GameStatus.RED_WIN) {
+                    sb.append("Red\n");
                     if (player1IsRed) {
                         this.p1Stats.averageSchwarmSizeWhenWon += roterSchwarm;
                         this.p1Stats.averageFischeWhenWon += roteFische;
@@ -371,6 +399,7 @@ class TestGames extends Thread {
                         this.p1Stats.losses++;
                     }
                 } else if (mg.gs == GameStatus.BLUE_WIN) {
+                    sb.append("Blue\n");
                     if (player1IsRed) {
                         this.p1Stats.averageSchwarmSizeWhenLost += roterSchwarm;
                         this.p1Stats.averageFischeWhenLost += roteFische;
@@ -408,6 +437,7 @@ class TestGames extends Thread {
                         this.p2Stats.lossesOnRed++;
                     }
                 }
+                TexelTuning.writeGame(sb.toString());
                 cleanUp(p1, p2, p1Writer, p1Input, p2Writer, p2Input);
             }
         } catch (Exception e) {

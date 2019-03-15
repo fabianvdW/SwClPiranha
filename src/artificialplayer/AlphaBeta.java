@@ -17,12 +17,12 @@ public class AlphaBeta extends ArtificalPlayer {
     // (v3)
     public static double[] gaDna = {
             //1,Phase,(1-Phase)
-            0.2, 0, 0.6,
+            0.4, 0, 0.8,
             0, 0, -2.0,
-            -2.5, 0, -7.0,
+            -3.5, 0, -7.0,
             1.0, 4.0, 0,
             0, 8.0, 0,
-            0, 0, -0.6
+            0, 0, -0.4
     };
     public static BoardRatingConstants brc = new BoardRatingConstants(gaDna);
     public static Search currentSearch = new Search(null, -1);

@@ -37,10 +37,13 @@ public abstract class ArtificalPlayer {
                 } else if (arr[0].equalsIgnoreCase("requestmove")) {
                     PrincipalVariation pv = this.requestMove(Integer.parseInt(arr[1]));
                     GameMove res = pv.stack.get(0);
-                    System.out.println(res.from + " " + res.to);
+                    boolean mateFound = pv.score < -29000 || pv.score > 29000;
+                    System.out.println(res.from + " " + res.to + " " + mateFound);
                     l.log(LogLevel.INFO, "sent " + res.from + " " + res.to);
                     l.log(LogLevel.INFO, "Search to depth: " + pv.depthleft);
                     l.log(LogLevel.INFO, "Search result: " + pv.score);
+                    l.log(LogLevel.INFO, "Nodes examined: " + AlphaBeta.nodesExamined);
+                    AlphaBeta.nodesExamined = 0;
                 } else if (arr[0].equalsIgnoreCase("makemove")) {
                     int from = Integer.parseInt(arr[1]);
                     int to = Integer.parseInt(arr[2]);
