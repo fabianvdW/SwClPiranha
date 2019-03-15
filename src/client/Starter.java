@@ -36,6 +36,7 @@ public class Starter extends AbstractClient {
 
     public static void main(String[] args) {
         //Initialize here
+        System.out.println("v4 playing!");
         System.out.println("Loading data!");
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("data.txt");
         System.out.println("Finished loading data!");

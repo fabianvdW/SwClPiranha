@@ -1,5 +1,6 @@
 package testing;
 
+import artificialplayer.AlphaBeta;
 import artificialplayer.BoardRating;
 import artificialplayer.BoardRatingConstants;
 import evaltuning.Genome;
@@ -10,9 +11,9 @@ import helpers.FEN;
 public class EvalTesting {
     public static void main(String[] args) {
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("SwClPiranha/src/game/data.txt");
-        MyGameState mg = FEN.readFEN("16809984 5764620742945669120 8589934594 -9209790869228468128 1 8388608 r 38 19");
+        MyGameState mg = FEN.readFEN("8736 5766296523843305472 8325824513 0 2 9007199254740992 r 28 14");
         System.out.println(mg);
         mg.analyze();
-        System.out.println(BoardRating.rating(mg, new BoardRatingConstants(Genome.standardDna)));
+        System.out.println(BoardRating.rating(mg, new BoardRatingConstants(AlphaBeta.gaDna)));
     }
 }

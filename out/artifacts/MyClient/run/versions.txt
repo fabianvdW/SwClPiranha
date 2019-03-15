@@ -1,0 +1,35 @@
+Uploaded Version: v2
+v2->v3: ~+160, long tested. Neuerung: Handwritten Eval
+
+[11-03-19 20:58:48.904]  INFO: Player 1:
+Insg Spiele: 73.0
+-------------------------------------
+Wins(R/B): 33(9/24)
+Avg. Fische @Win: 7.7272727272727275
+Avg. Schwarm @Win: 6.909090909090909
+Wins wenn Schwarm kleiner war: 1
+-------------------------------------
+Draws(R/B): 4(3/1)
+-------------------------------------
+Losses(R/B): 36(25/11)
+Avg. Fische @Loss: 5.472222222222222
+Avg. Schwarm @Loss: 3.388888888888889
+Losses wenn Schwarm groesser war: 3
+-------------------------------------
+
+
+[11-03-19 20:58:48.904]  INFO: Player 2:
+Insg Spiele: 73.0
+-------------------------------------
+Wins(R/B): 36(11/25)
+Avg. Fische @Win: 7.972222222222222
+Avg. Schwarm @Win: 6.166666666666667
+Wins wenn Schwarm kleiner war: 3
+-------------------------------------
+Draws(R/B): 4(1/3)
+-------------------------------------
+Losses(R/B): 33(24/9)
+Avg. Fische @Loss: 6.121212121212121
+Avg. Schwarm @Loss: 3.727272727272727
+Losses wenn Schwarm groesser war: 1
+-------------------------------------

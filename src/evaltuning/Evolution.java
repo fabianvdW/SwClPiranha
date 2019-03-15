@@ -29,11 +29,14 @@ public class Evolution implements Serializable {
     public static Log l;
 
     public Evolution() {
-        this.mutateStaerke = 0.8;
+        this.mutateStaerke = 0.6;
         this.population = new Genome[64];
         this.best8 = new Genome[8];
-        for (int i = 0; i < this.population.length; i++) {
-            this.population[i] = new Genome();
+        Genome stdGenome = new Genome(AlphaBeta.gaDna);
+        this.population[0] = stdGenome;
+        for (int i = 1; i < this.population.length; i++) {
+            this.population[i] = stdGenome.mutate(this.mutateStaerke, 1);
+            //new Genome();
         }
     }
 
@@ -100,7 +103,7 @@ public class Evolution implements Serializable {
         }
         index = 48;
         Random r = new Random();
-        for (int i = 0; i < 15; i++) {
+        for (int i = 0; i < 14; i++) {
             int index1 = (int) (Math.abs(r.nextGaussian() * 5));
             index1 = Math.min(15, index1);
             int index2;
@@ -158,6 +161,7 @@ public class Evolution implements Serializable {
             }
         }
 
+        this.population[62] = new Genome(AlphaBeta.gaDna);
         this.population[63] = this.sufiWinner.mutate(this.mutateStaerke, 1);
         this.generation += 1;
         this.mutateStaerke -= 0.003;

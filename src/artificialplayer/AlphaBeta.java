@@ -10,9 +10,20 @@ import testing.Fix;
 public class AlphaBeta extends ArtificalPlayer {
     public static int nodesExamined;
     public static int depth0Nodes;
+    public final static boolean nullmove = true;
 
     //(v2)
-    public static double[] gaDna = {1.1929413659945325, -0.8731702020117803, -0.18857558152186485, -0.28516712873434763, 0.2632768554065141, 0.8993662608977158, 0.13348138971818577, -0.22333247871946682, -0.4039322894096489, 0.26511382721538596, 0.1665940335462095, 0.8675391276945661, 1.3508070853980805, 0.9575173529821485, 1.4240074329668702, -0.20112452911349518, -0.49828852243518695, -0.10684710598696326, -0.9626061894702808, -0.19868752897198622, 1.6581937255059032};
+    //public static double[] gaDna = {1.1929413659945325, -0.8731702020117803, -0.18857558152186485, -0.28516712873434763, 0.2632768554065141, 0.8993662608977158, 0.13348138971818577, -0.22333247871946682, -0.4039322894096489, 0.26511382721538596, 0.1665940335462095, 0.8675391276945661, 1.3508070853980805, 0.9575173529821485, 1.4240074329668702, -0.20112452911349518, -0.49828852243518695, -0.10684710598696326, -0.9626061894702808, -0.19868752897198622, 1.6581937255059032};
+    // (v3)
+    public static double[] gaDna = {
+            //1,Phase,(1-Phase)
+            0.4, 0, 0.8,
+            0, 0, -2.0,
+            -3.5, 0, -7.0,
+            1.0, 4.0, 0,
+            0, 8.0, 0,
+            0, 0, -0.4
+    };
     public static BoardRatingConstants brc = new BoardRatingConstants(gaDna);
     public static Search currentSearch = new Search(null, -1);
 
@@ -118,6 +129,15 @@ public class AlphaBeta extends ArtificalPlayer {
 
             }
         }
+        //Make Null move
+        /*if (nullmove && depth >= 2 && depth + g.pliesPlayed < 60 && (g.move == GameColor.RED || BoardRating.getBiggestSchwarm(g, GameColor.RED) < g.roteFische.popCount())) {
+            PrincipalVariation pv = alphaBeta(GameLogic.makeNullMove(g), depth - 2, -maximizingPlayer, -beta, -beta + 0.001);
+            double rat = pv.score * -1;
+            if (rat >= beta) {
+                bestPv.score = rat;
+                return bestPv;
+            }
+        }*/
         //Search for Killer Moves and then for Captures
         //Killer move
         if (depth >= 2
@@ -162,10 +182,17 @@ public class AlphaBeta extends ArtificalPlayer {
             currPv.stack.add(gmro.moves[i]);
             currPv.hashStack.add(g.hash);
             PrincipalVariation followingPv;
+            /*if (depth >= 3 && !pvmoveFound && i >= moveOrderingIndex) {
+                followingPv = alphaBeta(gmro.states[i], depth - 2, -maximizingPlayer, -beta, -alpha);
+                double rat = followingPv.score * -1;
+                if (rat >= alpha) {
+                    followingPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -beta, -alpha);
+                }
+            } else*/
             if (depth <= 2 || !pvmoveFound || i == 0) {
                 followingPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -beta, -alpha);
             } else {
-                followingPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -alpha - 1, -alpha);
+                followingPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -alpha - 0.0001, -alpha);
                 double rat = followingPv.score * -1;
                 if (rat >= alpha && rat <= beta) {
                     followingPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -beta, -alpha);
@@ -270,6 +297,16 @@ public class AlphaBeta extends ArtificalPlayer {
 
             }
         }
+        //Make Null move
+        /*
+        if (nullmove && depth >= 2 && depth + g.pliesPlayed < 60 && (g.move == GameColor.RED || BoardRating.getBiggestSchwarm(g, GameColor.RED) < g.roteFische.popCount())) {
+            PrincipalVariation piv = alphaBeta(GameLogic.makeNullMove(g), depth - 2, -maximizingPlayer, -beta, -beta + 0.001);
+            double rat = piv.score * -1;
+            if (rat >= beta) {
+                bestPv.score = rat;
+                return bestPv;
+            }
+        }*/
         //Move ordering pt.2
         //Search for Killer Moves and then for Captures
         //Killer move
@@ -317,6 +354,7 @@ public class AlphaBeta extends ArtificalPlayer {
             pv.hashStack.add(g.hash);
             //PrincipalVariation currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -1000, 1000);
             PrincipalVariation currentPv;
+
             if (depth <= 2 || !pvmoveFound || i == 0) {
                 if (i != 0) {
                     currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -beta, -bestPv.score);
@@ -324,7 +362,7 @@ public class AlphaBeta extends ArtificalPlayer {
                     currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -beta, -alpha);
                 }
             } else {
-                currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -bestPv.score - 1, -bestPv.score);
+                currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -bestPv.score - 0.0001, -bestPv.score);
                 double rat = currentPv.score * -1;
                 if (rat >= alpha && rat <= beta) {
                     currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -beta, -alpha);

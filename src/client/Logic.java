@@ -98,28 +98,28 @@ public class Logic implements IGameHandler {
         //GameMove m = AlphaBeta.alphaBetaRoot(mg, 3, mg.move == GameColor.RED ? 1 : -1);
         Direction resultDirection;
         if (m.dir == GameDirection.DOWN) {
-            resultDirection = Direction.DOWN;
-        } else if (m.dir == GameDirection.DOWN_LEFT) {
-            resultDirection = Direction.DOWN_LEFT;
-        } else if (m.dir == GameDirection.LEFT) {
-            resultDirection = Direction.LEFT;
-        } else if (m.dir == GameDirection.UP_LEFT) {
-            resultDirection = Direction.UP_LEFT;
-        } else if (m.dir == GameDirection.UP) {
-            resultDirection = Direction.UP;
-        } else if (m.dir == GameDirection.UP_RIGHT) {
-            resultDirection = Direction.UP_RIGHT;
-        } else if (m.dir == GameDirection.RIGHT) {
-            resultDirection = Direction.RIGHT;
-        } else {
-            resultDirection = Direction.DOWN_RIGHT;
-        }
-        Move result = new Move(9 - m.from % 10, m.from / 10, resultDirection);
-        //log.info("Turn: "+this.gameState.getTurn());
-        //log.info("Round: "+this.gameState.getRound());
-        //sendAction(possibleMoves.get((int) (Math.random() * possibleMoves.size())));
-        sendAction(result);
+        resultDirection = Direction.DOWN;
+    } else if (m.dir == GameDirection.DOWN_LEFT) {
+        resultDirection = Direction.DOWN_LEFT;
+    } else if (m.dir == GameDirection.LEFT) {
+        resultDirection = Direction.LEFT;
+    } else if (m.dir == GameDirection.UP_LEFT) {
+        resultDirection = Direction.UP_LEFT;
+    } else if (m.dir == GameDirection.UP) {
+        resultDirection = Direction.UP;
+    } else if (m.dir == GameDirection.UP_RIGHT) {
+        resultDirection = Direction.UP_RIGHT;
+    } else if (m.dir == GameDirection.RIGHT) {
+        resultDirection = Direction.RIGHT;
+    } else {
+        resultDirection = Direction.DOWN_RIGHT;
     }
+    Move result = new Move(9 - m.from % 10, m.from / 10, resultDirection);
+    //log.info("Turn: "+this.gameState.getTurn());
+    //log.info("Round: "+this.gameState.getRound());
+    //sendAction(possibleMoves.get((int) (Math.random() * possibleMoves.size())));
+    sendAction(result);
+}
 
     /**
      * {@inheritDoc}
