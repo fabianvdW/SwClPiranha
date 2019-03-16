@@ -53,12 +53,14 @@ public class Fix {
         System.out.println(AlphaBeta.killerMovesFound);
         System.out.println(AlphaBeta.noKillerMovesFound);
         System.exit(-1);
+        byte birth = 0;
         for (int i = 0; i < fens.length; i++) {
             MyGameState mg = FEN.readFEN(fens[i]);
             System.out.println(mg);
             Search s = new Search(mg, depths[i]);
+            s.birthTime = birth;
             s.run();
-            Search.birthTime += 2;
+            birth += 2;
             PrincipalVariation pv = s.currentBestPv;
             GameMove m = pv.stack.get(0);
             System.out.println("Move found in Direction: " + m.dir);

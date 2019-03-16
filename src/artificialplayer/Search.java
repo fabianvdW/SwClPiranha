@@ -10,12 +10,13 @@ public class Search extends Thread {
     public static CacheEntry[] cache = new CacheEntry[2 * 524288];
     public static int cacheMask = 2 * 524288 - 1;
     //Power of 2
-    public static KillerMove[][] killers = new KillerMove[100][3];
-    public static int[][] historyHeuristic;
-    public static int[][] bfHeuristic;
+    public KillerMove[][] killers = new KillerMove[100][3];
+    public int lastKillerDeleted = 0;
+    public int[][] historyHeuristic;
+    public int[][] bfHeuristic;
     public int depth;
     public boolean stop = false;
-    public static byte birthTime = 0;
+    public byte birthTime = 0;
     MyGameState mg;
 
     public Search(MyGameState mg, int depth) {
@@ -31,7 +32,7 @@ public class Search extends Thread {
             //AlphaBeta.nodesExamined = 0;
             //AlphaBeta.depth0Nodes = 0;
             //System.out.println("Depth: " + depth + " searched");
-            PrincipalVariation pv = AlphaBeta.alphaBeta(this.mg, depth, mg.move == GameColor.RED ? 1 : -1, -100000, 100000, 0);
+            PrincipalVariation pv = AlphaBeta.alphaBeta(this, this.mg, depth, mg.move == GameColor.RED ? 1 : -1, -100000, 100000, 0);
             if (stop) {
                 break;
             }
@@ -40,7 +41,7 @@ public class Search extends Thread {
             //System.out.println("Score: " + pv.score);
             for (int i = currentBestPv.stack.size() - 1; i >= 0; i--) {
                 boolean betaNode = (i == currentBestPv.stack.size() - 1) && currentBestPv.stack.size() < depth;
-                cache[(int) (currentBestPv.hashStack.get(i) & Search.cacheMask)] = new CacheEntry(currentBestPv.hashStack.get(i), currentBestPv.score * (i % 2 == 0 ? 1 : -1), Search.birthTime,
+                cache[(int) (currentBestPv.hashStack.get(i) & Search.cacheMask)] = new CacheEntry(currentBestPv.hashStack.get(i), currentBestPv.score * (i % 2 == 0 ? 1 : -1), this.birthTime,
                         (byte) (depth - i), currentBestPv.stack.get(i), true, betaNode, false);
             }
             //
