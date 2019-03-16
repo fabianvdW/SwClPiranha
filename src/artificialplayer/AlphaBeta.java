@@ -1,23 +1,24 @@
 package artificialplayer;
 
-import client.Logic;
 import datastructures.BitBoard;
-import evaltuning.Genome;
 import game.*;
-import helpers.FEN;
-import testing.Fix;
+
+import java.util.Arrays;
 
 public class AlphaBeta extends ArtificalPlayer {
     public static int nodesExamined;
     public static int depth0Nodes;
-    public final static boolean nullmove = true;
+    public static boolean nullmove = false;
+    public static int killerMovesFound = 0;
+    public static int noKillerMovesFound = 0;
 
+    public static int[] indexs = new int[95];
     //(v2)
     //public static double[] gaDna = {1.1929413659945325, -0.8731702020117803, -0.18857558152186485, -0.28516712873434763, 0.2632768554065141, 0.8993662608977158, 0.13348138971818577, -0.22333247871946682, -0.4039322894096489, 0.26511382721538596, 0.1665940335462095, 0.8675391276945661, 1.3508070853980805, 0.9575173529821485, 1.4240074329668702, -0.20112452911349518, -0.49828852243518695, -0.10684710598696326, -0.9626061894702808, -0.19868752897198622, 1.6581937255059032};
     // (v3)
     public static double[] gaDna = {
             //1,Phase,(1-Phase)
-            0.4, 0, 0.8,
+            0.7, 0, 1.2,
             0, 0, -2.0,
             -3.5, 0, -7.0,
             1.0, 4.0, 0,
@@ -51,7 +52,8 @@ public class AlphaBeta extends ArtificalPlayer {
     }
 
     //Rot ist 1, Blaue ist -1
-    public static PrincipalVariation alphaBeta(MyGameState g, int depth, int maximizingPlayer, double alpha, double beta) {
+    public static PrincipalVariation alphaBeta(MyGameState g, int depth, int maximizingPlayer, double alpha, double beta, int currentDepth) {
+
 
         PrincipalVariation currPv = new PrincipalVariation(depth);
         if (currentSearch.stop) {
@@ -130,40 +132,43 @@ public class AlphaBeta extends ArtificalPlayer {
             }
         }
         //Make Null move
-        /*if (nullmove && depth >= 2 && depth + g.pliesPlayed < 60 && (g.move == GameColor.RED || BoardRating.getBiggestSchwarm(g, GameColor.RED) < g.roteFische.popCount())) {
-            PrincipalVariation pv = alphaBeta(GameLogic.makeNullMove(g), depth - 2, -maximizingPlayer, -beta, -beta + 0.001);
-            double rat = pv.score * -1;
+        if (nullmove && !pvmoveFound && depth >= 4 && currentDepth > 0 && depth + g.pliesPlayed < 60 && (g.move == GameColor.RED || BoardRating.getBiggestSchwarm(g, GameColor.RED) < g.roteFische.popCount())) {
+            double rat = alphaBeta(GameLogic.makeNullMove(g), depth - 4, -maximizingPlayer, -beta, -beta + 0.0001, currentDepth + 1).score * -1;
             if (rat >= beta) {
                 bestPv.score = rat;
                 return bestPv;
             }
-        }*/
-        //Search for Killer Moves and then for Captures
-        //Killer move
-        if (depth >= 2
-                && g.pliesPlayed > 20
-                ) {
-            for (int i = moveOrderingIndex; i < gmro.instances; i++) {
-                GameMove move = gmro.moves[i];
-                MyGameState nextGameState = gmro.states[i];
+        }
 
-                BitBoard gegnerFischeNow = g.move == GameColor.BLUE ? g.roteFische : g.blaueFische;
-                BitBoard gegnerFischeGleich = g.move == GameColor.BLUE ? nextGameState.roteFische : nextGameState.blaueFische;
-                if (BoardRating.getBiggestSchwarm(g, g.move) < BoardRating.getBiggestSchwarm(nextGameState, g.move)
-                        || (gegnerFischeNow.popCount() > gegnerFischeGleich.popCount())
-                        && BoardRating.getBiggestSchwarm(g, nextGameState.move) > BoardRating.getBiggestSchwarm(nextGameState, nextGameState.move)) {
-                    //Found Killer move
-                    GameMove atPosIndex = gmro.moves[moveOrderingIndex];
-                    MyGameState atPosIndexState = gmro.states[moveOrderingIndex];
-                    gmro.moves[moveOrderingIndex] = move;
-                    gmro.states[moveOrderingIndex] = nextGameState;
-                    gmro.moves[i] = atPosIndex;
-                    gmro.states[i] = atPosIndexState;
-                    moveOrderingIndex++;
-                }
+        //Killer heuristic
+        boolean found = false;
+        for (int i = moveOrderingIndex; i < gmro.instances; i++) {
+            GameMove move = gmro.moves[i];
+            MyGameState nextGameState = gmro.states[i];
+            if (Search.killers[currentDepth][0] != null && Search.killers[currentDepth][0].gm.equals(move)
+                    || Search.killers[currentDepth][1] != null && Search.killers[currentDepth][1].gm.equals(move) ||
+                    Search.killers[currentDepth][2] != null && Search.killers[currentDepth][2].gm.equals(move) ||
+                    currentDepth >= 2 && (Search.killers[currentDepth - 2][0] != null && Search.killers[currentDepth - 2][0].gm.equals(move)
+                            || Search.killers[currentDepth - 2][1] != null && Search.killers[currentDepth - 2][1].gm.equals(move)
+                            || Search.killers[currentDepth - 2][2] != null && Search.killers[currentDepth - 2][2].gm.equals(move))) {
+                found = true;
+                GameMove atPosIndex = gmro.moves[moveOrderingIndex];
+                MyGameState atPosIndexState = gmro.states[moveOrderingIndex];
+                gmro.moves[moveOrderingIndex] = move;
+                gmro.states[moveOrderingIndex] = nextGameState;
+                gmro.moves[i] = atPosIndex;
+                gmro.states[i] = atPosIndexState;
+                moveOrderingIndex++;
             }
         }
+        if (found) {
+            killerMovesFound++;
+        } else {
+            noKillerMovesFound++;
+        }
+
         //Captures
+        /*int captureMoveIndex = moveOrderingIndex;
         for (int i = moveOrderingIndex; i < gmro.instances; i++) {
             GameMove move = gmro.moves[i];
             MyGameState nextGameState = gmro.states[i];
@@ -177,29 +182,55 @@ public class AlphaBeta extends ArtificalPlayer {
                 gmro.states[i] = atPosIndexState;
                 moveOrderingIndex++;
             }
+        }*/
+
+        //History heuristic
+        double[] ratings = new double[gmro.instances];
+        for (int i = 0; i < gmro.instances; i++) {
+            GameMove mv = gmro.moves[i];
+            ratings[i] = Search.historyHeuristic[mv.from][mv.to] / (Search.bfHeuristic[mv.from][mv.to] + 0.0);
         }
+        //Sort array
+        int n = gmro.instances;
+        for (int i = moveOrderingIndex; i < n - 1; i++) {
+            for (int j = moveOrderingIndex; j < n - 1 - i; j++) {
+                if (ratings[j] < ratings[j + 1]) {
+                    //Swap
+                    double curr = ratings[j];
+                    ratings[j] = ratings[j + 1];
+                    ratings[j + 1] = curr;
+                    GameMove currM = gmro.moves[j];
+                    MyGameState currMgs = gmro.states[j];
+                    gmro.moves[j] = gmro.moves[j + 1];
+                    gmro.states[j] = gmro.states[j + 1];
+                    gmro.moves[j + 1] = currM;
+                    gmro.states[j + 1] = currMgs;
+                }
+            }
+        }
+
+        int index = -1;
         for (int i = 0; i < gmro.instances; i++) {
             currPv.stack.add(gmro.moves[i]);
             currPv.hashStack.add(g.hash);
             PrincipalVariation followingPv;
-            /*if (depth >= 3 && !pvmoveFound && i >= moveOrderingIndex) {
-                followingPv = alphaBeta(gmro.states[i], depth - 2, -maximizingPlayer, -beta, -alpha);
+            /*if (depth >= 3 && !pvmoveFound && i >= moveOrderingIndex && i >= gmro.instances / 2) {
+                followingPv = alphaBeta(gmro.states[i], depth - 2, -maximizingPlayer, -beta, -alpha, currentDepth + 1);
                 double rat = followingPv.score * -1;
                 if (rat >= alpha) {
-                    followingPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -beta, -alpha);
+                    followingPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -beta, -alpha, currentDepth + 1);
                 }
-            } else*/
+            } else */
             if (depth <= 2 || !pvmoveFound || i == 0) {
-                followingPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -beta, -alpha);
+                followingPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -beta, -alpha, currentDepth + 1);
             } else {
-                followingPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -alpha - 0.0001, -alpha);
+                followingPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -alpha - 0.0001, -alpha, currentDepth + 1);
                 double rat = followingPv.score * -1;
                 if (rat >= alpha && rat <= beta) {
-                    followingPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -beta, -alpha);
+                    followingPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -beta, -alpha, currentDepth + 1);
                 }
             }
             double rat = followingPv.score * -1;
-
             if (rat > bestPv.score) {
                 bestPv = currPv.clone();
                 bestPv.score = rat;
@@ -208,12 +239,40 @@ public class AlphaBeta extends ArtificalPlayer {
             }
             if (bestPv.score > alpha) {
                 alpha = bestPv.score;
+                index = i;
             }
             if (alpha >= beta) {
+                //Place in killer heuristic
+                if (Search.killers[currentDepth][0] == null) {
+                    Search.killers[currentDepth][0] = new KillerMove(gmro.moves[i]);
+                } else if (Search.killers[currentDepth][1] == null) {
+                    Search.killers[currentDepth][1] = new KillerMove(gmro.moves[i]);
+                } else if (Search.killers[currentDepth][2] == null) {
+                    Search.killers[currentDepth][2] = new KillerMove(gmro.moves[i]);
+                } else {
+                    if (!(Search.killers[currentDepth][0].gm != null && Search.killers[currentDepth][0].gm.equals(gmro.moves[i])) ||
+                            Search.killers[currentDepth][1].gm != null && Search.killers[currentDepth][1].gm.equals(gmro.moves[i]) ||
+                            Search.killers[currentDepth][2].gm != null && Search.killers[currentDepth][2].gm.equals(gmro.moves[i])) {
+
+                        Search.killers[currentDepth][KillerMove.lastDeleted] = new KillerMove(gmro.moves[i]);
+                        KillerMove.lastDeleted += 1;
+                        if (KillerMove.lastDeleted == 3) {
+                            KillerMove.lastDeleted = 0;
+                        }
+                    }
+                }
+                GameMove moveFound = gmro.moves[i];
+                Search.historyHeuristic[moveFound.from][moveFound.to] += depth;
                 break;
+            } else {
+                GameMove moveFound = gmro.moves[i];
+                Search.bfHeuristic[moveFound.from][moveFound.to] += depth;
             }
             currPv.stack.remove(currPv.stack.size() - 1);
             currPv.hashStack.remove(currPv.hashStack.size() - 1);
+        }
+        if (index != -1) {
+            indexs[index] += 1;
         }
         //Make entry
         if (depth >= 1) {
@@ -297,16 +356,6 @@ public class AlphaBeta extends ArtificalPlayer {
 
             }
         }
-        //Make Null move
-        /*
-        if (nullmove && depth >= 2 && depth + g.pliesPlayed < 60 && (g.move == GameColor.RED || BoardRating.getBiggestSchwarm(g, GameColor.RED) < g.roteFische.popCount())) {
-            PrincipalVariation piv = alphaBeta(GameLogic.makeNullMove(g), depth - 2, -maximizingPlayer, -beta, -beta + 0.001);
-            double rat = piv.score * -1;
-            if (rat >= beta) {
-                bestPv.score = rat;
-                return bestPv;
-            }
-        }*/
         //Move ordering pt.2
         //Search for Killer Moves and then for Captures
         //Killer move
@@ -357,15 +406,15 @@ public class AlphaBeta extends ArtificalPlayer {
 
             if (depth <= 2 || !pvmoveFound || i == 0) {
                 if (i != 0) {
-                    currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -beta, -bestPv.score);
+                    currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -beta, -bestPv.score, 1);
                 } else {
-                    currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -beta, -alpha);
+                    currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -beta, -alpha, 1);
                 }
             } else {
-                currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -bestPv.score - 0.0001, -bestPv.score);
+                currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -bestPv.score - 0.0001, -bestPv.score, 1);
                 double rat = currentPv.score * -1;
                 if (rat >= alpha && rat <= beta) {
-                    currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -beta, -alpha);
+                    currentPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -beta, -alpha, 1);
                 }
             }
             double rat = currentPv.score * -1;

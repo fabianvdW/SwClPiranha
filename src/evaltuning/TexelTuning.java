@@ -6,7 +6,6 @@ import game.*;
 import helpers.FEN;
 import helpers.GlobalFlags;
 
-import java.awt.font.TextLayout;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -28,6 +27,7 @@ public class TexelTuning {
 
     public static void main(String[] args) {
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("SwClPiranha/src/game/data.txt");
+        //BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("data.txt");
         File file = new File(GlobalFlags.TEXEL_PATH);
         try {
             FileWriter fr = new FileWriter(file, true);

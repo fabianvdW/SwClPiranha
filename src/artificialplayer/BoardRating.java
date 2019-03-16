@@ -23,7 +23,7 @@ public class BoardRating {
 
         BiggestSchwarmObject bsoRot = getBiggestSchwarm(roteSchwaerme);
         BiggestSchwarmObject bsoBlau = getBiggestSchwarm(blaueSchwaerme);
-        return redEval(g.pliesPlayed, roteFische, roteSchwaerme, GameColor.RED, brc, bsoRot) - redEval(g.pliesPlayed, blaueFische, blaueSchwaerme, GameColor.BLUE, brc, bsoBlau);
+        return redEval(g.pliesPlayed, roteFische, roteSchwaerme, GameColor.RED, brc, bsoRot, blaueFische, (bsoBlau.biggestSchwarm.size / (blaueFische.popCount() + 0.0))) - redEval(g.pliesPlayed, blaueFische, blaueSchwaerme, GameColor.BLUE, brc, bsoBlau, roteFische, bsoRot.biggestSchwarm.size / (roteFische.popCount() + 0.0));
     }
 
     public static BiggestSchwarmObject getBiggestSchwarm(ArrayList<Schwarm> schwaerme) {
@@ -45,7 +45,7 @@ public class BoardRating {
         return new BiggestSchwarmObject(biggestSchwarm);
     }
 
-    public static double redEval(int pliesPlayed, BitBoard fische, ArrayList<Schwarm> schwaerme, GameColor gc, BoardRatingConstants brc, BiggestSchwarmObject bso) {
+    public static double redEval(int pliesPlayed, BitBoard fische, ArrayList<Schwarm> schwaerme, GameColor gc, BoardRatingConstants brc, BiggestSchwarmObject bso, BitBoard gegnerFische, double gegnerRatio) {
         double unSkewedPhase = (pliesPlayed + 0.0) / 60.0;
         double phase = 1 - Math.pow(1 - unSkewedPhase, 2);
 
@@ -87,12 +87,15 @@ public class BoardRating {
         double ratio = bso.biggestSchwarm.size / (fischAnzahl + 0.0);
         biggestSchwarmEval = brc.biggestSchwarm.getOutput(Math.pow(ratio, 2), phase);
         if (ratio > 0.5) {
-            biggestSchwarmEval *= 1 + bso.biggestSchwarm.calculateSichereFische() / (bso.biggestSchwarm.size + 0.0);
+            int uselessFische=fischAnzahl-bso.biggestSchwarm.size;
+            biggestSchwarmEval *= 1 + bso.biggestSchwarm.calculateSichereFische() / (bso.biggestSchwarm.size + 0.0)-8*Math.pow(gegnerRatio, 3)*uselessFische/(fischAnzahl+0.0);
         }
 
         absoluteSchwarmEval = brc.absolutSchwarm.getOutput(Math.pow(bso.biggestSchwarm.size / 16.0 + 0.5, 2), Math.pow(unSkewedPhase, 3));
 
         randFische = brc.randFische.getOutput(fische.and(BitBoardConstants.RAND).popCount(), phase);
+
+
         if (GlobalFlags.VERBOSE) {
             System.out.println("Phase: " + phase);
             System.out.println("Eval for " + gc);

@@ -1,6 +1,7 @@
 package artificialplayer;
 
 import game.GameColor;
+import game.GameMove;
 import game.MyGameState;
 
 
@@ -9,6 +10,9 @@ public class Search extends Thread {
     public static CacheEntry[] cache = new CacheEntry[2 * 524288];
     public static int cacheMask = 2 * 524288 - 1;
     //Power of 2
+    public static KillerMove[][] killers = new KillerMove[100][3];
+    public static int[][] historyHeuristic;
+    public static int[][] bfHeuristic;
     public int depth;
     public boolean stop = false;
     public static byte birthTime = 0;
@@ -20,11 +24,14 @@ public class Search extends Thread {
     }
 
     public void run() {
+        killers = new KillerMove[100][3];
+        historyHeuristic = new int[100][100];
+        bfHeuristic = new int[100][100];
         for (int depth = 1; depth <= this.depth; depth++) {
             //AlphaBeta.nodesExamined = 0;
             //AlphaBeta.depth0Nodes = 0;
             //System.out.println("Depth: " + depth + " searched");
-            PrincipalVariation pv = AlphaBeta.alphaBetaRoot(this.mg, depth, mg.move == GameColor.RED ? 1 : -1, -100000, 100000);
+            PrincipalVariation pv = AlphaBeta.alphaBeta(this.mg, depth, mg.move == GameColor.RED ? 1 : -1, -100000, 100000, 0);
             if (stop) {
                 break;
             }

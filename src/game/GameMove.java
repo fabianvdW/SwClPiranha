@@ -22,7 +22,7 @@ public class GameMove {
     public boolean equals(Object o){
         if(o instanceof GameMove){
             GameMove g= (GameMove) o;
-            return g.from==this.from&&g.to==this.to&&g.dir==this.dir;
+            return g.from==this.from&&g.to==this.to;
         }
         return false;
     }
