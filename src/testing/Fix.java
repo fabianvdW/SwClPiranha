@@ -38,16 +38,17 @@ public class Fix {
 */
         //MyGameState g = new MyGameState(new BitBoard(4096L, 140737488355328L));
 
-        MyGameState g = FEN.readFEN("33652768 1735154143738725376 33957085248 510 0 4629700416936869888 b 3 1");
+        MyGameState g = FEN.readFEN("66048 1009233039785459712 4194304 17179869184 0 -9151314442816847872 r 54 27");
 
-        /*System.out.println(g);
+        System.out.println(g);
         System.out.println(BoardRating.rating(g, AlphaBeta.brc));
-        System.exit(0);*/
+        System.exit(0);
         System.out.println(g);
         Search se = new Search(g, 6);
         se.run();
         System.out.println(AlphaBeta.nodesExamined);
         System.out.println(AlphaBeta.depth0Nodes);
+        System.out.println(AlphaBeta.quiesenceNodes);
         System.out.println(se.currentBestPv.score);
         System.out.println(Arrays.toString(AlphaBeta.indexs));
         System.out.println(AlphaBeta.killerMovesFound);

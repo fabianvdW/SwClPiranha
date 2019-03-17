@@ -7,6 +7,7 @@ import game.*;
 public class AlphaBeta extends ArtificalPlayer {
     public static int nodesExamined;
     public static int depth0Nodes;
+    public static int quiesenceNodes;
     public static boolean nullmove = false;
     public static int killerMovesFound = 0;
     public static int noKillerMovesFound = 0;
@@ -17,7 +18,7 @@ public class AlphaBeta extends ArtificalPlayer {
     // (v3)
     public static double[] gaDna = {
             //1,Phase,(1-Phase)
-            0.7, 0, 1.2,
+            0.7, 0, 1.5,
             0, 0, -2.0,
             -3.5, 0, -7.0,
             1.0, 4.0, 0,
@@ -51,8 +52,119 @@ public class AlphaBeta extends ArtificalPlayer {
         return search(this.mg, time, birth);
     }
 
+    public static double quiescenseSearch(Search search, double alpha, double beta, MyGameState mg, int maximizingPlayer) {
+        if (mg.gmro == null) {
+            nodesExamined++;
+            quiesenceNodes++;
+            mg.analyze();
+        }
+        if (mg.gs != GameStatus.INGAME) {
+            if (mg.gs == GameStatus.DRAW) {
+                return 0;
+            } else if (mg.gs == GameStatus.RED_WIN) {
+                return maximizingPlayer * (30000 - mg.pliesPlayed);
+            } else {
+                return maximizingPlayer * (-30000 + mg.pliesPlayed);
+            }
+        }
+        double rat = BoardRating.rating(mg, AlphaBeta.brc) * maximizingPlayer;
+        if (rat >= beta) {
+            return beta;
+        }
+        if (rat > alpha) {
+            alpha = rat;
+        }
+        GameMoveResultObject gmro = mg.gmro;
+        mg.gmro = null;
+        int moveOrderingIndex = 0;
+        //Cache thingies
+
+        {
+            QuiesenceCacheEntry ce = search.quiesenceCache[(int) (mg.hash & Search.quiesenceCacheMask)];
+            if (ce != null && ce.hash == mg.hash) {
+                //Cache-hit
+                int deltaBirth = search.birthTimeQuiesence - ce.birth;
+
+                if (deltaBirth == 0 || ce.isSafe) {
+                    if (!ce.betaNode && !ce.alphaNode) {
+                        return ce.score;
+                    } else {
+                        if (ce.betaNode) {
+                            if (ce.score > alpha) {
+                                alpha = ce.score;
+                            }
+                        } else {
+                            if (ce.score < beta) {
+                                beta = ce.score;
+                            }
+                        }
+                    }
+                }
+                //Move ordering
+                //Swap move and state from pos 0
+                moveOrderingIndex = 1;
+                int index = -1;
+                for (int i = 0; i < gmro.instances; i++) {
+                    if (gmro.moves[i].from == ce.gm.from && gmro.moves[i].to == ce.gm.to) {
+                        index = i;
+                        break;
+                    }
+                }
+                GameMove atPos0 = gmro.moves[0];
+                MyGameState atPos0S = gmro.states[0];
+                gmro.moves[0] = gmro.moves[index];
+                gmro.states[0] = gmro.states[index];
+                gmro.moves[index] = atPos0;
+                gmro.states[index] = atPos0S;
+            }
+        }
+
+        //Legal moves connect the schwarm
+        int meineFische = mg.move == GameColor.RED ? mg.roteFische.popCount() : mg.blaueFische.popCount();
+        BitBoard biggestSchwarmBoard = BoardRating.getBiggestSchwarmBoard(mg, mg.move);
+        BitBoard biggestSchwarmBoardCl = biggestSchwarmBoard.clone();
+        BitBoard nachbarn = new BitBoard(0, 0);
+        while (!biggestSchwarmBoardCl.equalsZero()) {
+            int fisch = biggestSchwarmBoardCl.numberOfTrailingZeros();
+            nachbarn.orEquals(BitBoardConstants.NACHBARN[fisch]);
+            biggestSchwarmBoardCl.unsetBitEquals(fisch);
+        }
+        boolean isSafe = (meineFische - biggestSchwarmBoard.popCount()) * 2 + mg.pliesPlayed < 60;
+        GameMove bestMove = null;
+        double bestMoveScore = -1000000.0;
+        for (int i = 0; i < gmro.instances; i++) {
+            GameMove move = gmro.moves[i];
+            if (biggestSchwarmBoard.and(BitBoardConstants.EINHEITS_UNIT_LEFT_SHIFT[move.from]).equalsZero() && !nachbarn.and(BitBoardConstants.EINHEITS_UNIT_LEFT_SHIFT[move.to]).equalsZero()) {
+                double score = -quiescenseSearch(search, -beta, -alpha, gmro.states[i], -maximizingPlayer);
+                if (score >= bestMoveScore) {
+                    bestMoveScore = score;
+                    bestMove = move;
+                }
+                if (score >= beta) {
+                    int cacheIndex = (int) (mg.hash & Search.quiesenceCacheMask);
+                    search.quiesenceCache[cacheIndex] = new QuiesenceCacheEntry(mg.hash, score, (byte) search.birthTimeQuiesence, bestMove, true, false, (byte) (mg.pliesPlayed), isSafe);
+                    return beta;
+                }
+                if (score > alpha) {
+                    alpha = score;
+                }
+            }
+        }
+        if (bestMove != null) {
+            boolean alphaNode = (rat == alpha);
+            int cacheIndex = (int) (mg.hash & Search.quiesenceCacheMask);
+            if (search.quiesenceCache[cacheIndex] == null ||
+                    search.quiesenceCache[cacheIndex].birth < search.birthTimeQuiesence && (!search.quiesenceCache[cacheIndex].isSafe || search.quiesenceCache[cacheIndex].pliesPlayed < mg.pliesPlayed)
+                    || search.quiesenceCache[cacheIndex].pliesPlayed < mg.pliesPlayed) {
+                search.quiesenceCache[cacheIndex] = new QuiesenceCacheEntry(mg.hash, alpha, (byte) (search.birthTimeQuiesence), bestMove, false, alphaNode, (byte) (mg.pliesPlayed), isSafe);
+            }
+        }
+        return alpha;
+    }
+
     //Rot ist 1, Blaue ist -1
-    public static PrincipalVariation alphaBeta(Search search, MyGameState g, int depth, int maximizingPlayer, double alpha, double beta, int currentDepth) {
+    public static PrincipalVariation alphaBeta(Search search, MyGameState g, int depth, int maximizingPlayer,
+                                               double alpha, double beta, int currentDepth) {
 
 
         PrincipalVariation currPv = new PrincipalVariation(depth);
@@ -75,7 +187,11 @@ public class AlphaBeta extends ArtificalPlayer {
         }
         if (depth == 0) {
             depth0Nodes++;
-            currPv.score = BoardRating.rating(g, AlphaBeta.brc) * maximizingPlayer;
+            if (g.pliesPlayed < 60 || true) {
+                currPv.score = BoardRating.rating(g, AlphaBeta.brc) * maximizingPlayer;
+            } else {
+                currPv.score = quiescenseSearch(search, alpha, beta, g, maximizingPlayer);
+            }
             return currPv;
         }
         PrincipalVariation bestPv = new PrincipalVariation(depth);
@@ -295,7 +411,8 @@ public class AlphaBeta extends ArtificalPlayer {
 
     }
 
-    public static PrincipalVariation alphaBetaRoot(Search search, MyGameState g, int depth, int maximizingPlayer, double alpha, double beta) {
+    public static PrincipalVariation alphaBetaRoot(Search search, MyGameState g, int depth, int maximizingPlayer,
+                                                   double alpha, double beta) {
         PrincipalVariation pv = new PrincipalVariation(depth);
         nodesExamined++;
         g.analyze();

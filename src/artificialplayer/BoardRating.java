@@ -59,6 +59,13 @@ public class BoardRating {
         int fischAnzahl = fische.popCount();
         fischEval = brc.anzahlFische.getOutput(fischAnzahl, phase);
 
+        if (fischAnzahl == 2) {
+            fischEval += 20;
+        } else if (fischAnzahl == 3) {
+            fischEval += 10;
+        } else if (fischAnzahl == 4) {
+            fischEval += 5;
+        }
         Pos spielFeldMitte = new Pos(4.5, 4.5);
         for (Schwarm s : schwaerme) {
             double dist = spielFeldMitte.distance(new Pos(s.averageX, s.averageY));
@@ -87,8 +94,8 @@ public class BoardRating {
         double ratio = bso.biggestSchwarm.size / (fischAnzahl + 0.0);
         biggestSchwarmEval = brc.biggestSchwarm.getOutput(Math.pow(ratio, 2), phase);
         if (ratio > 0.5) {
-            int uselessFische=fischAnzahl-bso.biggestSchwarm.size;
-            biggestSchwarmEval *= 1 + bso.biggestSchwarm.calculateSichereFische() / (bso.biggestSchwarm.size + 0.0)-8*Math.pow(gegnerRatio, 3)*uselessFische/(fischAnzahl+0.0);
+            int uselessFische = fischAnzahl - bso.biggestSchwarm.size;
+            biggestSchwarmEval *= 1 + bso.biggestSchwarm.calculateSichereFische() / (bso.biggestSchwarm.size + 0.0) - 8 * Math.pow(gegnerRatio, 3) * uselessFische / (fischAnzahl + 0.0);
         }
 
         absoluteSchwarmEval = brc.absolutSchwarm.getOutput(Math.pow(bso.biggestSchwarm.size / 16.0 + 0.5, 2), Math.pow(unSkewedPhase, 3));
@@ -122,6 +129,22 @@ public class BoardRating {
             fischClone.andEquals(b.not());
         }
         return max;
+    }
+
+    public static BitBoard getBiggestSchwarmBoard(MyGameState g, GameColor gc) {
+        BitBoard fischClone = gc == GameColor.RED ? g.roteFische.clone() : g.blaueFische.clone();
+        int max = -1;
+        BitBoard maxBb = null;
+        while (!fischClone.equalsZero()) {
+            BitBoard b = GameLogic.getSchwarmBoard(fischClone);
+            int count = b.popCount();
+            if (count > max) {
+                max = count;
+                maxBb = b;
+            }
+            fischClone.andEquals(b.not());
+        }
+        return maxBb;
     }
 
     public static ArrayList<Schwarm> berechneSchwaerme(BitBoard fische) {

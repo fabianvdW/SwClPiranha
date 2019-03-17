@@ -7,8 +7,11 @@ import game.MyGameState;
 
 public class Search extends Thread {
     public PrincipalVariation currentBestPv;
-    public static CacheEntry[] cache = new CacheEntry[2 * 524288];
-    public static int cacheMask = 2 * 524288 - 1;
+    public static CacheEntry[] cache = new CacheEntry[4 * 524288];
+    public static int cacheMask = 4 * 524288 - 1;
+
+    public QuiesenceCacheEntry[] quiesenceCache = new QuiesenceCacheEntry[2 * 524288];
+    public static int quiesenceCacheMask = 2 * 524288 - 1;
     //Power of 2
     public KillerMove[][] killers = new KillerMove[100][3];
     public int lastKillerDeleted = 0;
@@ -17,6 +20,7 @@ public class Search extends Thread {
     public int depth;
     public boolean stop = false;
     public byte birthTime = 0;
+    public int birthTimeQuiesence = 0;
     MyGameState mg;
 
     public Search(MyGameState mg, int depth) {
@@ -25,6 +29,11 @@ public class Search extends Thread {
     }
 
     public void run() {
+        if (mg.pliesPlayed >= 52) {
+            AlphaBeta.nullmove = true;
+        } else {
+            AlphaBeta.nullmove = false;
+        }
         killers = new KillerMove[100][3];
         historyHeuristic = new int[100][100];
         bfHeuristic = new int[100][100];
@@ -44,6 +53,7 @@ public class Search extends Thread {
                 cache[(int) (currentBestPv.hashStack.get(i) & Search.cacheMask)] = new CacheEntry(currentBestPv.hashStack.get(i), currentBestPv.score * (i % 2 == 0 ? 1 : -1), this.birthTime,
                         (byte) (depth - i), currentBestPv.stack.get(i), true, betaNode, false);
             }
+            birthTimeQuiesence++;
             //
             //cache[(int) (this.mg.hash & Search.cacheMask)] = new CacheEntry(mg.hash, currentBestPv.score, Search.birthTime, (byte) depth, currentBestPv.stack.get(0));
         }

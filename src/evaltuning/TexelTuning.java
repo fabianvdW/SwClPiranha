@@ -27,10 +27,10 @@ public class TexelTuning {
     }
 
     public static void main(String[] args) {
-        //BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("SwClPiranha/src/game/data.txt");
+        BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("SwClPiranha/src/game/data.txt");
         Search.cache = new CacheEntry[8 * 524288];
         Search.cacheMask = 8 * 524288 - 1;
-        BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("data.txt");
+        //BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("data.txt");
         File file = new File(GlobalFlags.TEXEL_PATH);
         try {
             FileWriter fr = new FileWriter(file, true);
