@@ -30,7 +30,7 @@ public class Search extends Thread {
 
     public void run() {
         if (mg.pliesPlayed >= 52) {
-            AlphaBeta.nullmove = true;
+            AlphaBeta.nullmove = false;
         } else {
             AlphaBeta.nullmove = false;
         }

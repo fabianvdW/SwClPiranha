@@ -1,6 +1,10 @@
 package game;
 
-public class GameMove {
+import java.io.Serializable;
+
+public class GameMove implements Serializable {
+    static final long serialVersionUID = 42L;
+
     public int from;
     public int to;
     public GameDirection dir;

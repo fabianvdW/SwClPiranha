@@ -18,7 +18,7 @@ public class AlphaBeta extends ArtificalPlayer {
     // (v3)
     public static double[] gaDna = {
             //1,Phase,(1-Phase)
-            0.7, 0, 1.5,
+            0.8, 0, 0.3,
             0, 0, -2.0,
             -3.5, 0, -7.0,
             1.0, 4.0, 0,
@@ -178,10 +178,12 @@ public class AlphaBeta extends ArtificalPlayer {
                 currPv.score = 0;
                 return currPv;
             } else if (g.gs == GameStatus.RED_WIN) {
-                currPv.score = maximizingPlayer * (30000 - g.pliesPlayed);
+                double diff = BoardRating.getBiggestSchwarm(g, GameColor.RED) - BoardRating.getBiggestSchwarm(g, GameColor.BLUE);
+                currPv.score = maximizingPlayer * (30000 - g.pliesPlayed + diff / 100.0);
                 return currPv;
             } else {
-                currPv.score = maximizingPlayer * (-30000 + g.pliesPlayed);
+                double diff = BoardRating.getBiggestSchwarm(g, GameColor.BLUE) - BoardRating.getBiggestSchwarm(g, GameColor.RED);
+                currPv.score = maximizingPlayer * (-30000 + g.pliesPlayed - diff / 100.0);
                 return currPv;
             }
         }

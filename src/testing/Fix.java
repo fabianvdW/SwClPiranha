@@ -26,7 +26,7 @@ public class Fix {
             9, 7};
 
     public static void main(String[] args) {
-        GlobalFlags.VERBOSE = false;
+        GlobalFlags.VERBOSE = true;
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("SwClPiranha/src/game/data.txt");
 /*
         MyGameState g = FEN.readFEN("8 180179238186385408 10241 18023332108566528 0 72075186223972352 r 50 25");
@@ -38,7 +38,7 @@ public class Fix {
 */
         //MyGameState g = new MyGameState(new BitBoard(4096L, 140737488355328L));
 
-        MyGameState g = FEN.readFEN("66048 1009233039785459712 4194304 17179869184 0 -9151314442816847872 r 54 27");
+        MyGameState g = FEN.readFEN("66594 216278395359592704 0 4611686022735986688 0 17660905521152 r 52 26");
 
         System.out.println(g);
         System.out.println(BoardRating.rating(g, AlphaBeta.brc));
