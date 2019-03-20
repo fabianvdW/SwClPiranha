@@ -68,10 +68,6 @@ public class BoardRating {
             fischEval += 10;
         } else if (fischAnzahl == 4) {
             fischEval += 5;
-        } else if (fischAnzahl == 5) {
-            fischEval += 2.5;
-        } else if (fischAnzahl == 6) {
-            fischEval += 1;
         }
 
         Pos spielFeldMitte = new Pos(4.5, 4.5);
