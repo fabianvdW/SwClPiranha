@@ -1,5 +1,7 @@
 package game;
 
-public enum GameColor {
+import java.io.Serializable;
+
+public enum GameColor implements Serializable {
     RED,BLUE;
 }

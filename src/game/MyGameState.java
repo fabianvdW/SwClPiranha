@@ -3,7 +3,11 @@ package game;
 import datastructures.BitBoard;
 import helpers.StringColor;
 
-public class MyGameState {
+import java.io.Serializable;
+
+public class MyGameState implements Serializable {
+    static final long serialVersionUID = 42L;
+
     public BitBoard roteFische;
     public BitBoard blaueFische;
     public BitBoard kraken;
@@ -170,7 +174,7 @@ public class MyGameState {
     public boolean equals(Object o) {
         if (o instanceof MyGameState) {
             MyGameState g = (MyGameState) o;
-            return g.roteFische == this.roteFische && g.blaueFische == this.blaueFische && g.kraken == this.kraken;
+            return g.roteFische.equals(this.roteFische) && g.blaueFische.equals(this.blaueFische) && g.kraken.equals(this.kraken);
         }
         return false;
     }

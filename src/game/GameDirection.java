@@ -1,6 +1,8 @@
 package game;
 
-public enum GameDirection {
+import java.io.Serializable;
+
+public enum GameDirection implements Serializable {
     //Only the primary 4 Directions are used
     //Therefore UP = -Down
     //UP_LEFT = -DOWN_RIGHT

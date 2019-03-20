@@ -2,7 +2,11 @@ package game;
 
 import datastructures.BitBoard;
 
-public class GameMoveResultObject {
+import java.io.Serializable;
+
+public class GameMoveResultObject implements Serializable {
+    static final long serialVersionUID = 42L;
+
     public BitBoard attackBoard;
     public GameMove[] moves;
     public MyGameState[] states;

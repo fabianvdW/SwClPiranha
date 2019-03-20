@@ -1,12 +1,12 @@
 package evaltuning;
 
+import artificialplayer.CacheEntry;
 import artificialplayer.PrincipalVariation;
 import artificialplayer.Search;
 import game.*;
 import helpers.FEN;
 import helpers.GlobalFlags;
 
-import java.awt.font.TextLayout;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -28,6 +28,9 @@ public class TexelTuning {
 
     public static void main(String[] args) {
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("SwClPiranha/src/game/data.txt");
+        Search.cache = new CacheEntry[8 * 524288];
+        Search.cacheMask = 8 * 524288 - 1;
+        //BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("data.txt");
         File file = new File(GlobalFlags.TEXEL_PATH);
         try {
             FileWriter fr = new FileWriter(file, true);
@@ -69,6 +72,14 @@ public class TexelTuning {
 
         MyGameState mg = new MyGameState();
         mg.hash = MyGameState.calculateHash(mg);
+        mg.analyze();
+        mg = mg.gmro.states[(int) (mg.gmro.instances * Math.random())];
+        mg.analyze();
+        mg = mg.gmro.states[(int) (mg.gmro.instances * Math.random())];
+        mg.analyze();
+        mg=mg.gmro.states[(int)(mg.gmro.instances*Math.random())];
+        mg.analyze();
+        mg=mg.gmro.states[(int)(mg.gmro.instances*Math.random())];
         mg.analyze();
         A:
         while (mg.gs == GameStatus.INGAME) {

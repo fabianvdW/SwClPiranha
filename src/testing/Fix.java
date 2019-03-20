@@ -7,12 +7,15 @@ import artificialplayer.PrincipalVariation;
 import artificialplayer.Search;
 import datastructures.BitBoard;
 import game.BitBoardConstants;
+import game.GameColor;
 import game.GameMove;
 import game.MyGameState;
 import helpers.FEN;
 import helpers.GlobalFlags;
 import helpers.StringToGameStateConverter;
 import sc.plugin2019.Board;
+
+import java.util.Arrays;
 
 public class Fix {
     public static String[] fens = {
@@ -35,7 +38,8 @@ public class Fix {
 */
         //MyGameState g = new MyGameState(new BitBoard(4096L, 140737488355328L));
 
-        MyGameState g = FEN.readFEN("167774342 153122387368607744 256 2305843009213702144 0 140754668224512 r 44 22");
+        MyGameState g = FEN.readFEN("570753184 283141960893440 0 2305845208255823872 1024 8589934592 b 35 17");
+
         System.out.println(g);
         System.out.println(BoardRating.rating(g, AlphaBeta.brc));
         System.exit(0);
@@ -44,14 +48,20 @@ public class Fix {
         se.run();
         System.out.println(AlphaBeta.nodesExamined);
         System.out.println(AlphaBeta.depth0Nodes);
+        System.out.println(AlphaBeta.quiesenceNodes);
         System.out.println(se.currentBestPv.score);
+        System.out.println(Arrays.toString(AlphaBeta.indexs));
+        System.out.println(AlphaBeta.killerMovesFound);
+        System.out.println(AlphaBeta.noKillerMovesFound);
         System.exit(-1);
+        byte birth = 0;
         for (int i = 0; i < fens.length; i++) {
             MyGameState mg = FEN.readFEN(fens[i]);
             System.out.println(mg);
             Search s = new Search(mg, depths[i]);
+            s.birthTime = birth;
             s.run();
-            Search.birthTime += 2;
+            birth += 2;
             PrincipalVariation pv = s.currentBestPv;
             GameMove m = pv.stack.get(0);
             System.out.println("Move found in Direction: " + m.dir);

@@ -13,11 +13,12 @@ import java.util.Scanner;
 
 public abstract class ArtificalPlayer {
     MyGameState mg;
+    byte birth = 0;
 
     public ArtificalPlayer() {
     }
 
-    public abstract PrincipalVariation requestMove(int time);
+    public abstract PrincipalVariation requestMove(int time, byte birth);
 
     public void main(String logName) {
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("data.txt");
@@ -35,7 +36,7 @@ public abstract class ArtificalPlayer {
                     long l1 = Long.parseLong(arr[2]);
                     mg = new MyGameState(new BitBoard(l0, l1));
                 } else if (arr[0].equalsIgnoreCase("requestmove")) {
-                    PrincipalVariation pv = this.requestMove(Integer.parseInt(arr[1]));
+                    PrincipalVariation pv = this.requestMove(Integer.parseInt(arr[1]), this.birth);
                     GameMove res = pv.stack.get(0);
                     boolean mateFound = pv.score < -29000 || pv.score > 29000;
                     System.out.println(res.from + " " + res.to + " " + mateFound);
@@ -51,7 +52,7 @@ public abstract class ArtificalPlayer {
                     for (int i = 0; i < mg.gmro.instances; i++) {
                         if (mg.gmro.moves[i].from == from && mg.gmro.moves[i].to == to) {
                             mg = mg.gmro.states[i];
-                            Search.birthTime += 1;
+                            this.birth += 1;
                             l.log(LogLevel.INFO, "FEN:\n" + FEN.toFEN(mg));
                             break;
                         }

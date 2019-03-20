@@ -1,6 +1,10 @@
 package game;
 
-public class GameMove {
+import java.io.Serializable;
+
+public class GameMove implements Serializable {
+    static final long serialVersionUID = 42L;
+
     public int from;
     public int to;
     public GameDirection dir;
@@ -22,7 +26,7 @@ public class GameMove {
     public boolean equals(Object o){
         if(o instanceof GameMove){
             GameMove g= (GameMove) o;
-            return g.from==this.from&&g.to==this.to&&g.dir==this.dir;
+            return g.from==this.from&&g.to==this.to;
         }
         return false;
     }

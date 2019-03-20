@@ -1,17 +1,26 @@
 package artificialplayer;
 
 import game.GameColor;
+import game.GameMove;
 import game.MyGameState;
 
 
 public class Search extends Thread {
     public PrincipalVariation currentBestPv;
-    public static CacheEntry[] cache = new CacheEntry[2 * 524288];
-    public static int cacheMask = 2 * 524288 - 1;
+    public static CacheEntry[] cache = new CacheEntry[4 * 524288];
+    public static int cacheMask = 4 * 524288 - 1;
+
+    public QuiesenceCacheEntry[] quiesenceCache = new QuiesenceCacheEntry[2 * 524288];
+    public static int quiesenceCacheMask = 2 * 524288 - 1;
     //Power of 2
+    public KillerMove[][] killers = new KillerMove[100][3];
+    public int lastKillerDeleted = 0;
+    public int[][] historyHeuristic;
+    public int[][] bfHeuristic;
     public int depth;
     public boolean stop = false;
-    public static byte birthTime = 0;
+    public byte birthTime = 0;
+    public int birthTimeQuiesence = 0;
     MyGameState mg;
 
     public Search(MyGameState mg, int depth) {
@@ -20,11 +29,19 @@ public class Search extends Thread {
     }
 
     public void run() {
+        if (mg.pliesPlayed >= 52) {
+            AlphaBeta.nullmove = false;
+        } else {
+            AlphaBeta.nullmove = false;
+        }
+        killers = new KillerMove[100][3];
+        historyHeuristic = new int[100][100];
+        bfHeuristic = new int[100][100];
         for (int depth = 1; depth <= this.depth; depth++) {
             //AlphaBeta.nodesExamined = 0;
             //AlphaBeta.depth0Nodes = 0;
             //System.out.println("Depth: " + depth + " searched");
-            PrincipalVariation pv = AlphaBeta.alphaBetaRoot(this.mg, depth, mg.move == GameColor.RED ? 1 : -1, -100000, 100000);
+            PrincipalVariation pv = AlphaBeta.alphaBeta(this, this.mg, depth, mg.move == GameColor.RED ? 1 : -1, -100000, 100000, 0);
             if (stop) {
                 break;
             }
@@ -33,9 +50,10 @@ public class Search extends Thread {
             //System.out.println("Score: " + pv.score);
             for (int i = currentBestPv.stack.size() - 1; i >= 0; i--) {
                 boolean betaNode = (i == currentBestPv.stack.size() - 1) && currentBestPv.stack.size() < depth;
-                cache[(int) (currentBestPv.hashStack.get(i) & Search.cacheMask)] = new CacheEntry(currentBestPv.hashStack.get(i), currentBestPv.score * (i % 2 == 0 ? 1 : -1), Search.birthTime,
+                cache[(int) (currentBestPv.hashStack.get(i) & Search.cacheMask)] = new CacheEntry(currentBestPv.hashStack.get(i), currentBestPv.score * (i % 2 == 0 ? 1 : -1), this.birthTime,
                         (byte) (depth - i), currentBestPv.stack.get(i), true, betaNode, false);
             }
+            birthTimeQuiesence++;
             //
             //cache[(int) (this.mg.hash & Search.cacheMask)] = new CacheEntry(mg.hash, currentBestPv.score, Search.birthTime, (byte) depth, currentBestPv.stack.get(0));
         }
