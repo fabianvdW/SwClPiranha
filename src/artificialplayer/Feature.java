@@ -14,8 +14,4 @@ public class Feature implements Serializable {
         this.b = b;
         this.c = c;
     }
-
-    public double getOutput(double input, double phase) {
-        return a * input + phase * b * input + (1 - phase) * c * input;
-    }
 }

@@ -25,6 +25,7 @@ public class AlphaBeta extends ArtificalPlayer {
             0, 8.0, 0,
             0, 0, -0.4
     };
+
     public static BoardRatingConstants brc = new BoardRatingConstants(gaDna);
     public static Search currentSearch = new Search(null, -1);
 

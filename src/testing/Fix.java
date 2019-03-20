@@ -38,7 +38,7 @@ public class Fix {
 */
         //MyGameState g = new MyGameState(new BitBoard(4096L, 140737488355328L));
 
-        MyGameState g = FEN.readFEN("66594 216278395359592704 0 4611686022735986688 0 17660905521152 r 52 26");
+        MyGameState g = FEN.readFEN("570753184 283141960893440 0 2305845208255823872 1024 8589934592 b 35 17");
 
         System.out.println(g);
         System.out.println(BoardRating.rating(g, AlphaBeta.brc));

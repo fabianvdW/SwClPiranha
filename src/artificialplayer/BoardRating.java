@@ -1,6 +1,8 @@
 package artificialplayer;
 
 import datastructures.BitBoard;
+import evaltuning.TexelParser;
+import evaltuning.TexelTuning;
 import game.*;
 import helpers.GlobalFlags;
 
@@ -57,7 +59,8 @@ public class BoardRating {
         double randFische = 0;
 
         int fischAnzahl = fische.popCount();
-        fischEval = brc.anzahlFische.getOutput(fischAnzahl, phase);
+        UsedFeature fischAnzahlUsed = new UsedFeature(fischAnzahl, brc.anzahlFische, phase);
+        fischEval = fischAnzahlUsed.value;
 
         if (fischAnzahl == 2) {
             fischEval += 20;
@@ -65,42 +68,58 @@ public class BoardRating {
             fischEval += 10;
         } else if (fischAnzahl == 4) {
             fischEval += 5;
+        } else if (fischAnzahl == 5) {
+            fischEval += 2.5;
+        } else if (fischAnzahl == 6) {
+            fischEval += 1;
         }
+
         Pos spielFeldMitte = new Pos(4.5, 4.5);
+        double cummulatedInput = 0.0;
         for (Schwarm s : schwaerme) {
             double dist = spielFeldMitte.distance(new Pos(s.averageX, s.averageY));
-            abstandZuMitteEval += brc.abstandZuMitte.getOutput(Math.pow(dist / MAX_DIST, 2), phase) * s.size;
+            cummulatedInput += Math.pow(dist / MAX_DIST, 2) * s.size;
         }
-        abstandZuMitteEval /= fischAnzahl + 0.0;
-
+        cummulatedInput /= fischAnzahl + 0.0;
         if (bso.biggestSchwarm.size / (fischAnzahl + 0.0) > 0.5) {
             double dist = spielFeldMitte.distance(new Pos(bso.biggestSchwarm.averageX, bso.biggestSchwarm.averageY));
-            abstandZuMitteEval += brc.abstandZuMitte.getOutput(Math.pow(dist / MAX_DIST, 2), phase);
+            cummulatedInput += Math.pow(dist / MAX_DIST, 2);
         }
 
+        UsedFeature abstandZuMitteUsed = new UsedFeature(cummulatedInput, brc.abstandZuMitte, phase);
+        abstandZuMitteEval = abstandZuMitteUsed.value;
+
         Pos biggestSchwarmCoordinates = new Pos(bso.biggestSchwarm.averageX, bso.biggestSchwarm.averageY);
+        cummulatedInput = 0.0;
         if (bso.biggestSchwarm.size < fischAnzahl) {
             int f = fischAnzahl - bso.biggestSchwarm.size;
             for (Schwarm s : schwaerme) {
                 if (s != bso.biggestSchwarm) {
                     double dist = biggestSchwarmCoordinates.distance(new Pos(s.averageX, s.averageY));
-                    abstandZuBiggestSchwarm += brc.abstandZuBiggestSchwarm.getOutput(Math.pow(dist / MAX_DIST, 2), phase) * s.size;
+                    cummulatedInput += Math.pow(dist / MAX_DIST, 2) * s.size;
                 }
 
             }
-            abstandZuBiggestSchwarm /= f + 0.0;
+            cummulatedInput /= f + 0.0;
         }
+        UsedFeature abstandZuBiggestSchwarmUsed = new UsedFeature(cummulatedInput, brc.abstandZuBiggestSchwarm, phase);
+        abstandZuBiggestSchwarm = abstandZuBiggestSchwarmUsed.value;
 
         double ratio = bso.biggestSchwarm.size / (fischAnzahl + 0.0);
-        biggestSchwarmEval = brc.biggestSchwarm.getOutput(Math.pow(ratio, 2), phase);
+        cummulatedInput = Math.pow(ratio, 2);
         if (ratio > 0.5) {
             int uselessFische = fischAnzahl - bso.biggestSchwarm.size;
-            biggestSchwarmEval *= 1 + bso.biggestSchwarm.calculateSichereFische() / (bso.biggestSchwarm.size + 0.0) - 8 * Math.pow(gegnerRatio, 3) * uselessFische / (fischAnzahl + 0.0);
+            cummulatedInput *= 1 + bso.biggestSchwarm.calculateSichereFische() / (bso.biggestSchwarm.size + 0.0) - 8 * Math.pow(gegnerRatio, 3) * uselessFische / (fischAnzahl + 0.0);
         }
+        UsedFeature biggestSchwarmUsed = new UsedFeature(cummulatedInput, brc.biggestSchwarm, phase);
+        biggestSchwarmEval = biggestSchwarmUsed.value;
 
-        absoluteSchwarmEval = brc.absolutSchwarm.getOutput(Math.pow(bso.biggestSchwarm.size / 16.0 + 0.5, 2), Math.pow(unSkewedPhase, 3));
 
-        randFische = brc.randFische.getOutput(fische.and(BitBoardConstants.RAND).popCount(), phase);
+        UsedFeature absoluteSchwarmUsed = new UsedFeature(Math.pow(bso.biggestSchwarm.size / 16.0 + 0.5, 2), brc.absolutSchwarm, Math.pow(unSkewedPhase, 3));
+        absoluteSchwarmEval = absoluteSchwarmUsed.value;
+
+        UsedFeature randFischeUsed = new UsedFeature(fische.and(BitBoardConstants.RAND).popCount(), brc.randFische, phase);
+        randFische = randFischeUsed.value;
 
 
         if (GlobalFlags.VERBOSE) {
@@ -113,6 +132,14 @@ public class BoardRating {
             System.out.println("Maximal Schwarm Size: " + absoluteSchwarmEval);
             System.out.println("Rand Fische: " + randFische);
             //System.out.println("Insg: " + (biggestSchwarmEval + abstandZuBiggestSchwarmEval + abstandZuMitteEval + biggestSchwarmBonusEval + fischEval));
+        }
+        if (GlobalFlags.TEXEL_TUNING) {
+            TexelParser.lastEval[0] = fischAnzahlUsed;
+            TexelParser.lastEval[1] = abstandZuMitteUsed;
+            TexelParser.lastEval[2] = abstandZuBiggestSchwarmUsed;
+            TexelParser.lastEval[3] = biggestSchwarmUsed;
+            TexelParser.lastEval[4] = absoluteSchwarmUsed;
+            TexelParser.lastEval[5] = randFischeUsed;
         }
         return abstandZuMitteEval + fischEval + abstandZuBiggestSchwarm + biggestSchwarmEval + absoluteSchwarmEval + randFische;
     }

@@ -2,16 +2,25 @@ package evaltuning;
 
 import artificialplayer.AlphaBeta;
 import artificialplayer.BoardRating;
+import artificialplayer.BoardRatingConstants;
+import artificialplayer.UsedFeature;
 import game.MyGameState;
 import helpers.FEN;
+import helpers.GlobalFlags;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Random;
 
 public class TexelParser {
     static double k = 0.27;
     static int theorticalMax = 0;
     static BinarySearchTree bst;
+    public static UsedFeature[] lastEval = new UsedFeature[6];
+    static int batchSize = 16000;
+    static double lr = -0.1;
     /*
      * Unique GameStates: 3597341
      * Label Collisons when parsing: 64940
@@ -59,13 +68,39 @@ public class TexelParser {
     }
 
     public static void main(String[] args) {
-        //makeBst();
-        //saveBst();
-        readBst();
+        makeBst();
+        saveBst();
+        GlobalFlags.TEXEL_TUNING = true;
+        //readBst();
         ArrayList<LabeledGameState> states = new ArrayList<>(BinarySearchTree.nodeCount);
         bst.traverse(states);
         System.out.println("States size: " + states.size());
-        System.out.println(evaluationError(states));
+        AlphaBeta.brc = new BoardRatingConstants(AlphaBeta.gaDna);
+        /*
+        for (int i = 0; i < 100; i++) {
+            System.out.println("Loss: " + evaluationError(states));
+            makeSGD(states);
+            System.out.println("New Weights: ");
+            System.out.println(Arrays.toString(AlphaBeta.gaDna));
+        }*/
+        for (int i = 0; i < 18; i++) {
+            double[] best = null;
+            double bestScore = 1;
+            for (int j = 0; j < 100; j++) {
+                double plus = j / 100.0 - 0.5;
+                double[] cl = AlphaBeta.gaDna.clone();
+                cl[i] += plus;
+                AlphaBeta.brc = new BoardRatingConstants(cl);
+                double err = evaluationError(states);
+                System.out.println("I: " + i + ", J: " + j + " Error: " + err);
+                if (err < bestScore) {
+                    bestScore = err;
+                    best = cl;
+                }
+            }
+            AlphaBeta.gaDna = best;
+        }
+        System.out.println(Arrays.toString(AlphaBeta.gaDna));
     }
 
     public static double evaluationError(ArrayList<LabeledGameState> states) {
@@ -77,8 +112,65 @@ public class TexelParser {
         return res;
     }
 
+    public static void makeSGD(ArrayList<LabeledGameState> states) {
+        int iterations = (int) (Math.ceil(states.size() / (batchSize + 0.0)));
+        for (int i = 0; i < iterations; i++) {
+            makeMiniBatch(states, i);
+        }
+        Collections.shuffle(states);
+    }
+
+    public static void makeMiniBatch(ArrayList<LabeledGameState> states, int batchNum) {
+        double[] gradient = new double[18];
+        int size = states.size();
+        for (int i = batchNum * batchSize; i < size && i < (batchNum + 1) * batchSize; i++) {
+            LabeledGameState lgs = states.get(i);
+            double eval = BoardRating.rating(lgs.mg, AlphaBeta.brc);
+            double labelMinusEval = lgs.label - eval;
+            double[] evalDeriv = makeEvalDeriv();
+            double sigmaDerivAt = sigmoid_deriv(Math.pow(labelMinusEval, 2));
+            multiplyDouble(evalDeriv, sigmaDerivAt * 2 * labelMinusEval);
+            addDouble(gradient, evalDeriv);
+        }
+        multiplyDouble(gradient, (1 / (batchSize + 0.0)) * lr);
+        addDouble(AlphaBeta.gaDna, gradient);
+        AlphaBeta.brc = new BoardRatingConstants(AlphaBeta.gaDna);
+    }
+
+    public static double[] makeEvalDeriv() {
+        double[] res = new double[18];
+        for (int i = 0; i < 6; i++) {
+            res[3 * i] = lastEval[i].inputA;
+            res[3 * i + 1] = lastEval[i].inputB;
+            res[3 * i + 2] = lastEval[i].inputC;
+        }
+        return res;
+    }
+
+    public static void addDouble(double[] addTo, double[] toAdd) {
+        for (int i = 0; i < addTo.length; i++) {
+            addTo[i] += toAdd[i];
+        }
+    }
+
+    public static void multiplyDouble(double[] toMultiply, double multiplier) {
+        for (int i = 0; i < toMultiply.length; i++) {
+            toMultiply[i] *= multiplier;
+        }
+    }
+
     public static double sigmoid(double s) {
         return 1.0 / (1.0 + Math.pow(10, -k * s / 4.0));
+    }
+
+    public static double sigmoid_deriv(double x) {
+        double oben = k * Math.log(10);
+        double coshInput = oben * x / 8.0;
+        return oben / (16.0 * Math.pow(cosh(coshInput), 2));
+    }
+
+    public static double cosh(double x) {
+        return (Math.exp(x) + Math.exp(-x)) / 2.0;
     }
 
     public static void readTexelFile(String path) {
