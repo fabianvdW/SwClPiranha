@@ -137,6 +137,17 @@ public class BoardRating {
             TexelParser.lastEval[4] = absoluteSchwarmUsed;
             TexelParser.lastEval[5] = randFischeUsed;
         }
+        //Phase-Feature:
+        //Gezonte Fische bestimmen
+        //Für jeden Fisch nicht im größten Schwarm:
+        //Checke ausrichtung zum größten Schwarm:
+        //Oben Links// Oben //Oben rechts
+        //Mitte Links// X // Mitte rechts
+        //Unten LInks// Unten// Unten rechts
+        //Nachbar-Bitboards dieser Ausrichtung erzeugen
+        //Gegner-Fische in diese Richtung zählen, die blockieren
+        //Umso mehr(^2), desto schlechter
+        //Center-Fische-Feature
         return abstandZuMitteEval + fischEval + abstandZuBiggestSchwarm + biggestSchwarmEval + absoluteSchwarmEval + randFische;
     }
 

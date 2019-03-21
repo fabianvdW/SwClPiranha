@@ -68,10 +68,10 @@ public class TexelParser {
     }
 
     public static void main(String[] args) {
-        makeBst();
-        saveBst();
+        //makeBst();
+        //saveBst();
         GlobalFlags.TEXEL_TUNING = true;
-        //readBst();
+        readBst();
         ArrayList<LabeledGameState> states = new ArrayList<>(BinarySearchTree.nodeCount);
         bst.traverse(states);
         System.out.println("States size: " + states.size());
@@ -83,6 +83,8 @@ public class TexelParser {
             System.out.println("New Weights: ");
             System.out.println(Arrays.toString(AlphaBeta.gaDna));
         }*/
+        System.out.println("Loss: " + evaluationError(states,AlphaBeta.brc));
+        /*
         for (int i = 0; i < 18; i++) {
             double[] best = null;
             double bestScore = 1;
@@ -100,13 +102,14 @@ public class TexelParser {
             }
             AlphaBeta.gaDna = best;
         }
+        */
         System.out.println(Arrays.toString(AlphaBeta.gaDna));
     }
 
-    public static double evaluationError(ArrayList<LabeledGameState> states) {
+    public static double evaluationError(ArrayList<LabeledGameState> states,BoardRatingConstants brc) {
         double res = 0.0;
         for (LabeledGameState lgs : states) {
-            res += Math.pow(lgs.label - sigmoid(BoardRating.rating(lgs.mg, AlphaBeta.brc)), 2);
+            res += Math.pow(lgs.label - sigmoid(BoardRating.rating(lgs.mg, brc)), 2);
         }
         res /= states.size() + 0.0;
         return res;

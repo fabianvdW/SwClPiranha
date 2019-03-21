@@ -10,13 +10,13 @@ public class Genome implements Serializable {
     static final long serialVersionUID = 42L;
 
     public static double[] standardDna = {
-            0.3, 0.4, 0,
-            0.5, 1.5, 0,
-            0, 0, -0.15,
-            0, 0, 0.2,
-            0, 2.8, 0,
-            -0.1, 0, -0.5,
-            -0.4, -2.3, 0
+            //1,Phase,(1-Phase)
+            0.8, 0, 0.3,
+            0, 0, -2.0,
+            -1.5, -5.5, 0.0,
+            1.0, 4.0, 0,
+            0, 8.0, 0,
+            0, 0, -0.4
     };
 
     public static Random r = new Random();
