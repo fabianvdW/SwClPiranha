@@ -41,9 +41,12 @@ public class Evolution implements Serializable {
     }
 
     public synchronized Match getMatch() {
-        Match res = matchQueue.get(0);
-        matchQueue.remove(0);
-        return res;
+        if (this.matchQueue.size() > 0) {
+            Match res = matchQueue.get(0);
+            matchQueue.remove(0);
+            return res;
+        }
+        return null;
     }
 
     public synchronized void addMatch(Match m) {
@@ -52,31 +55,38 @@ public class Evolution implements Serializable {
 
     public void doGeneration() {
         //Play in queue
+        System.out.println("top 33-64");
         makeQueue(this.population, fillIndex(64), 2);
         Genome[][] winnersAndLosers = playQueue();
         this.population = winnersAndLosers[0];
 
+        System.out.println("top 17-32");
         makeQueue(this.population, fillIndex(32), 2);
         winnersAndLosers = playQueue();
         this.population = winnersAndLosers[0];
 
+        System.out.println("top 9-16");
         makeQueue(this.population, fillIndex(16), 2);
         winnersAndLosers = playQueue();
         this.population = winnersAndLosers[0];
         Genome[] top16toTop9 = winnersAndLosers[1];
 
+        System.out.println("top 5-8");
         makeQueue(this.population, fillIndex(8), 2);
         winnersAndLosers = playQueue();
         this.population = winnersAndLosers[0];
         Genome[] top8toTop5 = winnersAndLosers[1];
 
+        System.out.println("Top 3-4");
         makeQueue(this.population, fillIndex(4), 2);
         winnersAndLosers = playQueue();
         this.population = winnersAndLosers[0];
         Genome[] top4ToTop3 = winnersAndLosers[1];
 
-        makeQueue(this.population, fillIndex(2), 10);
+        System.out.println("top 1-2");
+        makeQueue(this.population, fillIndex(2), 5);
         winnersAndLosers = playQueue();
+        System.out.println("Seeding");
         this.population = winnersAndLosers[0];
         Genome top2 = winnersAndLosers[1][0];
         assert (this.population.length == 1);
@@ -115,6 +125,7 @@ public class Evolution implements Serializable {
         }
 
         //Sufi
+        System.out.println("Sufi");
         Match sufi = null;
         if (this.sufiWinner == null) {
             this.sufiWinner = this.population[0];
@@ -161,6 +172,7 @@ public class Evolution implements Serializable {
             }
         }
 
+        System.out.println("Sufi done");
         this.population[62] = new Genome(AlphaBeta.gaDna);
         this.population[63] = this.sufiWinner.mutate(this.mutateStaerke, 1);
         this.generation += 1;
@@ -384,8 +396,12 @@ class QueuePlayer extends Thread {
     public void run() {
         while (ev.matchQueue.size() > 0) {
             Match m = ev.getMatch();
-            m.result = Evolution.playGame(m);
-            ev.addMatch(m);
+            if (m != null) {
+                m.result = Evolution.playGame(m);
+                ev.addMatch(m);
+            } else {
+                break;
+            }
         }
     }
 }

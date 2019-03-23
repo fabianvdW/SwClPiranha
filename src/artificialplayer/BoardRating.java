@@ -117,7 +117,6 @@ public class BoardRating {
         UsedFeature randFischeUsed = new UsedFeature(fische.and(BitBoardConstants.RAND).popCount(), brc.randFische, phase);
         randFische = randFischeUsed.value;
 
-
         if (GlobalFlags.VERBOSE) {
             System.out.println("Phase: " + phase);
             System.out.println("Eval for " + gc);
@@ -137,6 +136,7 @@ public class BoardRating {
             TexelParser.lastEval[4] = absoluteSchwarmUsed;
             TexelParser.lastEval[5] = randFischeUsed;
         }
+        //Center-Fische-Feature
         return abstandZuMitteEval + fischEval + abstandZuBiggestSchwarm + biggestSchwarmEval + absoluteSchwarmEval + randFische;
     }
 

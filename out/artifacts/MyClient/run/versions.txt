@@ -2,3 +2,5 @@ Uploaded Version: v2
 v2->v3: ~+160, long tested. Neuerung: Handwritten Eval
 
 v3-> v4: ~+120, normal tests: Neuerung: Killer Heuristic, Relative History Heuristic, Re-written Eval, Fokus auf Potential und Fische
+v4-> v5: ~+120, normal tests: Neuerung: BiggestSchwarm Strafe vom Anfang weggenommen und zum Phase-Feature gemacht
+v5-> v5.1: ~+70, long tests: Neuerung: BiggestSchwarm Strafe vom normalen Feature weggenommen, zum Phase-Feature hinzugefügt
