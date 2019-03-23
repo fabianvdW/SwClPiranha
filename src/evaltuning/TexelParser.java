@@ -15,7 +15,7 @@ import java.util.Collections;
 import java.util.Random;
 
 public class TexelParser {
-    static double k = 0.27;
+    static double k = 0.5;
     static int theorticalMax = 0;
     static BinarySearchTree bst;
     public static UsedFeature[] lastEval = new UsedFeature[6];
@@ -83,7 +83,7 @@ public class TexelParser {
             System.out.println("New Weights: ");
             System.out.println(Arrays.toString(AlphaBeta.gaDna));
         }*/
-        System.out.println("Loss: " + evaluationError(states,AlphaBeta.brc));
+        System.out.println("Loss: " + evaluationError(states, AlphaBeta.brc));
         /*
         for (int i = 0; i < 18; i++) {
             double[] best = null;
@@ -106,7 +106,7 @@ public class TexelParser {
         System.out.println(Arrays.toString(AlphaBeta.gaDna));
     }
 
-    public static double evaluationError(ArrayList<LabeledGameState> states,BoardRatingConstants brc) {
+    public static double evaluationError(ArrayList<LabeledGameState> states, BoardRatingConstants brc) {
         double res = 0.0;
         for (LabeledGameState lgs : states) {
             res += Math.pow(lgs.label - sigmoid(BoardRating.rating(lgs.mg, brc)), 2);

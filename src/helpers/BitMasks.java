@@ -10,6 +10,101 @@ public class BitMasks {
 
     public static void main(String[] args) {
         //System.out.println(BitBoardConstants.RAND);
+        //System.out.println(generateZonedBitBoards());
+    }
+
+    public static String generateZonedBitBoards() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        for (int i = 0; i < 8; i++) {
+            sb.append("{");
+            for (int j = 0; j < 100; j++) {
+                BitBoard b = BitBoardConstants.NACHBARN[j].clone();
+                BitBoard mask = new BitBoard(0, 0);
+                switch (i) {
+                    case 0: {
+                        mask.orEquals(new BitBoard(0, 1).leftShift(j + 11));
+                        mask.orEquals(new BitBoard(0, 1).leftShift(j + 10));
+                        mask.orEquals(new BitBoard(0, 1).leftShift(j + 9));
+                        break;
+                    }
+                    case 1: {
+                        mask.orEquals(new BitBoard(0, 1).leftShift(j + 10));
+                        mask.orEquals(new BitBoard(0, 1).leftShift(j + 11));
+                        mask.orEquals(new BitBoard(0, 1).leftShift(j + 1));
+                        break;
+                    }
+                    case 2: {
+                        mask.orEquals(new BitBoard(0, 1).leftShift(j + 11));
+                        mask.orEquals(new BitBoard(0, 1).leftShift(j + 1));
+                        if (j > 8) {
+                            mask.orEquals(new BitBoard(0, 1).leftShift(j - 9));
+                        }
+                        break;
+                    }
+                    case 3: {
+                        mask.orEquals(new BitBoard(0, 1).leftShift(j + 1));
+                        if (j > 8) {
+                            mask.orEquals(new BitBoard(0, 1).leftShift(j - 9));
+                        }
+                        if (j > 9) {
+                            mask.orEquals(new BitBoard(0, 1).leftShift(j - 10));
+                        }
+                        break;
+                    }
+                    case 4: {
+                        if (j > 8) {
+                            mask.orEquals(new BitBoard(0, 1).leftShift(j - 9));
+                        }
+                        if (j > 9) {
+                            mask.orEquals(new BitBoard(0, 1).leftShift(j - 10));
+                        }
+                        if (j > 10) {
+                            mask.orEquals(new BitBoard(0, 1).leftShift(j - 11));
+                        }
+                        break;
+                    }
+                    case 5: {
+                        if (j > 9) {
+                            mask.orEquals(new BitBoard(0, 1).leftShift(j - 10));
+                        }
+                        if (j > 10) {
+                            mask.orEquals(new BitBoard(0, 1).leftShift(j - 11));
+                        }
+                        if (j > 0) {
+                            mask.orEquals(new BitBoard(0, 1).leftShift(j - 1));
+                        }
+                        break;
+                    }
+                    case 6: {
+                        if (j > 10) {
+                            mask.orEquals(new BitBoard(0, 1).leftShift(j - 11));
+                        }
+                        if (j > 0) {
+                            mask.orEquals(new BitBoard(0, 1).leftShift(j - 1));
+                        }
+                        mask.orEquals(new BitBoard(0, 1).leftShift(j + 9));
+                        break;
+                    }
+                    case 7: {
+                        if (j > 0) {
+                            mask.orEquals(new BitBoard(0, 1).leftShift(j - 1));
+                        }
+                        mask.orEquals(new BitBoard(0, 1).leftShift(j + 9));
+                        mask.orEquals(new BitBoard(0, 1).leftShift(j + 10));
+                        break;
+                    }
+                }
+                b.andEquals(mask);
+                sb.append("new BitBoard(");
+                sb.append(String.format("0x%016x", b.l0) + "L,");
+                sb.append(String.format("0x%016x", b.l1) + "L");
+                sb.append("),");
+            }
+            sb.append("},");
+        }
+        sb.append("};");
+        return sb.toString();
     }
 
     public static String generateEinheitsUnitsLeftShiftMasksNot() {

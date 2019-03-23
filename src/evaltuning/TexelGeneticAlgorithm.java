@@ -5,8 +5,6 @@ import artificialplayer.BoardRatingConstants;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static java.util.Map.Entry.comparingByValue;
-import static java.util.stream.Collectors.toMap;
 
 public class TexelGeneticAlgorithm {
 

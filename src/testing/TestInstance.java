@@ -410,8 +410,8 @@ class TestGames extends Thread {
                         this.p2Stats.schwarmSizeOccurencesWhenWon[blauerSchwarm] += 1;
 
                         if (roterSchwarm > blauerSchwarm) {
-                            this.p1Stats.wonWhenSchwarmWasSmaller++;
-                            this.p2Stats.lostWhenSchwarmWasBigger++;
+                            this.p2Stats.wonWhenSchwarmWasSmaller++;
+                            this.p1Stats.lostWhenSchwarmWasBigger++;
                         }
                         this.p2Stats.wins++;
                         this.p2Stats.winsOnBlue++;
@@ -427,8 +427,8 @@ class TestGames extends Thread {
                         this.p1Stats.schwarmSizeOccurencesWhenWon[blauerSchwarm] += 1;
 
                         if (roterSchwarm > blauerSchwarm) {
-                            this.p2Stats.wonWhenSchwarmWasSmaller++;
-                            this.p1Stats.lostWhenSchwarmWasBigger++;
+                            this.p1Stats.wonWhenSchwarmWasSmaller++;
+                            this.p2Stats.lostWhenSchwarmWasBigger++;
                         }
 
                         this.p1Stats.wins++;
