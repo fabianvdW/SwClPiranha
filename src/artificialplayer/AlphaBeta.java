@@ -18,8 +18,8 @@ public class AlphaBeta extends ArtificalPlayer {
     // (v3)
     public static double[] gaDna = {
             //1,Phase,(1-Phase)
-            0.8, 0, 0.3,
-            0, 0, -2.0,
+            1.1, 0, 0.3,
+            0, 0, -16.0,
             0, -7.0, 0.0,
             1.0, 4.0, 0,
             0, 8.0, 0,

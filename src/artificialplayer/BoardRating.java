@@ -105,7 +105,7 @@ public class BoardRating {
         cummulatedInput = Math.pow(ratio, 2);
         if (ratio > 0.5) {
             int uselessFische = fischAnzahl - bso.biggestSchwarm.size;
-            cummulatedInput *= 1 + bso.biggestSchwarm.calculateSichereFische() / (bso.biggestSchwarm.size + 0.0) - 8 * Math.pow(gegnerRatio, 3) * uselessFische / (fischAnzahl + 0.0);
+            cummulatedInput *= 1 + bso.biggestSchwarm.calculateSichereFische() / (bso.biggestSchwarm.size + 0.0); //- 8 * Math.pow(gegnerRatio, 3) * uselessFische / (fischAnzahl + 0.0);
         }
         UsedFeature biggestSchwarmUsed = new UsedFeature(cummulatedInput, brc.biggestSchwarm, phase);
         biggestSchwarmEval = biggestSchwarmUsed.value;
