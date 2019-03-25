@@ -1,6 +1,7 @@
 package game;
 
 import datastructures.BitBoard;
+import helpers.BitMasks;
 import helpers.StringColor;
 
 import java.io.Serializable;
@@ -156,10 +157,9 @@ public class MyGameState implements Serializable {
         int diff;
         do {
             pos2 = getRandomKrakenPosition();
-            diff = Math.abs(pos1 - pos2);
             //Make sure pos is in the middle 6x6 squares || make sure it is not on same vertical, horizontal or diagonal line
         }
-        while (pos2 % 10 == 9 || pos2 % 10 == 8 || pos2 % 10 == 1 || pos2 % 10 == 0 || diff % 10 == 0 || pos1 / 10 == pos2 / 10 || diff % 11 == 0 || diff % 9 == 0);
+        while (pos2 % 10 == 9 || pos2 % 10 == 8 || pos2 % 10 == 1 || pos2 % 10 == 0 || !BitMasks.isValidKrakenPosition(pos1, pos2));
         BitBoard b = new BitBoard(0, 0);
         b.orEquals(new BitBoard(0, 1).leftShift(pos1));
         b.orEquals(new BitBoard(0, 1).leftShift(pos2));

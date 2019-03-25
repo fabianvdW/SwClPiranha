@@ -3,14 +3,47 @@ package helpers;
 import datastructures.BitBoard;
 import game.BitBoardConstants;
 import game.GameDirection;
+import game.MyGameState;
 
 import javax.print.DocFlavor;
+import java.util.ArrayList;
 
 public class BitMasks {
 
     public static void main(String[] args) {
         //System.out.println(BitBoardConstants.RAND);
         //System.out.println(generateZonedBitBoards());
+    }
+
+    public static String generateKrakenPositions() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        BitBoard outerIterator = BitBoardConstants.CENTER.clone();
+        while (!outerIterator.equalsZero()) {
+            int pos1 = outerIterator.numberOfTrailingZeros();
+            outerIterator.unsetBitEquals(pos1);
+            BitBoard innerIterator = outerIterator.clone();
+            while (!innerIterator.equalsZero()) {
+                int pos2 = innerIterator.numberOfTrailingZeros();
+                innerIterator.unsetBitEquals(pos2);
+                if (isValidKrakenPosition(pos1, pos2)) {
+                    BitBoard kraken = new BitBoard(0, 1).leftShift(pos1).or(new BitBoard(0, 1).leftShift(pos2));
+                    sb.append("new BitBoard(");
+                    sb.append(String.format("0x%016x", kraken.l0) + "L,");
+                    sb.append(String.format("0x%016x", kraken.l1) + "L");
+                    sb.append("),");
+                }
+            }
+        }
+        sb.append("};");
+        return sb.toString();
+    }
+
+    public static boolean isValidKrakenPosition(int pos1, int pos2) {
+        int xDiff = pos1 % 10 - pos2 % 10;
+        int yDiff = pos1 / 10 - pos2 / 10;
+        return pos1 / 10 != pos2 / 10 && pos1 % 10 != pos2 % 10
+                && xDiff != yDiff && xDiff != -yDiff;
     }
 
     public static String generateZonedBitBoards() {

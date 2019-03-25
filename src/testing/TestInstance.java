@@ -20,9 +20,27 @@ import java.util.TimerTask;
 public class TestInstance {
     public static ArrayList<TestGames> threads = new ArrayList<>();
     public static int millisTime;
-    static ArrayList<BitBoard> krakenPositionsPlayed = new ArrayList<>();
     static Log l;
     static Log ergebnisLog;
+    static ArrayList<BitBoard> krakenPositions;
+
+    public static synchronized void fillKrakenPositions() {
+        krakenPositions = new ArrayList<>();
+        for (int i = 0; i < BitBoardConstants.KRAKEN_POSITIONS.length; i++) {
+            krakenPositions.add(BitBoardConstants.KRAKEN_POSITIONS[i]);
+        }
+    }
+
+    public static synchronized BitBoard drawKrakenPosition() {
+        if (krakenPositions == null || krakenPositions.size() == 0) {
+            fillKrakenPositions();
+            drawKrakenPosition();
+        }
+        int index = (int) (krakenPositions.size() * Math.random());
+        BitBoard res = krakenPositions.get(index);
+        krakenPositions.remove(index);
+        return res;
+    }
 
     public static void main(String[] args) {
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("data.txt");
@@ -263,12 +281,7 @@ class TestGames extends Thread {
                 waitReady(p1Input, p2Input);
                 MyGameState mg;
                 if (i % 2 == 0) {
-                    int count = 0;
-                    do {
-                        mg = new MyGameState();
-                        count++;
-                    } while (count < 50 && TestInstance.krakenPositionsPlayed.contains(mg.kraken));
-                    TestInstance.krakenPositionsPlayed.add(mg.kraken);
+                    mg = new MyGameState(TestInstance.drawKrakenPosition());
                     startState = mg.clone();
                 } else {
                     mg = startState;

@@ -4,23 +4,26 @@ import artificialplayer.AlphaBeta;
 import artificialplayer.BoardRating;
 import artificialplayer.BoardRatingConstants;
 import artificialplayer.UsedFeature;
+import datastructures.BitBoard;
+import game.BitBoardConstants;
+import game.GameColor;
 import game.MyGameState;
 import helpers.FEN;
 import helpers.GlobalFlags;
+import helpers.logging.Log;
+import helpers.logging.LogLevel;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Random;
+import java.util.*;
 
 public class TexelParser {
     static double k = 0.5;
     static int theorticalMax = 0;
     static BinarySearchTree bst;
     public static UsedFeature[] lastEval = new UsedFeature[6];
-    static int batchSize = 16000;
-    static double lr = -0.1;
+    static int batchSize = 3597341;
+    static double standardLr = -1;
+    static double lr;
     /*
      * Unique GameStates: 3597341
      * Label Collisons when parsing: 64940
@@ -48,13 +51,15 @@ public class TexelParser {
         }
     }
 
-    public static void makeBst() {
+    public static ArrayList<GameHistory> makeBst() {
+        ArrayList<GameHistory> res = new ArrayList<>();
         for (String s : paths) {
-            readTexelFile(s);
+            res.addAll(readTexelFile(s));
         }
         System.out.println("Unique GameStates: " + BinarySearchTree.nodeCount);
         System.out.println("Label Collisons when parsing: " + BinarySearchTree.labelCollisions);
         System.out.println("Parsed GameStates: " + theorticalMax);
+        return res;
     }
 
     public static void readBst() {
@@ -67,8 +72,111 @@ public class TexelParser {
         }
     }
 
+    public static double lrScheduler(double percent) {
+        return Math.pow(percent, 2) * 0.66 - 1.33 * percent + 1;
+    }
+
+    public static void makeStatistic(ArrayList<GameHistory> games) {
+        int redWins = 0;
+        int blueWins = 0;
+        int draws = 0;
+        double averageSchwarmSizeAtWin = 0;
+        double averageSchwarmSizeAtLoss = 0;
+        double averageFischSizeAtWin = 0;
+        double averageFischSizeAtLoss = 0;
+        double N = games.size() + 0.0;
+        ArrayList<BitBoard> unterschiedlicheKrakenPositionen = new ArrayList<>();
+        double[] redWinsKraken = new double[340];
+        double[] blueWinsKraken = new double[340];
+        double[] drawsKraken = new double[340];
+        for (GameHistory game : games) {
+            MyGameState lastState = game.history.get(game.history.size() - 1);
+            BitBoard kraken = lastState.kraken;
+            int index = findKrakenIndex(kraken);
+            if (!unterschiedlicheKrakenPositionen.contains(kraken)) {
+                unterschiedlicheKrakenPositionen.add(kraken);
+            }
+            if (game.redWin) {
+                redWinsKraken[index] += 1;
+                redWins++;
+                averageSchwarmSizeAtWin += BoardRating.getBiggestSchwarm(lastState, GameColor.RED);
+                averageSchwarmSizeAtLoss += BoardRating.getBiggestSchwarm(lastState, GameColor.BLUE);
+                averageFischSizeAtWin += lastState.roteFische.popCount();
+                averageFischSizeAtLoss += lastState.blaueFische.popCount();
+            } else if (game.blueWin) {
+                blueWinsKraken[index] += 1;
+                blueWins++;
+
+                averageSchwarmSizeAtWin += BoardRating.getBiggestSchwarm(lastState, GameColor.BLUE);
+                averageSchwarmSizeAtLoss += BoardRating.getBiggestSchwarm(lastState, GameColor.RED);
+                averageFischSizeAtWin += lastState.blaueFische.popCount();
+                averageFischSizeAtLoss += lastState.roteFische.popCount();
+            } else {
+                drawsKraken[index] += 1;
+                assert (game.draw);
+                draws++;
+            }
+        }
+        System.out.println("Games: " + N);
+        System.out.println("Red Wins: " + redWins + " (" + redWins / N + ")");
+        System.out.println("Blue Wins: " + blueWins + " (" + blueWins / N + ")");
+        System.out.println("Draws: " + draws + " (" + draws / N + ")");
+        System.out.println("Average Schwarm @Win: " + averageSchwarmSizeAtWin / N);
+        System.out.println("Average Fisch @Win: " + averageFischSizeAtWin / N);
+        System.out.println("Average Schwarm @Loss: " + averageSchwarmSizeAtLoss / N);
+        System.out.println("Average Fisch @Loss: " + averageFischSizeAtLoss / N);
+        System.out.println("Unterschiedliche Krakenpositionen played: " + unterschiedlicheKrakenPositionen.size());
+        for (int i = 0; i < 340; i++) {
+            double n = redWinsKraken[i] + blueWinsKraken[i] + drawsKraken[i];
+            double rP = redWinsKraken[i] / n;
+            double bP = blueWinsKraken[i] / n;
+            double dP = drawsKraken[i] / n;
+            System.out.println("I: " + i + " Games: " + n + " (R/B/D): (" + rP + ", " + bP + ", " + dP + ")");
+        }
+    }
+
+    public static int findKrakenIndex(BitBoard kraken) {
+        for (int i = 0; i < BitBoardConstants.KRAKEN_POSITIONS.length; i++) {
+            if (BitBoardConstants.KRAKEN_POSITIONS[i].equals(kraken)) {
+                return i;
+            }
+        }
+        System.exit(-1);
+        return -1;
+    }
+
+    public static void printWorstGames(ArrayList<GameHistory> games) {
+        Log l = new Log("worstEvaluationGames.log");
+        Collections.sort(games, new Comparator<GameHistory>() {
+            @Override
+            public int compare(GameHistory o1, GameHistory o2) {
+                if (o1.distance < o2.distance) {
+                    return 1;
+                } else if (o1.distance > o2.distance) {
+                    return -1;
+                }
+                return 0;
+            }
+        });
+        for (int i = 0; i < 100; i++) {
+            GameHistory game = games.get(i);
+            l.log(LogLevel.INFO, "New game, LOSS: " + game.distance + "\n");
+            l.log(LogLevel.INFO, "Winner: " + (game.redWin ? "Rot" : (game.blueWin ? "Blau" : "Draw")) + "\n");
+            for (MyGameState mg : game.history) {
+                l.log(LogLevel.INFO, FEN.toFEN(mg) + "\n");
+            }
+            l.log(LogLevel.INFO, "\n");
+        }
+        l.onClose();
+    }
+
     public static void main(String[] args) {
-        //makeBst();
+        //ArrayList<GameHistory> games = makeBst();
+        /*makeStatistic(games);
+        for (GameHistory game : games) {
+            game.calculateDistance();
+        }
+        printWorstGames(games);*/
         //saveBst();
         GlobalFlags.TEXEL_TUNING = true;
         readBst();
@@ -76,13 +184,14 @@ public class TexelParser {
         bst.traverse(states);
         System.out.println("States size: " + states.size());
         AlphaBeta.brc = new BoardRatingConstants(AlphaBeta.gaDna);
-        /*
+
         for (int i = 0; i < 100; i++) {
-            System.out.println("Loss: " + evaluationError(states));
+            lr = standardLr * lrScheduler(i / 100.0);
+            System.out.println("Loss: " + evaluationError(states, AlphaBeta.brc));
             makeSGD(states);
             System.out.println("New Weights: ");
             System.out.println(Arrays.toString(AlphaBeta.gaDna));
-        }*/
+        }
         System.out.println("Loss: " + evaluationError(states, AlphaBeta.brc));
         /*
         for (int i = 0; i < 18; i++) {
@@ -176,7 +285,8 @@ public class TexelParser {
         return (Math.exp(x) + Math.exp(-x)) / 2.0;
     }
 
-    public static void readTexelFile(String path) {
+    public static ArrayList<GameHistory> readTexelFile(String path) {
+        ArrayList<GameHistory> games = new ArrayList<>(100000);
         try {
             BufferedReader bfr = new BufferedReader(new FileReader(path));
             //Read game
@@ -208,11 +318,13 @@ public class TexelParser {
                         bst.insert(new LabeledGameState(mg, label));
                     }
                 }
+                games.add(new GameHistory(currentGame, label == 1, label == 0, label == 0.5));
             }
             bfr.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return games;
     }
 }
 
