@@ -26,6 +26,9 @@ public class Search extends Thread {
     public Search(MyGameState mg, int depth) {
         this.mg = mg;
         this.depth = depth;
+        killers = new KillerMove[100][3];
+        historyHeuristic = new int[100][100];
+        bfHeuristic = new int[100][100];
     }
 
     public void run() {
@@ -35,9 +38,9 @@ public class Search extends Thread {
             AlphaBeta.nullmove = false;
         }
         killers = new KillerMove[100][3];
-        historyHeuristic = new int[100][100];
-        bfHeuristic = new int[100][100];
         for (int depth = 1; depth <= this.depth; depth++) {
+            historyHeuristic = new int[100][100];
+            bfHeuristic = new int[100][100];
             //AlphaBeta.nodesExamined = 0;
             //AlphaBeta.depth0Nodes = 0;
             //System.out.println("Depth: " + depth + " searched");

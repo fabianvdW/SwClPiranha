@@ -19,14 +19,13 @@ import java.util.Arrays;
 
 public class Fix {
     public static String[] fens = {
-            "2056 144150441167421440 8705 18023332108566528 0 72075186223972352 r 48 24",
-            "8 180179238186385408 10241 18023332108566528 0 72075186223972352 r 50 25",
+            "8 70368744177664 268439552 504403158273884162 0 18018796555993088 r 52 26",
     };
     public static int[] depths = {
-            9, 7};
+            8};
 
     public static void main(String[] args) {
-        GlobalFlags.VERBOSE = true;
+        GlobalFlags.VERBOSE = false;
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("SwClPiranha/src/game/data.txt");
 /*
         MyGameState g = FEN.readFEN("8 180179238186385408 10241 18023332108566528 0 72075186223972352 r 50 25");
@@ -38,11 +37,13 @@ public class Fix {
 */
         //MyGameState g = new MyGameState(new BitBoard(4096L, 140737488355328L));
 
-        MyGameState g = FEN.readFEN("268500992 1156303603447627776 2112 81135265686487318 256 67108864 b 29 14");
-        System.out.println(g);
+        MyGameState g = FEN.readFEN("8 36028797018963968 268439556 360287970198028290 0 18018796555993088 r 54 27");
+        /*System.out.println(g);
         System.out.println(BoardRating.rating(g, AlphaBeta.brc));
-        System.exit(0);
-        System.out.println(g);
+        System.exit(0);*/
+        //System.out.println(g);
+        /*System.out.println(AlphaBeta.alphaBeta(new Search(g, 10), g, 6, 1, -100000.0, 100000.0, 0).score);
+        System.exit(-1);*/
         Search se = new Search(g, 6);
         se.run();
         System.out.println(AlphaBeta.nodesExamined);
@@ -52,6 +53,7 @@ public class Fix {
         System.out.println(Arrays.toString(AlphaBeta.indexs));
         System.out.println(AlphaBeta.killerMovesFound);
         System.out.println(AlphaBeta.noKillerMovesFound);
+        System.out.println(se.currentBestPv.stack.get(0));
         System.exit(-1);
         byte birth = 0;
         for (int i = 0; i < fens.length; i++) {
@@ -64,7 +66,8 @@ public class Fix {
             PrincipalVariation pv = s.currentBestPv;
             GameMove m = pv.stack.get(0);
             System.out.println("Move found in Direction: " + m.dir);
-            System.out.println("From: (" + m.from + ")" + " TO: " + m.to);
+            //System.out.println("From: (" + m.from + ")" + " TO: " + m.to);
+            System.out.println(m.toString());
             System.out.println("PV:");
             printPV(pv);
             System.out.println("PV Score: " + pv.score);
@@ -74,7 +77,8 @@ public class Fix {
     public static void printPV(PrincipalVariation pv) {
         for (int j = 0; j < pv.stack.size(); j++) {
             GameMove mv = pv.stack.get(j);
-            System.out.println(mv.from + " " + mv.to);
+            //System.out.println(mv.from + " " + mv.to);
+            System.out.println(mv.toString());
         }
     }
 

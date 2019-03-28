@@ -26,6 +26,7 @@ public class AlphaBeta extends ArtificalPlayer {
             0, 0, -0.4,
     };*/
 
+
     public static double[] gaDna = {
             1.9108852958167004, -0.15031422206007594, -.6,
             -1.2601833426477702, 0.07199858467216563, -16.0,
@@ -33,14 +34,7 @@ public class AlphaBeta extends ArtificalPlayer {
             0.5852834136017783, 4.736090249367409, -3.2933651310548004,
             0.047160809561919814, 11.401690312465984, 2.62104958739865,
             -0.1243385575305164, -0.7581158132381646, -0.2923504919527621};
-    /*public static double[] gaDna={
-            0.9648528777228419, -0.038285983427578704, 1.3413123441801444,
-            0.09744267310458055, 0.3945725207221731, -0.09992592203369796,
-            -5.283725151691738, -0.4064293070718061, -0.2538500862551524,
-            0.30652424395552114, 1.2667445794033716, -0.6265740782062489,
-            4.499371612837676, 1.2316386124756376, -0.130284146802618,
-            0.006838237213736749, -0.23911992543729002, -0.3133697838466268};
-            */
+
     public static BoardRatingConstants brc = new BoardRatingConstants(gaDna);
     public static Search currentSearch = new Search(null, -1);
 
@@ -181,7 +175,7 @@ public class AlphaBeta extends ArtificalPlayer {
     //Rot ist 1, Blaue ist -1
     public static PrincipalVariation alphaBeta(Search search, MyGameState g, int depth, int maximizingPlayer,
                                                double alpha, double beta, int currentDepth) {
-
+        double originalAlpha = alpha;
 
         PrincipalVariation currPv = new PrincipalVariation(depth);
         if (currentSearch.stop) {
@@ -226,7 +220,6 @@ public class AlphaBeta extends ArtificalPlayer {
 
                 if (ce.depth >= depth && !(g.pliesPlayed + depth >= 60 && g.pliesPlayed - deltaBirth + ce.depth < 60)) {
                     if (!ce.betaNode && !ce.alphaNode) {
-
                         ce.birth = search.birthTime;
                         currPv.stack.add(ce.gm);
                         currPv.hashStack.add(ce.hash);
@@ -237,11 +230,17 @@ public class AlphaBeta extends ArtificalPlayer {
                             if (ce.score > alpha) {
                                 alpha = ce.score;
                             }
-                        } else {
+                        } else if (ce.alphaNode) {
                             if (ce.score < beta) {
                                 beta = ce.score;
                             }
                         }
+                    }
+                    if (alpha >= beta) {
+                        currPv.score = alpha;
+                        currPv.stack.add(ce.gm);
+                        currPv.hashStack.add(ce.hash);
+                        return currPv;
                     }
                 }
                 //Move ordering
@@ -411,16 +410,26 @@ public class AlphaBeta extends ArtificalPlayer {
         //Make entry
         if (depth >= 1) {
             boolean betaNode = bestPv.score >= beta;
-            boolean alphaNode = bestPv.score < alpha;
+            boolean alphaNode = bestPv.score <= originalAlpha;
 
             bestPv.isBetaCutOff = betaNode;
 
             int cacheIndex = (int) (g.hash & Search.cacheMask);
             if (Search.cache[cacheIndex] == null) {
+                if (bestPv.stack.size() == 0) {
+                    System.out.println("Something went wrong!");
+                    System.out.println("Instances: " + gmro.instances);
+                    System.out.println(g.pliesPlayed);
+                }
                 Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, search.birthTime, (byte) depth, bestPv.stack.get(0), false, betaNode, alphaNode);
             } else {
                 CacheEntry ce = Search.cache[cacheIndex];
                 if (!ce.pvNode && ce.depth - (search.birthTime - ce.birth) <= depth) {
+                    if (bestPv.stack.size() == 0) {
+                        System.out.println("Something went wrong!");
+                        System.out.println("Instances: " + gmro.instances);
+                        System.out.println(g.pliesPlayed);
+                    }
                     Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, search.birthTime, (byte) depth, bestPv.stack.get(0), false, betaNode, alphaNode);
                 }
             }
