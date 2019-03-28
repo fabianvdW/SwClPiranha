@@ -7,7 +7,7 @@ public class RandomPlayer extends ArtificalPlayer {
     }
 
     @Override
-    public PrincipalVariation requestMove(int time,byte birth) {
+    public PrincipalVariation requestMove(int time) {
         this.mg.analyze();
         PrincipalVariation pv = new PrincipalVariation(1);
         pv.stack.add(this.mg.gmro.moves[(int) (this.mg.gmro.instances * Math.random())]);

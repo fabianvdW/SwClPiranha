@@ -37,14 +37,14 @@ public class Fix {
 */
         //MyGameState g = new MyGameState(new BitBoard(4096L, 140737488355328L));
 
-        MyGameState g = FEN.readFEN("8 36028797018963968 268439556 360287970198028290 0 18018796555993088 r 54 27");
-        /*System.out.println(g);
+        MyGameState g = FEN.readFEN("8589938698 648518352783804416 262336 -9221120235965251584 0 144132780261900288 r 40 20");
+        System.out.println(g);
         System.out.println(BoardRating.rating(g, AlphaBeta.brc));
-        System.exit(0);*/
+        System.exit(0);
         //System.out.println(g);
         /*System.out.println(AlphaBeta.alphaBeta(new Search(g, 10), g, 6, 1, -100000.0, 100000.0, 0).score);
         System.exit(-1);*/
-        Search se = new Search(g, 6);
+        Search se = new Search(g, 8);
         se.run();
         System.out.println(AlphaBeta.nodesExamined);
         System.out.println(AlphaBeta.depth0Nodes);
@@ -60,7 +60,6 @@ public class Fix {
             MyGameState mg = FEN.readFEN(fens[i]);
             System.out.println(mg);
             Search s = new Search(mg, depths[i]);
-            s.birthTime = birth;
             s.run();
             birth += 2;
             PrincipalVariation pv = s.currentBestPv;

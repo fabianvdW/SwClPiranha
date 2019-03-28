@@ -13,15 +13,14 @@ public class Search extends Thread {
     public QuiesenceCacheEntry[] quiesenceCache = new QuiesenceCacheEntry[2 * 524288];
     public static int quiesenceCacheMask = 2 * 524288 - 1;
     //Power of 2
-    public KillerMove[][] killers = new KillerMove[100][3];
+    public KillerMove[][] killers;
     public int lastKillerDeleted = 0;
     public int[][] historyHeuristic;
     public int[][] bfHeuristic;
     public int depth;
     public boolean stop = false;
-    public byte birthTime = 0;
     public int birthTimeQuiesence = 0;
-    MyGameState mg;
+    public MyGameState mg;
 
     public Search(MyGameState mg, int depth) {
         this.mg = mg;
@@ -48,13 +47,19 @@ public class Search extends Thread {
             if (stop) {
                 break;
             }
+            //Delete currentBestPv out of tt
+            if (currentBestPv != null) {
+                for (int i = currentBestPv.stack.size() - 1; i >= 0; i--) {
+                    cache[(int) (currentBestPv.hashStack.get(i) & Search.cacheMask)].pvNode = false;
+                }
+            }
+
             currentBestPv = pv;
             //System.out.println("Depth: " + depth + " searched!");
             //System.out.println("Score: " + pv.score);
             for (int i = currentBestPv.stack.size() - 1; i >= 0; i--) {
-                boolean betaNode = (i == currentBestPv.stack.size() - 1) && currentBestPv.stack.size() < depth;
-                cache[(int) (currentBestPv.hashStack.get(i) & Search.cacheMask)] = new CacheEntry(currentBestPv.hashStack.get(i), currentBestPv.score * (i % 2 == 0 ? 1 : -1), this.birthTime,
-                        (byte) (depth - i), currentBestPv.stack.get(i), true, betaNode, false);
+                cache[(int) (currentBestPv.hashStack.get(i) & Search.cacheMask)] = new CacheEntry(currentBestPv.hashStack.get(i), currentBestPv.score * (i % 2 == 0 ? 1 : -1), (byte) (this.mg.pliesPlayed + i),
+                        (byte) (depth - i), currentBestPv.stack.get(i), true, false, false);
             }
             birthTimeQuiesence++;
             //

@@ -31,7 +31,6 @@ public class Logic implements IGameHandler {
     private Starter client;
     private GameState gameState;
     private Player currentPlayer;
-    private int birthTime = 0;
 
     public static final Logger log = LoggerFactory.getLogger(Logic.class);
 
@@ -87,8 +86,7 @@ public class Logic implements IGameHandler {
         MyGameState mg = new MyGameState(roteFische, blaueFische, kraken, player, this.gameState.getTurn(), this.gameState.getRound());
         mg.hash = MyGameState.calculateHash(mg);
         log.info("FEN:\n" + FEN.toFEN(mg));
-        PrincipalVariation pv = AlphaBeta.search(mg, 1800, (byte) this.birthTime);
-        this.birthTime += 2;
+        PrincipalVariation pv = AlphaBeta.search(mg, 1800);
         GameMove m = pv.stack.get(0);
         log.info("Move: " + m.toString() + "\n" + " Direction: " + m.dir + "\n");
         log.info("PV: " + "\n");
