@@ -12,6 +12,7 @@ import game.GameMove;
 import game.MyGameState;
 import helpers.FEN;
 import helpers.GlobalFlags;
+import helpers.Perft;
 import helpers.StringToGameStateConverter;
 import sc.plugin2019.Board;
 
@@ -25,7 +26,7 @@ public class Fix {
             8};
 
     public static void main(String[] args) {
-        GlobalFlags.VERBOSE = false;
+        GlobalFlags.VERBOSE = true;
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("SwClPiranha/src/game/data.txt");
 /*
         MyGameState g = FEN.readFEN("8 180179238186385408 10241 18023332108566528 0 72075186223972352 r 50 25");
@@ -37,7 +38,11 @@ public class Fix {
 */
         //MyGameState g = new MyGameState(new BitBoard(4096L, 140737488355328L));
 
-        MyGameState g = FEN.readFEN("8589938698 648518352783804416 262336 -9221120235965251584 0 144132780261900288 r 40 20");
+        MyGameState g2= StringToGameStateConverter.readGameState(StringToGameStateConverter.GAME_STATE);
+        System.out.println(g2);
+        System.out.println(Perft.perft(g2, 5));
+        System.exit(0);
+        MyGameState g = FEN.readFEN("0 1152923705779687424 268435972 144239518914969616 2 9007199254740992 b 53 26");
         System.out.println(g);
         System.out.println(BoardRating.rating(g, AlphaBeta.brc));
         System.exit(0);

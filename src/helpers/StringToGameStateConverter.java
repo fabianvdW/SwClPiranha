@@ -20,6 +20,16 @@ public class StringToGameStateConverter {
             {" ", "b", "b", "b", "b", "b", "b", "b", "b", " "}
     };
 
+    public final static String[][] GAME_STATE = {{" ", " ", "R", "B", "B", "B", "B", " ", " ", " "},
+            {" ", "B", " ", " ", "B", "B", "B", " ", " ", " "},
+            {" ", "R", " ", " ", " ", " ", " ", " ", " ", " "},
+            {" ", " ", " ", " ", "R", " ", " ", " ", " ", "R"},
+            {"R", " ", "R", "R", "R", "O", " ", " ", " ", "R"},
+            {"R", " ", " ", " ", " ", " ", " ", " ", " ", "R"},
+            {"R", " ", " ", " ", " ", " ", "O", " ", " ", "R"},
+            {" ", " ", " ", " ", " ", " ", " ", " ", " ", "R"},
+            {" ", " ", " ", " ", " ", " ", " ", " ", " ", "R"},
+            {" ", " ", " ", " ", " ", " ", " ", " ", " ", " "},};
     //Blau am Zug
     /*public final static String[][] STANDARD_GAME_STATE = {
             {" ", " ", " ", " ", " ", "b", " ", " ", " ", " "},
@@ -46,7 +56,7 @@ public class StringToGameStateConverter {
                     blaueFische.orEquals(new BitBoard(0, 1).leftShift(shift));
                 } else if (s.equalsIgnoreCase("r")) {
                     roteFische.orEquals(new BitBoard(0, 1).leftShift(shift));
-                } else if (s.equalsIgnoreCase("k")) {
+                } else if (s.equalsIgnoreCase("k") || s.equalsIgnoreCase("o")) {
                     kraken.orEquals(new BitBoard(0, 1).leftShift(shift));
                 }
             }

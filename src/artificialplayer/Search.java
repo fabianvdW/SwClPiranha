@@ -31,11 +31,6 @@ public class Search extends Thread {
     }
 
     public void run() {
-        if (mg.pliesPlayed >= 52) {
-            AlphaBeta.nullmove = false;
-        } else {
-            AlphaBeta.nullmove = false;
-        }
         killers = new KillerMove[100][3];
         for (int depth = 1; depth <= this.depth; depth++) {
             historyHeuristic = new int[100][100];
@@ -43,7 +38,7 @@ public class Search extends Thread {
             //AlphaBeta.nodesExamined = 0;
             //AlphaBeta.depth0Nodes = 0;
             //System.out.println("Depth: " + depth + " searched");
-            PrincipalVariation pv = AlphaBeta.alphaBeta(this, this.mg, depth, mg.move == GameColor.RED ? 1 : -1, -100000, 100000, 0);
+            PrincipalVariation pv = AlphaBeta.alphaBeta(true,this, this.mg, depth, mg.move == GameColor.RED ? 1 : -1, -100000, 100000, 0);
             if (stop) {
                 break;
             }

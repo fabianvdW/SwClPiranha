@@ -8,7 +8,8 @@ public class AlphaBeta extends ArtificalPlayer {
     public static int nodesExamined;
     public static int depth0Nodes;
     public static int quiesenceNodes;
-    public static boolean nullmove = false;
+    public final static boolean nullmove = true;
+    public final static boolean lmr = false;
     public static int killerMovesFound = 0;
     public static int noKillerMovesFound = 0;
 
@@ -16,7 +17,7 @@ public class AlphaBeta extends ArtificalPlayer {
     //(v2)
     //public static double[] gaDna = {1.1929413659945325, -0.8731702020117803, -0.18857558152186485, -0.28516712873434763, 0.2632768554065141, 0.8993662608977158, 0.13348138971818577, -0.22333247871946682, -0.4039322894096489, 0.26511382721538596, 0.1665940335462095, 0.8675391276945661, 1.3508070853980805, 0.9575173529821485, 1.4240074329668702, -0.20112452911349518, -0.49828852243518695, -0.10684710598696326, -0.9626061894702808, -0.19868752897198622, 1.6581937255059032};
     // (v3)
-    /*public static double[] gaDna = {
+    public static double[] gaDna = {
             //1,Phase,(1-Phase)
             1.1, 0, 0.3,
             0, 0, -16.0,
@@ -24,16 +25,8 @@ public class AlphaBeta extends ArtificalPlayer {
             1.0, 4.0, 0,
             0, 8.0, 0,
             0, 0, -0.4,
-    };*/
+    };
 
-
-    public static double[] gaDna = {
-            1.9108852958167004, -0.15031422206007594, -.6,
-            -1.2601833426477702, 0.07199858467216563, -16.0,
-            0.09185904006972556, -7.2172322255636985, 0.39373849947322986,
-            0.5852834136017783, 4.736090249367409, -3.2933651310548004,
-            0.047160809561919814, 11.401690312465984, 2.62104958739865,
-            -0.1243385575305164, -0.7581158132381646, -0.2923504919527621};
 
     public static BoardRatingConstants brc = new BoardRatingConstants(gaDna);
     public static Search currentSearch = new Search(null, -1);
@@ -172,7 +165,7 @@ public class AlphaBeta extends ArtificalPlayer {
     }
 
     //Rot ist 1, Blaue ist -1
-    public static PrincipalVariation alphaBeta(Search search, MyGameState g, int depth, int maximizingPlayer,
+    public static PrincipalVariation alphaBeta(boolean allowNull, Search search, MyGameState g, int depth, int maximizingPlayer,
                                                double alpha, double beta, int currentDepth) {
         double originalAlpha = alpha;
 
@@ -261,9 +254,8 @@ public class AlphaBeta extends ArtificalPlayer {
 
             }
         }
-        //Make Null move
-        if (nullmove && !pvmoveFound && depth >= 4 && currentDepth > 0 && depth + g.pliesPlayed < 60 && (g.move == GameColor.RED || BoardRating.getBiggestSchwarm(g, GameColor.RED) < g.roteFische.popCount())) {
-            double rat = alphaBeta(search, GameLogic.makeNullMove(g), depth - 4, -maximizingPlayer, -beta, -beta + 0.0001, currentDepth + 1).score * -1;
+        if (nullmove && allowNull && !pvmoveFound && depth > 3 && currentDepth > 0 && depth + g.pliesPlayed < 60 && (g.move == GameColor.RED || GameLogic.getSchwarm(g, GameColor.RED) < g.roteFische.popCount())) {
+            double rat = alphaBeta(false, search, GameLogic.makeNullMove(g), depth - 3, -maximizingPlayer, -beta, -beta + 0.0001, currentDepth + 1).score * -1;
             if (rat >= beta) {
                 bestPv.score = rat;
                 return bestPv;
@@ -344,20 +336,19 @@ public class AlphaBeta extends ArtificalPlayer {
             currPv.stack.add(gmro.moves[i]);
             currPv.hashStack.add(g.hash);
             PrincipalVariation followingPv;
-            /*if (depth >= 3 && !pvmoveFound && i >= moveOrderingIndex && i >= gmro.instances / 2) {
-                followingPv = alphaBeta(gmro.states[i], depth - 2, -maximizingPlayer, -beta, -alpha, currentDepth + 1);
+            if (lmr && depth >= 3 && !pvmoveFound && i >= moveOrderingIndex && i >= gmro.instances / 2) {
+                followingPv = alphaBeta(true, search, gmro.states[i], depth - 2, -maximizingPlayer, -beta, -alpha, currentDepth + 1);
                 double rat = followingPv.score * -1;
                 if (rat >= alpha) {
-                    followingPv = alphaBeta(gmro.states[i], depth - 1, -maximizingPlayer, -beta, -alpha, currentDepth + 1);
+                    followingPv = alphaBeta(true, search, gmro.states[i], depth - 1, -maximizingPlayer, -beta, -alpha, currentDepth + 1);
                 }
-            } else */
-            if (depth <= 2 || !pvmoveFound || i == 0) {
-                followingPv = alphaBeta(search, gmro.states[i], depth - 1, -maximizingPlayer, -beta, -alpha, currentDepth + 1);
+            } else if (depth <= 2 || !pvmoveFound || i == 0) {
+                followingPv = alphaBeta(true, search, gmro.states[i], depth - 1, -maximizingPlayer, -beta, -alpha, currentDepth + 1);
             } else {
-                followingPv = alphaBeta(search, gmro.states[i], depth - 1, -maximizingPlayer, -alpha - 0.0001, -alpha, currentDepth + 1);
+                followingPv = alphaBeta(true, search, gmro.states[i], depth - 1, -maximizingPlayer, -alpha - 0.0001, -alpha, currentDepth + 1);
                 double rat = followingPv.score * -1;
                 if (rat >= alpha && rat <= beta) {
-                    followingPv = alphaBeta(search, gmro.states[i], depth - 1, -maximizingPlayer, -beta, -alpha, currentDepth + 1);
+                    followingPv = alphaBeta(true, search, gmro.states[i], depth - 1, -maximizingPlayer, -beta, -alpha, currentDepth + 1);
                 }
             }
             double rat = followingPv.score * -1;
@@ -418,7 +409,7 @@ public class AlphaBeta extends ArtificalPlayer {
                     System.out.println("Instances: " + gmro.instances);
                     System.out.println(g.pliesPlayed);
                 }
-                Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, (byte)(g.pliesPlayed), (byte) depth, bestPv.stack.get(0), false, betaNode, alphaNode);
+                Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, (byte) (g.pliesPlayed), (byte) depth, bestPv.stack.get(0), false, betaNode, alphaNode);
             } else {
                 CacheEntry ce = Search.cache[cacheIndex];
                 if (!ce.pvNode && ce.depth - (g.pliesPlayed - ce.pliesPlayed) <= depth) {
@@ -427,15 +418,13 @@ public class AlphaBeta extends ArtificalPlayer {
                         System.out.println("Instances: " + gmro.instances);
                         System.out.println(g.pliesPlayed);
                     }
-                    Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, (byte)(g.pliesPlayed), (byte) depth, bestPv.stack.get(0), false, betaNode, alphaNode);
+                    Search.cache[cacheIndex] = new CacheEntry(g.hash, bestPv.score, (byte) (g.pliesPlayed), (byte) depth, bestPv.stack.get(0), false, betaNode, alphaNode);
                 }
             }
         }
         return bestPv;
 
     }
-
-
 
 
 }
