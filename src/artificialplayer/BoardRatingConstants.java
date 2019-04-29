@@ -12,6 +12,7 @@ public class BoardRatingConstants implements Serializable {
     Feature biggestSchwarm;
     Feature absolutSchwarm;
     Feature randFische;
+    Feature abstandZuGegnerBiggestSchwarm;
 
     public BoardRatingConstants(double[] consts) {
         this.anzahlFische = new Feature(consts[0], consts[1], consts[2]);
@@ -20,5 +21,6 @@ public class BoardRatingConstants implements Serializable {
         this.biggestSchwarm = new Feature(consts[9], consts[10], consts[11]);
         this.absolutSchwarm = new Feature(consts[12], consts[13], consts[14]);
         this.randFische = new Feature(consts[15], consts[16], consts[17]);
+        this.abstandZuGegnerBiggestSchwarm= new Feature(consts[18],consts[19],consts[20]);
     }
 }

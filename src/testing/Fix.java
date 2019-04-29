@@ -36,20 +36,19 @@ public class Fix {
         printPV(p);
         System.exit(-1);
 */
-        //MyGameState g = new MyGameState(new BitBoard(4096L, 140737488355328L));
-
-        MyGameState g2= StringToGameStateConverter.readGameState(StringToGameStateConverter.GAME_STATE);
+       // MyGameState g = new MyGameState(new BitBoard(4096L, 140737488355328L));
+        /*MyGameState g2= StringToGameStateConverter.readGameState(StringToGameStateConverter.GAME_STATE);
         System.out.println(g2);
         System.out.println(Perft.perft(g2, 5));
-        System.exit(0);
-        MyGameState g = FEN.readFEN("0 1152923705779687424 268435972 144239518914969616 2 9007199254740992 b 53 26");
+        System.exit(0);*/
+        MyGameState g = FEN.readFEN("8624603140 589338234064913 128 -9178336006202458112 1024 144115188075855872 r 36 18");
         System.out.println(g);
         System.out.println(BoardRating.rating(g, AlphaBeta.brc));
         System.exit(0);
         //System.out.println(g);
         /*System.out.println(AlphaBeta.alphaBeta(new Search(g, 10), g, 6, 1, -100000.0, 100000.0, 0).score);
         System.exit(-1);*/
-        Search se = new Search(g, 8);
+        Search se = new Search(g, 7);
         se.run();
         System.out.println(AlphaBeta.nodesExamined);
         System.out.println(AlphaBeta.depth0Nodes);

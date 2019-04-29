@@ -25,6 +25,7 @@ public class AlphaBeta extends ArtificalPlayer {
             1.0, 4.0, 0,
             0, 8.0, 0,
             0, 0, -0.4,
+            0,-11.0,0
     };
 
 
@@ -164,6 +165,13 @@ public class AlphaBeta extends ArtificalPlayer {
         return alpha;
     }
 
+    public static boolean isTacticalMove(GameMove gm){
+        double x=gm.from/10;
+        double y= gm.from%10;
+        double newx=gm.to/10;
+        double newy=gm.to%10;
+        return Math.pow(x-4.5, 2)+Math.pow(y-4.5, 2)>Math.pow(newx-4.5, 2)+Math.pow(newy-4.5, 2);
+    }
     //Rot ist 1, Blaue ist -1
     public static PrincipalVariation alphaBeta(boolean allowNull, Search search, MyGameState g, int depth, int maximizingPlayer,
                                                double alpha, double beta, int currentDepth) {
@@ -254,14 +262,36 @@ public class AlphaBeta extends ArtificalPlayer {
 
             }
         }
-        if (nullmove && allowNull && !pvmoveFound && depth > 3 && currentDepth > 0 && depth + g.pliesPlayed < 60 && (g.move == GameColor.RED || GameLogic.getSchwarm(g, GameColor.RED) < g.roteFische.popCount())) {
-            double rat = alphaBeta(false, search, GameLogic.makeNullMove(g), depth - 3, -maximizingPlayer, -beta, -beta + 0.0001, currentDepth + 1).score * -1;
-            if (rat >= beta) {
-                bestPv.score = rat;
-                return bestPv;
-            }
+        boolean not_in_check= g.move == GameColor.RED || GameLogic.getSchwarm(g, GameColor.RED) < g.roteFische.popCount();
+        double rating=-10000000.0;
+        if(!pvmoveFound && depth > 3 && currentDepth > 0 && depth + g.pliesPlayed < 60 && not_in_check){
+                double rat = alphaBeta(false, search, GameLogic.makeNullMove(g), depth - 3, -maximizingPlayer, -beta, -beta + 0.0001, currentDepth + 1).score * -1;
+                if (rat >= beta) {
+                    bestPv.score = rat;
+                    return bestPv;
+                }
+
         }
 
+        /*if (depth >= 3 && moveOrderingIndex != 1) {
+            PrincipalVariation followPv = alphaBeta(true, search, g, depth - 2, maximizingPlayer, alpha, beta, currentDepth);
+            GameMove mv = followPv.stack.get(0);
+            int index = -1;
+            for (int i = 0; i < gmro.instances; i++) {
+                if (gmro.moves[i].from == mv.from && gmro.moves[i].to == mv.to) {
+                    index = i;
+                    break;
+                }
+            }
+            GameMove atPos0 = gmro.moves[0];
+            MyGameState atPos0S = gmro.states[0];
+            gmro.moves[0] = gmro.moves[index];
+            gmro.states[0] = gmro.states[index];
+            gmro.moves[index] = atPos0;
+            gmro.states[index] = atPos0S;
+            moveOrderingIndex = 1;
+
+        }*/
         //Killer heuristic
         boolean found = false;
         for (int i = moveOrderingIndex; i < gmro.instances; i++) {
@@ -331,12 +361,28 @@ public class AlphaBeta extends ArtificalPlayer {
             }
         }
 
+        boolean futil_pruning= false&&depth<=2&&not_in_check&&depth+g.pliesPlayed<60;
+        double futil_margin=0;
+        if(futil_pruning){
+            if(rating==-10000000.0){
+                rating=BoardRating.rating(g, AlphaBeta.brc)*maximizingPlayer;
+            }
+            futil_margin=rating+1*depth;
+        }
         int index = -1;
         for (int i = 0; i < gmro.instances; i++) {
             currPv.stack.add(gmro.moves[i]);
             currPv.hashStack.add(g.hash);
             PrincipalVariation followingPv;
-            if (lmr && depth >= 3 && !pvmoveFound && i >= moveOrderingIndex && i >= gmro.instances / 2) {
+            boolean isTactical= isTacticalMove(gmro.moves[i]);
+            if(futil_pruning&&bestPv.score>-29000&&beta<29000&&i>=moveOrderingIndex&&!isTactical){
+                if(futil_margin<=alpha){
+                    continue;
+                }else{
+                    futil_pruning=false;
+                }
+            }
+            if (lmr && depth >= 3 && i >= moveOrderingIndex && i>=gmro.instances/2&&!isTactical) {
                 followingPv = alphaBeta(true, search, gmro.states[i], depth - 2, -maximizingPlayer, -beta, -alpha, currentDepth + 1);
                 double rat = followingPv.score * -1;
                 if (rat >= alpha) {

@@ -15,8 +15,8 @@ public class Search extends Thread {
     //Power of 2
     public KillerMove[][] killers;
     public int lastKillerDeleted = 0;
-    public int[][] historyHeuristic;
-    public int[][] bfHeuristic;
+    public static int[][] historyHeuristic= new int[100][100];
+    public static int[][] bfHeuristic=new int[100][100];
     public int depth;
     public boolean stop = false;
     public int birthTimeQuiesence = 0;
@@ -26,19 +26,27 @@ public class Search extends Thread {
         this.mg = mg;
         this.depth = depth;
         killers = new KillerMove[100][3];
-        historyHeuristic = new int[100][100];
-        bfHeuristic = new int[100][100];
+        //historyHeuristic = new int[100][100];
+        //bfHeuristic = new int[100][100];
     }
 
     public void run() {
         killers = new KillerMove[100][3];
+        for (int i = 0; i < 100; i++) {
+            for (int j = 0; j < 100; j++) {
+                historyHeuristic[i][j] /= 8.0;
+                bfHeuristic[i][j] /= 8.0;
+            }
+        }
+        //historyHeuristic = new int[100][100];
+        //bfHeuristic = new int[100][100];
+
         for (int depth = 1; depth <= this.depth; depth++) {
-            historyHeuristic = new int[100][100];
-            bfHeuristic = new int[100][100];
             //AlphaBeta.nodesExamined = 0;
             //AlphaBeta.depth0Nodes = 0;
             //System.out.println("Depth: " + depth + " searched");
-            PrincipalVariation pv = AlphaBeta.alphaBeta(true,this, this.mg, depth, mg.move == GameColor.RED ? 1 : -1, -100000, 100000, 0);
+            PrincipalVariation pv = AlphaBeta.alphaBeta(true, this, this.mg, depth, mg.move == GameColor.RED ? 1 : -1, -100000, 100000, 0);
+            //System.out.println(pv.score);
             if (stop) {
                 break;
             }
