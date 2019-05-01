@@ -16,7 +16,7 @@ public class AlphaBeta extends ArtificalPlayer {
     public static int[] indexs = new int[95];
     //(v2)
     //public static double[] gaDna = {1.1929413659945325, -0.8731702020117803, -0.18857558152186485, -0.28516712873434763, 0.2632768554065141, 0.8993662608977158, 0.13348138971818577, -0.22333247871946682, -0.4039322894096489, 0.26511382721538596, 0.1665940335462095, 0.8675391276945661, 1.3508070853980805, 0.9575173529821485, 1.4240074329668702, -0.20112452911349518, -0.49828852243518695, -0.10684710598696326, -0.9626061894702808, -0.19868752897198622, 1.6581937255059032};
-    // (v3)
+    // CURRENT
     public static double[] gaDna = {
             //1,Phase,(1-Phase)
             1.1, 0, 0.3,
@@ -27,7 +27,6 @@ public class AlphaBeta extends ArtificalPlayer {
             0, 0, -0.4,
             0,-11.0,0
     };
-
 
     public static BoardRatingConstants brc = new BoardRatingConstants(gaDna);
     public static Search currentSearch = new Search(null, -1);
@@ -165,13 +164,14 @@ public class AlphaBeta extends ArtificalPlayer {
         return alpha;
     }
 
-    public static boolean isTacticalMove(GameMove gm){
-        double x=gm.from/10;
-        double y= gm.from%10;
-        double newx=gm.to/10;
-        double newy=gm.to%10;
-        return Math.pow(x-4.5, 2)+Math.pow(y-4.5, 2)>Math.pow(newx-4.5, 2)+Math.pow(newy-4.5, 2);
+    public static boolean isTacticalMove(GameMove gm) {
+        double x = gm.from / 10;
+        double y = gm.from % 10;
+        double newx = gm.to / 10;
+        double newy = gm.to % 10;
+        return Math.pow(x - 4.5, 2) + Math.pow(y - 4.5, 2) > Math.pow(newx - 4.5, 2) + Math.pow(newy - 4.5, 2);
     }
+
     //Rot ist 1, Blaue ist -1
     public static PrincipalVariation alphaBeta(boolean allowNull, Search search, MyGameState g, int depth, int maximizingPlayer,
                                                double alpha, double beta, int currentDepth) {
@@ -262,14 +262,14 @@ public class AlphaBeta extends ArtificalPlayer {
 
             }
         }
-        boolean not_in_check= g.move == GameColor.RED || GameLogic.getSchwarm(g, GameColor.RED) < g.roteFische.popCount();
-        double rating=-10000000.0;
-        if(!pvmoveFound && depth > 3 && currentDepth > 0 && depth + g.pliesPlayed < 60 && not_in_check){
-                double rat = alphaBeta(false, search, GameLogic.makeNullMove(g), depth - 3, -maximizingPlayer, -beta, -beta + 0.0001, currentDepth + 1).score * -1;
-                if (rat >= beta) {
-                    bestPv.score = rat;
-                    return bestPv;
-                }
+        boolean not_in_check = g.move == GameColor.RED || GameLogic.getSchwarm(g, GameColor.RED) < g.roteFische.popCount();
+        double rating = -10000000.0;
+        if (!pvmoveFound && depth > 3 && currentDepth > 0 && depth + g.pliesPlayed < 60 && not_in_check) {
+            double rat = alphaBeta(false, search, GameLogic.makeNullMove(g), depth - 3, -maximizingPlayer, -beta, -beta + 0.0001, currentDepth + 1).score * -1;
+            if (rat >= beta) {
+                bestPv.score = rat;
+                return bestPv;
+            }
 
         }
 
@@ -361,28 +361,28 @@ public class AlphaBeta extends ArtificalPlayer {
             }
         }
 
-        boolean futil_pruning= false&&depth<=2&&not_in_check&&depth+g.pliesPlayed<60;
-        double futil_margin=0;
-        if(futil_pruning){
-            if(rating==-10000000.0){
-                rating=BoardRating.rating(g, AlphaBeta.brc)*maximizingPlayer;
+        boolean futil_pruning = false && depth <= 2 && not_in_check && depth + g.pliesPlayed < 60;
+        double futil_margin = 0;
+        if (futil_pruning) {
+            if (rating == -10000000.0) {
+                rating = BoardRating.rating(g, AlphaBeta.brc) * maximizingPlayer;
             }
-            futil_margin=rating+1*depth;
+            futil_margin = rating + 1 * depth;
         }
         int index = -1;
         for (int i = 0; i < gmro.instances; i++) {
             currPv.stack.add(gmro.moves[i]);
             currPv.hashStack.add(g.hash);
             PrincipalVariation followingPv;
-            boolean isTactical= isTacticalMove(gmro.moves[i]);
-            if(futil_pruning&&bestPv.score>-29000&&beta<29000&&i>=moveOrderingIndex&&!isTactical){
-                if(futil_margin<=alpha){
+            boolean isTactical = isTacticalMove(gmro.moves[i]);
+            if (futil_pruning && bestPv.score > -29000 && beta < 29000 && i >= moveOrderingIndex && !isTactical) {
+                if (futil_margin <= alpha) {
                     continue;
-                }else{
-                    futil_pruning=false;
+                } else {
+                    futil_pruning = false;
                 }
             }
-            if (lmr && depth >= 3 && i >= moveOrderingIndex && i>=gmro.instances/2&&!isTactical) {
+            if (lmr && depth >= 3 && i >= moveOrderingIndex && i >= gmro.instances / 2 && !isTactical) {
                 followingPv = alphaBeta(true, search, gmro.states[i], depth - 2, -maximizingPlayer, -beta, -alpha, currentDepth + 1);
                 double rat = followingPv.score * -1;
                 if (rat >= alpha) {
