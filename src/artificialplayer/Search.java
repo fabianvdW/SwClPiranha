@@ -13,45 +13,56 @@ public class Search extends Thread {
     public QuiesenceCacheEntry[] quiesenceCache = new QuiesenceCacheEntry[2 * 524288];
     public static int quiesenceCacheMask = 2 * 524288 - 1;
     //Power of 2
-    public KillerMove[][] killers = new KillerMove[100][3];
+    public KillerMove[][] killers;
     public int lastKillerDeleted = 0;
-    public int[][] historyHeuristic;
-    public int[][] bfHeuristic;
+    public static int[][] historyHeuristic= new int[100][100];
+    public static int[][] bfHeuristic=new int[100][100];
     public int depth;
     public boolean stop = false;
-    public byte birthTime = 0;
     public int birthTimeQuiesence = 0;
-    MyGameState mg;
+    public MyGameState mg;
 
     public Search(MyGameState mg, int depth) {
         this.mg = mg;
         this.depth = depth;
+        killers = new KillerMove[100][3];
+        //historyHeuristic = new int[100][100];
+        //bfHeuristic = new int[100][100];
     }
 
     public void run() {
-        if (mg.pliesPlayed >= 52) {
-            AlphaBeta.nullmove = false;
-        } else {
-            AlphaBeta.nullmove = false;
-        }
         killers = new KillerMove[100][3];
-        historyHeuristic = new int[100][100];
-        bfHeuristic = new int[100][100];
+        for (int i = 0; i < 100; i++) {
+            for (int j = 0; j < 100; j++) {
+                historyHeuristic[i][j] /= 8.0;
+                bfHeuristic[i][j] /= 8.0;
+            }
+        }
+        //historyHeuristic = new int[100][100];
+        //bfHeuristic = new int[100][100];
+
         for (int depth = 1; depth <= this.depth; depth++) {
             //AlphaBeta.nodesExamined = 0;
             //AlphaBeta.depth0Nodes = 0;
             //System.out.println("Depth: " + depth + " searched");
-            PrincipalVariation pv = AlphaBeta.alphaBeta(this, this.mg, depth, mg.move == GameColor.RED ? 1 : -1, -100000, 100000, 0);
+            PrincipalVariation pv = AlphaBeta.alphaBeta(true, this, this.mg, depth, mg.move == GameColor.RED ? 1 : -1, -100000, 100000, 0);
+            //System.out.println(pv.score);
             if (stop) {
                 break;
             }
+            //Delete currentBestPv out of tt
+            if (currentBestPv != null) {
+                for (int i = currentBestPv.stack.size() - 1; i >= 0; i--) {
+                    cache[(int) (currentBestPv.hashStack.get(i) & Search.cacheMask)].pvNode = false;
+                }
+            }
+
             currentBestPv = pv;
             //System.out.println("Depth: " + depth + " searched!");
             //System.out.println("Score: " + pv.score);
             for (int i = currentBestPv.stack.size() - 1; i >= 0; i--) {
-                boolean betaNode = (i == currentBestPv.stack.size() - 1) && currentBestPv.stack.size() < depth;
-                cache[(int) (currentBestPv.hashStack.get(i) & Search.cacheMask)] = new CacheEntry(currentBestPv.hashStack.get(i), currentBestPv.score * (i % 2 == 0 ? 1 : -1), this.birthTime,
-                        (byte) (depth - i), currentBestPv.stack.get(i), true, betaNode, false);
+                cache[(int) (currentBestPv.hashStack.get(i) & Search.cacheMask)] = new CacheEntry(currentBestPv.hashStack.get(i), currentBestPv.score * (i % 2 == 0 ? 1 : -1), (byte) (this.mg.pliesPlayed + i),
+                        (byte) (depth - i), currentBestPv.stack.get(i), true, false, false);
             }
             birthTimeQuiesence++;
             //

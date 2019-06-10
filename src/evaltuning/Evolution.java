@@ -178,7 +178,7 @@ public class Evolution implements Serializable {
         this.generation += 1;
         this.mutateStaerke -= 0.003;
         if (this.mutateStaerke < 0.3) {
-            this.mutateStaerke = 0.1;
+            this.mutateStaerke = 0.3;
         }
     }
 

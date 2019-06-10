@@ -6,12 +6,10 @@ import artificialplayer.BoardRating;
 import artificialplayer.PrincipalVariation;
 import artificialplayer.Search;
 import datastructures.BitBoard;
-import game.BitBoardConstants;
-import game.GameColor;
-import game.GameMove;
-import game.MyGameState;
+import game.*;
 import helpers.FEN;
 import helpers.GlobalFlags;
+import helpers.Perft;
 import helpers.StringToGameStateConverter;
 import sc.plugin2019.Board;
 
@@ -19,14 +17,13 @@ import java.util.Arrays;
 
 public class Fix {
     public static String[] fens = {
-            "2056 144150441167421440 8705 18023332108566528 0 72075186223972352 r 48 24",
-            "8 180179238186385408 10241 18023332108566528 0 72075186223972352 r 50 25",
+            "8 70368744177664 268439552 504403158273884162 0 18018796555993088 r 52 26",
     };
     public static int[] depths = {
-            9, 7};
+            8};
 
     public static void main(String[] args) {
-        GlobalFlags.VERBOSE = true;
+        //GlobalFlags.VERBOSE = true;
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("SwClPiranha/src/game/data.txt");
 /*
         MyGameState g = FEN.readFEN("8 180179238186385408 10241 18023332108566528 0 72075186223972352 r 50 25");
@@ -36,15 +33,27 @@ public class Fix {
         printPV(p);
         System.exit(-1);
 */
-        //MyGameState g = new MyGameState(new BitBoard(4096L, 140737488355328L));
-
-        MyGameState g = FEN.readFEN("268500992 1156303603447627776 2112 81135265686487318 256 67108864 b 29 14");
+        MyGameState g = FEN.readFEN("8487008 1731072757112243204 34225520640 536871290 0 68736253952 b 3 1");
         System.out.println(g);
+        System.exit(-1);
+        //MyGameState g = FEN.readFEN("8 180179238186385408 10241 18023332108566528 0 72075186223972352 r 50 25");
+        //System.out.println(FEN.toFEN(g));
+        /*MyGameState g2= StringToGameStateConverter.readGameState(StringToGameStateConverter.GAME_STATE);
+        System.out.println(g2);
+        System.out.println(Perft.perft(g2, 5));
+        System.exit(0);*/
+        //MyGameState g = FEN.readFEN("10551296 96800593707008 16106129408 36028797018963968 4 9007199254740992 r 48 24");
+        //MyGameState g = FEN.readFEN("0 -9223372036854771686 21474836480 1161213153116160 2048 4503599627370496 r 52 26");
+        /*System.out.println(g);
         System.out.println(BoardRating.rating(g, AlphaBeta.brc));
-        System.exit(0);
-        System.out.println(g);
-        Search se = new Search(g, 6);
+        System.exit(0);*/
+        //System.out.println(g);
+        /*System.out.println(AlphaBeta.alphaBeta(new Search(g, 10), g, 6, 1, -100000.0, 100000.0, 0).score);
+        System.exit(-1);*/
+        long now = System.currentTimeMillis();
+        Search se = new Search(g, 7);
         se.run();
+        System.out.println("duration: " + (System.currentTimeMillis() - now));
         System.out.println(AlphaBeta.nodesExamined);
         System.out.println(AlphaBeta.depth0Nodes);
         System.out.println(AlphaBeta.quiesenceNodes);
@@ -52,19 +61,20 @@ public class Fix {
         System.out.println(Arrays.toString(AlphaBeta.indexs));
         System.out.println(AlphaBeta.killerMovesFound);
         System.out.println(AlphaBeta.noKillerMovesFound);
+        System.out.println(se.currentBestPv.stack.get(0));
         System.exit(-1);
         byte birth = 0;
         for (int i = 0; i < fens.length; i++) {
             MyGameState mg = FEN.readFEN(fens[i]);
             System.out.println(mg);
             Search s = new Search(mg, depths[i]);
-            s.birthTime = birth;
             s.run();
             birth += 2;
             PrincipalVariation pv = s.currentBestPv;
             GameMove m = pv.stack.get(0);
             System.out.println("Move found in Direction: " + m.dir);
-            System.out.println("From: (" + m.from + ")" + " TO: " + m.to);
+            //System.out.println("From: (" + m.from + ")" + " TO: " + m.to);
+            System.out.println(m.toString());
             System.out.println("PV:");
             printPV(pv);
             System.out.println("PV Score: " + pv.score);
@@ -74,7 +84,8 @@ public class Fix {
     public static void printPV(PrincipalVariation pv) {
         for (int j = 0; j < pv.stack.size(); j++) {
             GameMove mv = pv.stack.get(j);
-            System.out.println(mv.from + " " + mv.to);
+            //System.out.println(mv.from + " " + mv.to);
+            System.out.println(mv.toString());
         }
     }
 

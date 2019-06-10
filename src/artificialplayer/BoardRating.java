@@ -25,7 +25,7 @@ public class BoardRating {
 
         BiggestSchwarmObject bsoRot = getBiggestSchwarm(roteSchwaerme);
         BiggestSchwarmObject bsoBlau = getBiggestSchwarm(blaueSchwaerme);
-        return redEval(g.pliesPlayed, roteFische, roteSchwaerme, GameColor.RED, brc, bsoRot, blaueFische, (bsoBlau.biggestSchwarm.size / (blaueFische.popCount() + 0.0))) - redEval(g.pliesPlayed, blaueFische, blaueSchwaerme, GameColor.BLUE, brc, bsoBlau, roteFische, bsoRot.biggestSchwarm.size / (roteFische.popCount() + 0.0));
+        return redEval(g.pliesPlayed, roteFische, roteSchwaerme, GameColor.RED, brc, bsoRot,bsoBlau,blaueFische.popCount()) - redEval(g.pliesPlayed, blaueFische, blaueSchwaerme, GameColor.BLUE, brc, bsoBlau, bsoRot,roteFische.popCount());
     }
 
     public static BiggestSchwarmObject getBiggestSchwarm(ArrayList<Schwarm> schwaerme) {
@@ -47,7 +47,7 @@ public class BoardRating {
         return new BiggestSchwarmObject(biggestSchwarm);
     }
 
-    public static double redEval(int pliesPlayed, BitBoard fische, ArrayList<Schwarm> schwaerme, GameColor gc, BoardRatingConstants brc, BiggestSchwarmObject bso, BitBoard gegnerFische, double gegnerRatio) {
+    public static double redEval(int pliesPlayed, BitBoard fische, ArrayList<Schwarm> schwaerme, GameColor gc, BoardRatingConstants brc, BiggestSchwarmObject bso, BiggestSchwarmObject gegnerSchwarm,int gegnerFische) {
         double unSkewedPhase = (pliesPlayed + 0.0) / 60.0;
         double phase = 1 - Math.pow(1 - unSkewedPhase, 2);
 
@@ -57,6 +57,7 @@ public class BoardRating {
         double biggestSchwarmEval = 0;
         double absoluteSchwarmEval = 0;
         double randFische = 0;
+        double abstandZuGegnerBiggestSchwarm=0;
 
         int fischAnzahl = fische.popCount();
         UsedFeature fischAnzahlUsed = new UsedFeature(fischAnzahl, brc.anzahlFische, phase);
@@ -71,12 +72,20 @@ public class BoardRating {
         }
 
         Pos spielFeldMitte = new Pos(4.5, 4.5);
+        Pos gegnerSchwarmPos= new Pos(gegnerSchwarm.biggestSchwarm.averageX,gegnerSchwarm.biggestSchwarm.averageY);
         double cummulatedInput = 0.0;
+        double cummulatedInputGegner=0.0;
         for (Schwarm s : schwaerme) {
             double dist = spielFeldMitte.distance(new Pos(s.averageX, s.averageY));
             cummulatedInput += Math.pow(dist / MAX_DIST, 2) * s.size;
+            double dist2= gegnerSchwarmPos.distance(new Pos(s.averageX,s.averageY));
+            cummulatedInputGegner+=Math.pow(dist2/MAX_DIST, 2)*s.size;
         }
         cummulatedInput /= fischAnzahl + 0.0;
+        cummulatedInputGegner/=fischAnzahl+0.0;
+        cummulatedInputGegner*=Math.pow(gegnerSchwarm.biggestSchwarm.size/(gegnerFische+0.0),3);
+        UsedFeature abstandZuGegnerSchwarmUsed= new UsedFeature(cummulatedInputGegner, brc.abstandZuGegnerBiggestSchwarm, phase);
+        abstandZuGegnerBiggestSchwarm=abstandZuGegnerSchwarmUsed.value;
         if (bso.biggestSchwarm.size / (fischAnzahl + 0.0) > 0.5) {
             double dist = spielFeldMitte.distance(new Pos(bso.biggestSchwarm.averageX, bso.biggestSchwarm.averageY));
             cummulatedInput += Math.pow(dist / MAX_DIST, 2);
@@ -126,6 +135,7 @@ public class BoardRating {
             System.out.println("Biggest Schwarm: " + biggestSchwarmEval);
             System.out.println("Maximal Schwarm Size: " + absoluteSchwarmEval);
             System.out.println("Rand Fische: " + randFische);
+            System.out.println("Abstand zu Gegner Schwarm: "+abstandZuGegnerBiggestSchwarm);
             //System.out.println("Insg: " + (biggestSchwarmEval + abstandZuBiggestSchwarmEval + abstandZuMitteEval + biggestSchwarmBonusEval + fischEval));
         }
         if (GlobalFlags.TEXEL_TUNING) {
@@ -137,7 +147,7 @@ public class BoardRating {
             TexelParser.lastEval[5] = randFischeUsed;
         }
         //Center-Fische-Feature
-        return abstandZuMitteEval + fischEval + abstandZuBiggestSchwarm + biggestSchwarmEval + absoluteSchwarmEval + randFische;
+        return abstandZuMitteEval + fischEval + abstandZuBiggestSchwarm + biggestSchwarmEval + absoluteSchwarmEval + randFische+abstandZuGegnerBiggestSchwarm;
     }
 
     public static int getBiggestSchwarm(MyGameState g, GameColor gc) {
@@ -164,6 +174,7 @@ public class BoardRating {
             if (count > max) {
                 max = count;
                 maxBb = b;
+
             }
             fischClone.andEquals(b.not());
         }

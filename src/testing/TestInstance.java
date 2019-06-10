@@ -47,10 +47,12 @@ public class TestInstance {
         int games = Integer.parseInt(args[0]);
         int processors = Integer.parseInt(args[1]);
         String jarFile = args[2];
-        String p1Name = args[3];
-        String jarFile2 = args[4];
-        String p2Name = args[5];
-        millisTime = Integer.parseInt(args[6]);
+        boolean javaEngineP1=args[3].equalsIgnoreCase("true");
+        String p1Name = args[4];
+        String jarFile2 = args[5];
+        boolean javaEngineP2=args[6].equalsIgnoreCase("true");
+        String p2Name = args[7];
+        millisTime = Integer.parseInt(args[8]);
         l = new Log("spielleiter-error.log");
         ergebnisLog = new Log("spielleiterergebnisse.log");
         System.out.println("Started Tests!");
@@ -70,7 +72,7 @@ public class TestInstance {
         }
 
         for (int i = 0; i < processors; i++) {
-            threads.add(new TestGames(i + "", jarFile, jarFile2, gamesPerProcessors, p1Name, p2Name));
+            threads.add(new TestGames(i + "", jarFile, jarFile2, gamesPerProcessors, p1Name, p2Name,javaEngineP1,javaEngineP2));
         }
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -187,6 +189,8 @@ class TestGames extends Thread {
     private String name;
     private String p1;
     private String p2;
+    private boolean javap1;
+    private boolean javap2;
     private String p1Name;
     private String p2Name;
     private int games;
@@ -194,7 +198,7 @@ class TestGames extends Thread {
     PlayerStatistics p2Stats;
     boolean mateFound;
 
-    public TestGames(String name, String p1, String p2, int games, String p1Name, String p2Name) {
+    public TestGames(String name, String p1, String p2, int games, String p1Name, String p2Name,boolean javap1,boolean javap2) {
         this.name = name;
         this.p1 = p1;
         this.p2 = p2;
@@ -203,6 +207,8 @@ class TestGames extends Thread {
         this.games = games;
         this.p1Stats = new PlayerStatistics();
         this.p2Stats = new PlayerStatistics();
+        this.javap1=javap1;
+        this.javap2=javap2;
         mateFound = false;
         start();
     }
@@ -267,12 +273,24 @@ class TestGames extends Thread {
                 if (this.name.equalsIgnoreCase("0") && i % 5 == 0) {
                     System.out.println("" + i + "/" + games);
                 }
-                Process p1 = Runtime.getRuntime().exec("java -Dfile.encoding=UTF-8 -XX:MaxGCPauseMillis=100 -Xmx800m -Xms800m -Xmn700m -XX:+UseConcMarkSweepGC -XX:-UseParNewGC -XX:+ExplicitGCInvokesConcurrent -jar " + this.p1 + " ./logs/" + this.p1Name + "p" + this.name + "g" + i);
+                String command1="";
+                if(this.javap1){
+                    command1="java -Dfile.encoding=UTF-8 -XX:MaxGCPauseMillis=100 -Xmx800m -Xms800m -Xmn700m -XX:+UseConcMarkSweepGC -XX:-UseParNewGC -XX:+ExplicitGCInvokesConcurrent -jar " + this.p1 + " ./logs/" + this.p1Name + "p" + this.name + "g" + i;
+                }else{
+                    command1=this.p1+" ./logs/" + this.p1Name + "p" + this.name + "g" + i;
+                }
+                Process p1 = Runtime.getRuntime().exec(command1);
                 OutputStream os = p1.getOutputStream();
                 BufferedWriter p1Writer = new BufferedWriter(new OutputStreamWriter(os));
                 BufferedReader p1Input = new BufferedReader(new InputStreamReader(p1.getInputStream()));
 
-                Process p2 = Runtime.getRuntime().exec("java -Dfile.encoding=UTF-8 -XX:MaxGCPauseMillis=100 -Xmx800m -Xms800m -Xmn700m -XX:+UseConcMarkSweepGC -XX:-UseParNewGC -XX:+ExplicitGCInvokesConcurrent -jar " + this.p2 + " ./logs/" + this.p2Name + "p" + this.name + "g" + i);
+                String command2="";
+                if(this.javap2){
+                    command2="java -Dfile.encoding=UTF-8 -XX:MaxGCPauseMillis=100 -Xmx800m -Xms800m -Xmn700m -XX:+UseConcMarkSweepGC -XX:-UseParNewGC -XX:+ExplicitGCInvokesConcurrent -jar " + this.p2 + " ./logs/" + this.p2Name + "p" + this.name + "g" + i;
+                }else{
+                    command2=this.p2+" ./logs/" + this.p2Name + "p" + this.name + "g" + i;
+                }
+                Process p2 = Runtime.getRuntime().exec(command2);
                 OutputStream p2os = p2.getOutputStream();
                 BufferedWriter p2Writer = new BufferedWriter(new OutputStreamWriter(p2os));
                 BufferedReader p2Input = new BufferedReader(new InputStreamReader(p2.getInputStream()));
