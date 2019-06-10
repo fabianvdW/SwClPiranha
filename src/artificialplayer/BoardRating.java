@@ -174,6 +174,7 @@ public class BoardRating {
             if (count > max) {
                 max = count;
                 maxBb = b;
+
             }
             fischClone.andEquals(b.not());
         }

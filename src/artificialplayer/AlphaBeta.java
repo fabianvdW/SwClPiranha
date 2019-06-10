@@ -3,6 +3,8 @@ package artificialplayer;
 import datastructures.BitBoard;
 import game.*;
 
+import java.util.Arrays;
+
 
 public class AlphaBeta extends ArtificalPlayer {
     public static int nodesExamined;
@@ -25,7 +27,7 @@ public class AlphaBeta extends ArtificalPlayer {
             1.0, 4.0, 0,
             0, 8.0, 0,
             0, 0, -0.4,
-            0,-11.0,0
+            0, -11.0, 0
     };
 
     public static BoardRatingConstants brc = new BoardRatingConstants(gaDna);
@@ -39,8 +41,11 @@ public class AlphaBeta extends ArtificalPlayer {
     public static PrincipalVariation search(MyGameState mg, int time) {
         currentSearch = new Search(mg, 100);
         currentSearch.start();
+        long currentTime = System.currentTimeMillis();
         try {
-            Thread.sleep(time - 100);
+            while (System.currentTimeMillis() - currentTime < time - 100) {
+                Thread.sleep(5);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -196,6 +201,9 @@ public class AlphaBeta extends ArtificalPlayer {
                 currPv.score = maximizingPlayer * (-30000 + g.pliesPlayed - diff / 100.0);
                 return currPv;
             }
+        }
+        if (depth == 0 && g.move == GameColor.BLUE && BoardRating.getBiggestSchwarm(g, GameColor.BLUE) == g.blaueFische.popCount() - 1) {
+            depth += 1;
         }
         if (depth == 0) {
             depth0Nodes++;
@@ -371,6 +379,7 @@ public class AlphaBeta extends ArtificalPlayer {
         }
         int index = -1;
         for (int i = 0; i < gmro.instances; i++) {
+
             currPv.stack.add(gmro.moves[i]);
             currPv.hashStack.add(g.hash);
             PrincipalVariation followingPv;
@@ -438,7 +447,7 @@ public class AlphaBeta extends ArtificalPlayer {
             currPv.stack.remove(currPv.stack.size() - 1);
             currPv.hashStack.remove(currPv.hashStack.size() - 1);
         }
-        if (false && index != -1) {
+        if (false&&index != -1) {
             indexs[index] += 1;
         }
         //Make entry

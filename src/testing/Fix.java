@@ -6,10 +6,7 @@ import artificialplayer.BoardRating;
 import artificialplayer.PrincipalVariation;
 import artificialplayer.Search;
 import datastructures.BitBoard;
-import game.BitBoardConstants;
-import game.GameColor;
-import game.GameMove;
-import game.MyGameState;
+import game.*;
 import helpers.FEN;
 import helpers.GlobalFlags;
 import helpers.Perft;
@@ -26,7 +23,7 @@ public class Fix {
             8};
 
     public static void main(String[] args) {
-        GlobalFlags.VERBOSE = true;
+        //GlobalFlags.VERBOSE = true;
         BitBoardConstants.setSquareAttackDirectionSquareDestinationAttackLine("SwClPiranha/src/game/data.txt");
 /*
         MyGameState g = FEN.readFEN("8 180179238186385408 10241 18023332108566528 0 72075186223972352 r 50 25");
@@ -36,20 +33,27 @@ public class Fix {
         printPV(p);
         System.exit(-1);
 */
-       // MyGameState g = new MyGameState(new BitBoard(4096L, 140737488355328L));
+        MyGameState g = FEN.readFEN("8487008 1731072757112243204 34225520640 536871290 0 68736253952 b 3 1");
+        System.out.println(g);
+        System.exit(-1);
+        //MyGameState g = FEN.readFEN("8 180179238186385408 10241 18023332108566528 0 72075186223972352 r 50 25");
+        //System.out.println(FEN.toFEN(g));
         /*MyGameState g2= StringToGameStateConverter.readGameState(StringToGameStateConverter.GAME_STATE);
         System.out.println(g2);
         System.out.println(Perft.perft(g2, 5));
         System.exit(0);*/
-        MyGameState g = FEN.readFEN("8624603140 589338234064913 128 -9178336006202458112 1024 144115188075855872 r 36 18");
-        System.out.println(g);
+        //MyGameState g = FEN.readFEN("10551296 96800593707008 16106129408 36028797018963968 4 9007199254740992 r 48 24");
+        //MyGameState g = FEN.readFEN("0 -9223372036854771686 21474836480 1161213153116160 2048 4503599627370496 r 52 26");
+        /*System.out.println(g);
         System.out.println(BoardRating.rating(g, AlphaBeta.brc));
-        System.exit(0);
+        System.exit(0);*/
         //System.out.println(g);
         /*System.out.println(AlphaBeta.alphaBeta(new Search(g, 10), g, 6, 1, -100000.0, 100000.0, 0).score);
         System.exit(-1);*/
+        long now = System.currentTimeMillis();
         Search se = new Search(g, 7);
         se.run();
+        System.out.println("duration: " + (System.currentTimeMillis() - now));
         System.out.println(AlphaBeta.nodesExamined);
         System.out.println(AlphaBeta.depth0Nodes);
         System.out.println(AlphaBeta.quiesenceNodes);
